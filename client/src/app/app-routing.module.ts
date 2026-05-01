@@ -52,8 +52,14 @@ const routes: Routes = [
       import('./account/account.module').then((mod) => mod.AccountModule),
     data: { breadcrumb: { skip: true } },
   },
+   { 
+    path: 'chat', 
+    loadChildren: () => import('./chat/chat.module').then(m => m.ChatModule) 
+  },
 
   { path: '**', redirectTo: 'not-found', pathMatch: 'full' },
+
+ 
 ];
 
 @NgModule({

@@ -1,6 +1,6 @@
 using System.Text;
 using Core.Entities.Identity;
-using Infrastructure.Data; // <--- Adăugat pentru a accesa StoreContext
+using Infrastructure.Data; 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -40,6 +40,25 @@ namespace API.Extensions
                         ValidateIssuer = true,
                         ValidateAudience = false
                     };
+
+                 // ---> ADAUGĂ ACEASTĂ PARTE PENTRU SIGNALR <---
+                 options.Events = new JwtBearerEvents
+                 {
+                     OnMessageReceived = context => 
+                     {
+                         var accessToken = context.Request.Query["access_token"];
+                         var path = context.HttpContext.Request.Path;
+                         
+                         // Verificăm dacă requestul este pentru un Hub și avem un token în URL
+                         if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs"))
+                         {
+                             context.Token = accessToken;
+                         }
+
+                         return Task.CompletedTask;
+                     }
+                 };
+                 // ---> PÂNĂ AICI <---
             });
 
             services.AddAuthorization();

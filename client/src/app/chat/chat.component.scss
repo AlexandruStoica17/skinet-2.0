@@ -1,0 +1,9 @@
+.chat-body {
+    height: 500px;
+    overflow-y: scroll; // Adaugă scroll dacă sunt multe mesaje
+}
+
+.chat-bubble {
+    max-width: 75%; // Nu lăsa mesajele să ocupe tot ecranul
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
