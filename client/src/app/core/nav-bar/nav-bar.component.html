@@ -6,6 +6,10 @@
         <a class="p-2" routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Home</a>
         <a class="p-2" routerLink="/shop" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Shop</a>
         <a class="p-2" routerLink="/test-error" routerLinkActive="active">Errors</a>
+        <!-- Pune-l undeva lângă Shop sau Errors -->
+<li class="nav-item" *ngIf="(accountService.currentUser$ | async)">
+    <a class="nav-link" routerLink="/favorites" routerLinkActive="active">Favorites</a>
+</li>
 
     </nav>
 

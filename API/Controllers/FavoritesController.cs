@@ -1,32 +1,44 @@
 using API.Dtos;
 using API.Errors;
+using API.Extensions; // Necesar pentru RetrieveEmailFromPrincipal
 using AutoMapper;
 using Core.Entities;
+using Core.Entities.Identity; // Necesar pentru AppUser
 using Core.Interfaces;
 using Core.Specifications;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity; // Necesar pentru UserManager
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
 {
+    [Authorize] // Asigură-te că doar userii logați pot accesa aceste rute
     public class FavoritesController : BaseApiController
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
+        private readonly UserManager<AppUser> _userManager; // <--- AICI ESTE DECLARAȚIA CARE LIPSEA
 
-        public FavoritesController(IUnitOfWork unitOfWork, IMapper mapper)
+        public FavoritesController(IUnitOfWork unitOfWork, IMapper mapper, UserManager<AppUser> userManager)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
+            _userManager = userManager; // <--- AICI ESTE INIȚIALIZAREA CARE LIPSEA
         }
 
-        // 1. Vezi toate produsele favorite ale utilizatorului
-        [HttpGet("{userId}")]
-        public async Task<ActionResult<IReadOnlyList<ProductToReturnDto>>> GetFavorites(string userId)
+        // 1. Vezi toate produsele favorite ale utilizatorului (luăm user-ul din token direct)
+        [HttpGet]
+        public async Task<ActionResult<IReadOnlyList<ProductToReturnDto>>> GetFavorites()
         {
-            var spec = new FavoriteProductsWithProductSpecification(userId);
+            var email = HttpContext.User.RetrieveEmailFromPrincipal();
+            if (string.IsNullOrEmpty(email)) return Unauthorized(new ApiResponse(401));
+
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null) return NotFound(new ApiResponse(404));
+
+            var spec = new FavoriteProductsWithProductSpecification(user.Id);
             var favorites = await _unitOfWork.Repository<FavoriteProduct>().ListAsync(spec);
 
-            // Returnăm direct produsele din lista de favorite
             var products = favorites.Select(f => f.Product).ToList();
 
             return Ok(_mapper.Map<IReadOnlyList<Product>, IReadOnlyList<ProductToReturnDto>>(products));
@@ -36,8 +48,15 @@ namespace API.Controllers
         [HttpPost]
         public async Task<ActionResult> AddFavorite(FavoriteDto favoriteDto)
         {
-            // Verificăm dacă nu cumva îl are deja la favorite (ca să nu dea eroare)
-            var spec = new FavoriteProductsWithProductSpecification(favoriteDto.AppUserId);
+            var email = HttpContext.User.RetrieveEmailFromPrincipal();
+            if (string.IsNullOrEmpty(email)) return Unauthorized(new ApiResponse(401));
+
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null) return NotFound(new ApiResponse(404));
+
+            var userId = user.Id;
+
+            var spec = new FavoriteProductsWithProductSpecification(userId);
             var favorites = await _unitOfWork.Repository<FavoriteProduct>().ListAsync(spec);
             
             if (favorites.Any(x => x.ProductId == favoriteDto.ProductId))
@@ -46,7 +65,7 @@ namespace API.Controllers
             var favorite = new FavoriteProduct
             {
                 ProductId = favoriteDto.ProductId,
-                AppUserId = favoriteDto.AppUserId
+                AppUserId = userId // Salvăm ID-ul corect generat de Identity
             };
 
             _unitOfWork.Repository<FavoriteProduct>().Add(favorite);
@@ -61,8 +80,14 @@ namespace API.Controllers
         [HttpDelete]
         public async Task<ActionResult> RemoveFavorite(FavoriteDto favoriteDto)
         {
+            var email = HttpContext.User.RetrieveEmailFromPrincipal();
+            if (string.IsNullOrEmpty(email)) return Unauthorized(new ApiResponse(401));
+
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null) return NotFound(new ApiResponse(404));
+
             var spec = new BaseSpecification<FavoriteProduct>(x => 
-                x.AppUserId == favoriteDto.AppUserId && x.ProductId == favoriteDto.ProductId);
+                x.AppUserId == user.Id && x.ProductId == favoriteDto.ProductId);
             
             var favorite = await _unitOfWork.Repository<FavoriteProduct>().GetEntityWithSpec(spec);
 

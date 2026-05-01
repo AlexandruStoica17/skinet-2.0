@@ -1,0 +1,38 @@
+<div class="container mt-5 mb-5" style="min-height: 500px;">
+    <h2 class="mb-4">Produsele mele favorite <i class="fa fa-heart text-danger"></i></h2>
+    
+    <div class="row" *ngIf="products.length > 0">
+        <div class="col-md-3 mb-4" *ngFor="let product of products">
+            <!-- Adăugăm position-relative pentru a poziționa butonul de ștergere -->
+            <div class="card h-100 shadow-sm position-relative">
+                
+                <!-- BUTONUL DE ȘTERGERE -->
+                <button (click)="removeFavorite(product.id)" 
+                        class="btn btn-sm btn-outline-danger position-absolute" 
+                        style="top: 10px; right: 10px; z-index: 10;"
+                        title="Elimină de la favorite">
+                    <i class="fa fa-trash"></i>
+                </button>
+
+                <img src="{{product.pictureUrl}}" alt="{{product.name}}" class="img-fluid bg-info">
+                <div class="card-body d-flex flex-column">
+                    <h6 class="text-uppercase">{{product.name}}</h6>
+                    <span class="mb-2">{{product.price | currency}}</span>
+                    
+                    <button routerLink="/shop/{{product.id}}" class="btn btn-outline-primary w-100 mt-auto">
+                        Vezi Produsul
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row" *ngIf="products.length === 0">
+        <div class="col-12 text-center mt-5">
+            <i class="fa fa-heart-o fa-5x text-muted mb-3"></i>
+            <h4>Nu ai niciun produs adăugat la favorite încă.</h4>
+            <p class="text-muted">Explorează magazinul și salvează produsele pe care le iubești!</p>
+            <button routerLink="/shop" class="btn btn-primary mt-3">Înapoi la Magazin</button>
+        </div>
+    </div>
+</div>
