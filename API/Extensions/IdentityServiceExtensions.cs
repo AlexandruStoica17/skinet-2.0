@@ -1,5 +1,6 @@
 using System.Text;
 using Core.Entities.Identity;
+using Infrastructure.Data; // <--- Adăugat pentru a accesa StoreContext
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -11,16 +12,21 @@ namespace API.Extensions
     {
         public static IServiceCollection AddIdentityServices( this IServiceCollection services, IConfiguration config)
         {
+            /* --- COD VECHI COMENTAT (Baza de date separată pentru Identity) ---
             services.AddDbContext<AppIdentityDbContext>(opt =>
             {
                 opt.UseSqlite(config.GetConnectionString("IdentityConnection"));
             });
+            ------------------------------------------------------------------ */
             
             services.AddIdentityCore<AppUser>(opt =>
             {
                 //identity options here
             })
+            /* --- COD VECHI COMENTAT ---
             .AddEntityFrameworkStores<AppIdentityDbContext>()
+            ----------------------------- */
+            .AddEntityFrameworkStores<StoreContext>() // <--- FOLOSIM NOUA BAZĂ DE DATE UNIFICATĂ
             .AddSignInManager<SignInManager<AppUser>>();
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -35,8 +41,6 @@ namespace API.Extensions
                         ValidateAudience = false
                     };
             });
-
-
 
             services.AddAuthorization();
 

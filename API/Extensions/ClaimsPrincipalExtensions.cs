@@ -1,8 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
-using System.Threading.Tasks;
 
 namespace API.Extensions
 {
@@ -11,6 +7,14 @@ namespace API.Extensions
         public static string RetrieveEmailFromPrincipal(this ClaimsPrincipal user)
         {
             return user.FindFirstValue(ClaimTypes.Email);
+        }
+
+        // --- ADAUGĂ ACEASTĂ METODĂ PENTRU SIGNALR ---
+        public static string GetUsername(this ClaimsPrincipal user)
+        {
+            // Identity folosește de obicei ClaimTypes.Name pentru username (UniqueName în JWT)
+            return user.FindFirst(ClaimTypes.Name)?.Value 
+                ?? user.FindFirst(ClaimTypes.NameIdentifier)?.Value;
         }
     }
 }

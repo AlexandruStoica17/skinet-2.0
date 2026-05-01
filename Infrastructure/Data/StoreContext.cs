@@ -1,52 +1,78 @@
 using System.Reflection;
 using Core.Entities;
+using Core.Entities.Identity; // Adăugat pentru AppUser
 using Core.Entities.OrderAggregate;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore; // Adăugat pentru IdentityDbContext
 using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Data
 {
-    public class StoreContext : DbContext
+    // AICI E SCHIMBAREA MAJORĂ: Moștenim din IdentityDbContext<AppUser> în loc de DbContext
+    public class StoreContext : IdentityDbContext<AppUser>
     {
         public StoreContext(DbContextOptions<StoreContext> options) : base(options)
         {
         }
 
-       public DbSet<Product> Products { get; set; } //Products will be the name of the table
-       public DbSet<ProductBrand> ProductBrands { get; set; }
-       public DbSet<ProductType> ProductTypes { get; set; }
-       public DbSet<Order> Orders {get; set; }
-       public DbSet<OrderItem> OrderItems { get; set; }
-       public DbSet<DeliveryMethod> DeliveryMethods { get; set; }
+        // --- Tabelele E-commerce (Originale) ---
+        public DbSet<Product> Products { get; set; }
+        public DbSet<ProductBrand> ProductBrands { get; set; }
+        public DbSet<ProductType> ProductTypes { get; set; }
+        public DbSet<Order> Orders { get; set; }
+        public DbSet<OrderItem> OrderItems { get; set; }
+        public DbSet<DeliveryMethod> DeliveryMethods { get; set; }
 
-       protected override void OnModelCreating(ModelBuilder modelBuilder)
-{
-    base.OnModelCreating(modelBuilder);
-    modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+        // --- Tabelele Noi (Blog, Favorite, Poze) ---
+        public DbSet<Post> Posts { get; set; }
+        public DbSet<Comment> Comments { get; set; }
+        public DbSet<FavoriteProduct> FavoriteProducts { get; set; }
+        public DbSet<Photo> Photos { get; set; }
+        public DbSet<Message> Messages { get; set; }
 
-    if (Database.ProviderName == "Microsoft.EntityFrameworkCore.Sqlite")
-    {
-        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-           
-            var decimalProperties = entityType.ClrType.GetProperties()
-                .Where(p => p.PropertyType == typeof(decimal));
+            // CRITIC pentru Identity: Trebuie lăsat aici sus!
+            base.OnModelCreating(modelBuilder);
 
-            foreach (var property in decimalProperties)
+            modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+
+            // Partea ta originală pentru SQLite rămâne intactă
+            if (Database.ProviderName == "Microsoft.EntityFrameworkCore.Sqlite")
             {
-                modelBuilder.Entity(entityType.Name).Property(property.Name).HasConversion<double>();
-            }
+                foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+                {
 
-            
-            var dateTimeProperties = entityType.ClrType.GetProperties()
-                .Where(p => p.PropertyType == typeof(DateTimeOffset));
+                    var decimalProperties = entityType.ClrType.GetProperties()
+                        .Where(p => p.PropertyType == typeof(decimal));
 
-            foreach (var property in dateTimeProperties)
-            {
-                modelBuilder.Entity(entityType.Name).Property(property.Name)
-                    .HasConversion(new Microsoft.EntityFrameworkCore.Storage.ValueConversion.DateTimeOffsetToBinaryConverter());
+                    foreach (var property in decimalProperties)
+                    {
+                        modelBuilder.Entity(entityType.Name).Property(property.Name).HasConversion<double>();
+                    }
+
+
+                    var dateTimeProperties = entityType.ClrType.GetProperties()
+                        .Where(p => p.PropertyType == typeof(DateTimeOffset));
+
+                    foreach (var property in dateTimeProperties)
+                    {
+                        modelBuilder.Entity(entityType.Name).Property(property.Name)
+                            .HasConversion(new Microsoft.EntityFrameworkCore.Storage.ValueConversion.DateTimeOffsetToBinaryConverter());
+                    }
+                }
             }
+            // --- CONFIGURARE NOUĂ PENTRU MESAJE ---
+            modelBuilder.Entity<Message>()
+                .HasOne(u => u.Recipient)
+                .WithMany(m => m.MessagesReceived) // Va fi roșu momentan, rezolvăm la Pasul 3
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Message>()
+                .HasOne(u => u.Sender)
+                .WithMany(m => m.MessagesSent) // Va fi roșu momentan
+                .OnDelete(DeleteBehavior.Restrict);
+
+
         }
-    }
-}
     }
 }
