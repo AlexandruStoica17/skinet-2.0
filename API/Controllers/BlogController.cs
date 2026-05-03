@@ -2,9 +2,13 @@ using API.Dtos;
 using API.Errors;
 using AutoMapper;
 using Core.Entities;
+using Core.Entities.Identity; // Adăugat pentru AppUser
 using Core.Interfaces;
 using Core.Specifications;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity; // Adăugat pentru UserManager
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace API.Controllers
 {
@@ -13,12 +17,14 @@ namespace API.Controllers
         private readonly IGenericRepository<Post> _postRepo;
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly UserManager<AppUser> _userManager;
 
-        public BlogController(IGenericRepository<Post> postRepo, IMapper mapper, IUnitOfWork unitOfWork)
+        public BlogController(IGenericRepository<Post> postRepo, IMapper mapper, IUnitOfWork unitOfWork, UserManager<AppUser> userManager)
         {
             _postRepo = postRepo;
             _mapper = mapper;
             _unitOfWork = unitOfWork;
+            _userManager = userManager;
         }
 
         [HttpGet]
@@ -72,20 +78,30 @@ namespace API.Controllers
 
         // 2. Adaugă un comentariu la o postare
         // POST: api/blog/comments
+        [Authorize] 
         [HttpPost("comments")]
         public async Task<ActionResult<CommentToReturnDto>> AddComment(CommentCreateDto commentDto)
         {
+            // Extragem email-ul din token-ul utilizatorului logat
+            var email = HttpContext.User.FindFirstValue(ClaimTypes.Email);
+            
+            // Căutăm utilizatorul în baza de date
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null) return Unauthorized(new ApiResponse(401, "Trebuie să fii logat pentru a comenta"));
+
             var comment = _mapper.Map<CommentCreateDto, Comment>(commentDto);
             comment.CreatedAt = DateTime.UtcNow;
+
+            // Asociem ID-ul utilizatorului cu comentariul
+            comment.AppUserId = user.Id;
 
             _unitOfWork.Repository<Comment>().Add(comment);
             var result = await _unitOfWork.Complete();
 
             if (result <= 0) return BadRequest(new ApiResponse(400, "Problem adding comment"));
 
-            // Îl extragem din nou cu Specificația pentru a avea numele autorului în răspuns
+            // Extragem comentariul proaspăt creat, împreună cu detaliile autorului, folosind Specificația
             var spec = new CommentsWithUserSpecification(comment.PostId);
-            // Căutăm comentariul proaspăt creat
             var comments = await _unitOfWork.Repository<Comment>().ListAsync(spec);
             var commentToReturn = comments.FirstOrDefault(x => x.Id == comment.Id);
 

@@ -57,6 +57,7 @@ const routes: Routes = [
     loadChildren: () => import('./chat/chat.module').then(m => m.ChatModule) 
   },
   { path: 'favorites', loadChildren: () => import('./favorites/favorites.module').then(m => m.FavoritesModule) },
+  { path: 'blog', loadChildren: () => import('./blog/blog.module').then(m => m.BlogModule) },
 
   { path: '**', redirectTo: 'not-found', pathMatch: 'full' },
 

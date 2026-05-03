@@ -1,0 +1,69 @@
+<div class="container mt-5 mb-5" *ngIf="post">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            
+            <a routerLink="/blog" class="text-decoration-none text-muted mb-4 d-inline-block">
+                <i class="fa fa-arrow-left me-2"></i> Înapoi la Blog
+            </a>
+
+            <h1 class="fw-bolder mb-3">{{post.title}}</h1>
+            <div class="text-muted fst-italic mb-4">
+                Postat de <strong>{{post.authorName}}</strong> pe {{post.createdAt | date:'longDate'}}
+            </div>
+
+            <img *ngIf="post.imageUrl" [src]="post.imageUrl" 
+                 class="img-fluid rounded mb-4 w-100" 
+                 alt="{{post.title}}" style="max-height: 400px; object-fit: cover;">
+                 
+            <div *ngIf="!post.imageUrl" class="bg-light rounded mb-4 d-flex align-items-center justify-content-center" style="height: 300px;">
+                <i class="fa fa-picture-o fa-5x text-muted"></i>
+            </div>
+
+            <section class="mb-5">
+                <p class="lead fw-bold">{{post.summary}}</p>
+                <p class="fs-5" style="white-space: pre-wrap;">{{post.content}}</p>
+            </section>
+
+            <hr>
+            <h4 class="mt-4 mb-4">Comentarii</h4>
+           <!-- ÎNLOCUIEȘTE de la <hr> în jos cu asta: -->
+            <hr>
+            <h4 class="mt-4 mb-4">Comentarii ({{comments.length}})</h4>
+            
+            <!-- Lista de Comentarii -->
+            <div class="mb-4">
+                <div class="card mb-3 shadow-sm" *ngFor="let comment of comments">
+                    <div class="card-body">
+                        <p class="mb-2">{{comment.content}}</p>
+                        <small class="text-muted fw-bold">
+                            <i class="fa fa-user-circle-o me-1"></i> {{comment.authorName || 'Anonim'}} 
+                            <span class="ms-2 fw-normal"><i class="fa fa-clock-o me-1"></i> {{comment.createdAt | date:'short'}}</span>
+                        </small>
+                    </div>
+                </div>
+                <div *ngIf="comments.length === 0" class="text-muted fst-italic">
+                    Fii primul care lasă o părere!
+                </div>
+            </div>
+
+            <!-- Zona de Adăugare Comentariu -->
+            <div *ngIf="(accountService.currentUser$ | async); else loginToComment" class="bg-light p-4 rounded mb-5">
+                <h6 class="mb-3">Lasă un comentariu</h6>
+                <textarea [(ngModel)]="newCommentContent" class="form-control mb-3" rows="3" placeholder="Scrie aici părerea ta..."></textarea>
+                <button (click)="addComment()" [disabled]="!newCommentContent.trim()" class="btn btn-primary">
+                    Postează Comentariul
+                </button>
+            </div>
+            
+            <!-- Mesaj dacă nu ești logat -->
+            <ng-template #loginToComment>
+                <div class="alert alert-warning mb-5">
+                    <i class="fa fa-exclamation-triangle me-2"></i> 
+                    Trebuie să fii autentificat pentru a lăsa un comentariu. 
+                    <a routerLink="/account/login" class="alert-link">Logează-te aici</a>.
+                </div>
+            </ng-template>
+
+        </div>
+    </div>
+</div>

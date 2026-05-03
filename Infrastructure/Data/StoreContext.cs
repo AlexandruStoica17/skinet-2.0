@@ -28,7 +28,7 @@ namespace Infrastructure.Data
         public DbSet<FavoriteProduct> FavoriteProducts { get; set; }
         public DbSet<Photo> Photos { get; set; }
         public DbSet<Message> Messages { get; set; }
-
+        public DbSet<BlogPost> BlogPosts { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // CRITIC pentru Identity: Trebuie lăsat aici sus!
