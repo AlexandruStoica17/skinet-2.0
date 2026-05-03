@@ -6,6 +6,7 @@ import { SharedModule } from '../shared/shared.module';
 import { ProductDetailsComponent } from './product-details/product-details.component';
 import { RouterModule } from '@angular/router';
 import { ShopRoutingModule } from './shop-routing.module';
+import { NgxGalleryModule } from '@kolkov/ngx-gallery';
 
 
 
@@ -18,7 +19,8 @@ import { ShopRoutingModule } from './shop-routing.module';
   imports: [
     CommonModule,
     SharedModule,
-    ShopRoutingModule
+    ShopRoutingModule,
+    NgxGalleryModule
   ],
  
 })

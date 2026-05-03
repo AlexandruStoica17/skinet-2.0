@@ -1,8 +1,12 @@
 <div class="container">
     <div class="row" *ngIf="product">
+        
+        <!-- Partea Stângă (Galeria) -->
         <div class="col-6">
-            <img src="{{product.pictureUrl}}" alt="{{product.name}}" class="w-100">
+            <ngx-gallery [options]="galleryOptions" [images]="galleryImages" class="ngx-gallery"></ngx-gallery>
         </div>
+        
+        <!-- Partea Dreaptă (Logica de coș existentă) -->
         <div class="col-6 mt-5">
             <h2>{{product.name}}</h2>
             <p style="font-size: 2em;">{{product.price | currency}}</p>
