@@ -6,10 +6,11 @@
         <a class="p-2" routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Home</a>
         <a class="p-2" routerLink="/shop" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Shop</a>
         <a class="p-2" routerLink="/test-error" routerLinkActive="active">Errors</a>
-        
+
         <!-- Butonul Favorites vizibil doar pentru utilizatorii logați -->
-        <a class="p-2" *ngIf="(accountService.currentUser$ | async)" routerLink="/favorites" routerLinkActive="active">Favorites</a>
-        
+        <a class="p-2" *ngIf="(accountService.currentUser$ | async)" routerLink="/favorites"
+            routerLinkActive="active">Favorites</a>
+
         <!-- Butonul Blog -->
         <a class="p-2" routerLink="/blog" routerLinkActive="active">Blog</a>
     </nav>
@@ -38,6 +39,11 @@
                         <a routerLink="/basket" class="dropdown-item">
                             <i class="fa fa-shopping-cart me-3"></i> View basket
 
+                        </a>
+                    </li>
+                    <li class="py-1">
+                        <a routerLink="/account/profile" class="dropdown-item">
+                            <i class="fa fa-user-circle-o me-3"></i> Profilul Meu
                         </a>
                     </li>
 

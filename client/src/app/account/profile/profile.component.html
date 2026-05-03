@@ -1,0 +1,105 @@
+<div class="container mt-5">
+    <div class="row">
+        <!-- MENIUL LATERAL -->
+        <div class="col-md-4 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-body text-center pt-4">
+                    <i class="fa fa-user-circle-o fa-5x text-primary mb-3"></i>
+                    <h4 class="card-title">Profilul Meu</h4>
+                </div>
+                <div class="list-group list-group-flush" style="cursor: pointer;">
+                    <a class="list-group-item list-group-item-action" 
+                       [class.active]="activeTab === 'address'"
+                       (click)="activeTab = 'address'">
+                        <i class="fa fa-map-marker me-2"></i> Adresa de Livrare
+                    </a>
+                    <a class="list-group-item list-group-item-action" 
+                       [class.active]="activeTab === 'password'"
+                       (click)="activeTab = 'password'">
+                        <i class="fa fa-lock me-2"></i> Schimbă Parola
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- ZONA DE CONȚINUT -->
+        <div class="col-md-8">
+            
+            <!-- FORMULAR ADRESĂ (Se vede doar când activeTab este 'address') -->
+            <div class="card shadow-sm" *ngIf="activeTab === 'address'">
+                <div class="card-header bg-white">
+                    <h4 class="mb-0 py-2">Adresa Implicită de Livrare</h4>
+                </div>
+                <div class="card-body p-4" *ngIf="addressForm">
+                    <form [formGroup]="addressForm" (ngSubmit)="onSubmitAddress()">
+                        <div class="row mb-3">
+                            <div class="col-md-6 form-group">
+                                <label class="form-label">Prenume</label>
+                                <input type="text" class="form-control" formControlName="firstName">
+                            </div>
+                            <div class="col-md-6 form-group">
+                                <label class="form-label">Nume de familie</label>
+                                <input type="text" class="form-control" formControlName="lastName">
+                            </div>
+                        </div>
+                        <div class="form-group mb-3">
+                            <label class="form-label">Stradă și Număr</label>
+                            <input type="text" class="form-control" formControlName="street">
+                        </div>
+                        <div class="row mb-4">
+                            <div class="col-md-4 form-group">
+                                <label class="form-label">Oraș</label>
+                                <input type="text" class="form-control" formControlName="city">
+                            </div>
+                            <div class="col-md-4 form-group">
+                                <label class="form-label">Județ / Stat</label>
+                                <input type="text" class="form-control" formControlName="state">
+                            </div>
+                            <div class="col-md-4 form-group">
+                                <label class="form-label">Cod Poștal</label>
+                                <input type="text" class="form-control" formControlName="zipCode">
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-end">
+                            <button type="submit" class="btn btn-primary" [disabled]="addressForm.invalid || !addressForm.dirty">
+                                Salvează Modificările
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- FORMULAR PAROLĂ (Se vede doar când activeTab este 'password') -->
+            <div class="card shadow-sm" *ngIf="activeTab === 'password'">
+                <div class="card-header bg-white">
+                    <h4 class="mb-0 py-2">Schimbă Parola</h4>
+                </div>
+                <div class="card-body p-4" *ngIf="passwordForm">
+                    <form [formGroup]="passwordForm" (ngSubmit)="onSubmitPassword()">
+                        <div class="form-group mb-3">
+                            <label class="form-label">Parola Veche</label>
+                            <input type="password" class="form-control" formControlName="oldPassword" placeholder="Introdu parola curentă">
+                        </div>
+                        <div class="form-group mb-3">
+                            <label class="form-label">Parola Nouă</label>
+                            <input type="password" class="form-control" formControlName="newPassword" placeholder="Introdu o parolă nouă">
+                            <div class="form-text text-danger" *ngIf="passwordForm.get('newPassword')?.errors?.['pattern'] && passwordForm.get('newPassword')?.touched">
+                                Parola trebuie să conțină o literă mare, o literă mică, un număr, un caracter special și minim 6 caractere.
+                            </div>
+                        </div>
+                        <div class="form-group mb-4">
+                            <label class="form-label">Confirmă Parola Nouă</label>
+                            <input type="password" class="form-control" formControlName="confirmPassword" placeholder="Confirmă parola nouă">
+                        </div>
+                        <div class="d-flex justify-content-end">
+                            <button type="submit" class="btn btn-primary" [disabled]="passwordForm.invalid">
+                                Schimbă Parola
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>

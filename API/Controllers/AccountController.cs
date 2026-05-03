@@ -121,5 +121,32 @@ namespace API.Controllers
                 Email = user.Email
             };
         }
+
+        [Authorize] // Doar utilizatorii logați își pot schimba parola
+        [HttpPost("change-password")]
+        public async Task<ActionResult> ChangePassword(ChangePasswordDto passwordDto)
+        {
+            // 1. Extragem emailul din token-ul userului logat
+            var email = User.FindFirstValue(ClaimTypes.Email);
+            var user = await _userManager.FindByEmailAsync(email);
+
+            if (user == null) return Unauthorized(new ApiResponse(401));
+
+            // 2. Încercăm să schimbăm parola folosind funcția nativă din Identity
+            var result = await _userManager.ChangePasswordAsync(user, passwordDto.OldPassword, passwordDto.NewPassword);
+
+            // 3. Dacă a eșuat (ex: parola veche e greșită), returnăm erorile
+            if (!result.Succeeded)
+            {
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError(error.Code, error.Description);
+                }
+                return ValidationProblem();
+            }
+
+            // 4. Succes!
+            return Ok(new { message = "Parola a fost actualizată cu succes!" });
+        }
     }
 }

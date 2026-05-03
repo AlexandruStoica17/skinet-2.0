@@ -75,5 +75,10 @@ export class AccountService {
   updateUserAddress(address: Address){
     return this.http.put(this.baseUrl + 'account/address', address);
   }
+
+  changePassword(values: any) {
+    // Trimitem datele către noul endpoint din C#
+    return this.http.post(this.baseUrl + 'account/change-password', values);
+  }
   
 }
