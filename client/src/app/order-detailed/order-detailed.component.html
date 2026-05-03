@@ -1,9 +1,42 @@
 <div class="container mt-5">
+    
+    <!-- Buton de întoarcere -->
+    <div class="row mb-4" *ngIf="order">
+        <div class="col-12 d-flex justify-content-between align-items-center">
+            <h2>Detaliile Comenzii #{{order.id}}</h2>
+            <a routerLink="/orders" class="btn btn-outline-primary">
+                <i class="fa fa-arrow-left me-2"></i> Înapoi la comenzi
+            </a>
+        </div>
+    </div>
+
     <div class="row" *ngIf="order">
+        
+        <!-- Partea Stângă: Tabelul cu Produse și Adresa -->
         <div class="col-8">
+            
+            <!-- Card cu Adresa de Livrare -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body bg-light">
+                    <h5 class="card-title text-uppercase mb-3"><i class="fa fa-truck me-2"></i> Date Livrare</h5>
+                    <div class="row">
+                        <div class="col-6">
+                            <p class="mb-1"><strong>Dată Comandă:</strong> {{order.orderDate | date: 'medium'}}</p>
+                            <p class="mb-0"><strong>Metodă Livrare:</strong> {{order.deliveryMethod}}</p>
+                        </div>
+                        <div class="col-6">
+                            <p class="mb-1"><strong>Destinatar:</strong> {{order.shipToAddress.firstName}} {{order.shipToAddress.lastName}}</p>
+                            <p class="mb-0"><strong>Adresă:</strong> {{order.shipToAddress.street}}, {{order.shipToAddress.city}}, {{order.shipToAddress.state}},
+                                 {{order.shipToAddress.zipcode}}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabelul de Produse (cel pe care îl aveai deja) -->
             <div>
-                <div class="table-responsive">
-                    <table class="table">
+                <div class="table-responsive shadow-sm">
+                    <table class="table mb-0">
                         <thead>
                             <tr>
                                 <th scope="col" class="border-0 bg-light">
@@ -12,7 +45,7 @@
                                 <th scope="col" class="border-0 bg-light">
                                     <div class="py-2 text-uppercase">Price</div>
                                 </th>
-                                <th scope="col" class="border-0 bg-light">
+                                <th scope="col" class="border-0 bg-light text-center">
                                     <div class="py-2 text-uppercase">Quantity</div>
                                 </th>
                                 <th scope="col" class="border-0 bg-light">
@@ -24,17 +57,14 @@
                             <tr *ngFor="let item of order.orderItems">
                                 <th scope="row">
                                     <div class="p-2">
-                                        <img src="{{item.pictureUrl}}" alt="{{item.productName}}" class="img-fluid"
-                                            style="max-height: 50px">
+                                        <img src="{{item.pictureUrl}}" alt="{{item.productName}}" class="img-fluid" style="max-height: 50px">
                                         <div class="ml-3 d-inline-block align-middle">
-                                            <h5 class="mb-0">
-                                                {{item.productName}}
-                                            </h5>
+                                            <h5 class="mb-0">{{item.productName}}</h5>
                                         </div>
                                     </div>
                                 </th>
                                 <td class="align-middle"><strong>{{item.price | currency}}</strong></td>
-                                <td class="align-middle">
+                                <td class="align-middle text-center">
                                     <span class="font-weight-bold px-2">{{item.quantity}}</span>
                                 </td>
                                 <td class="align-middle"><strong>{{item.price * item.quantity | currency}}</strong></td>
@@ -44,24 +74,29 @@
                 </div>
             </div>
         </div>
+
+        <!-- Partea Dreaptă: Sumarul Comenzii (cel pe care îl aveai deja) -->
         <div class="col-4">
-            <div class="bg-light px-4 py-3 text-uppercase font-weight-bold">Order summary
-            </div>
-            <div class="p-4">
-                <ul class="list-unstyled mb-1">
-                    <li class="d-flex justify-content-between py-3 border-bottom">
-                        <strong class="text-muted">Order subtotal</strong>
-                        <strong>{{order.subtotal | currency}}</strong>
-                    </li>
-                    <li class="d-flex justify-content-between py-3 border-bottom">
-                        <strong class="text-muted">Shipping and handling</strong>
-                        <strong>{{order.shippingPrice | currency}}</strong>
-                    </li>
-                    <li class="d-flex justify-content-between py-3 border-bottom">
-                        <strong class="text-muted">Total</strong>
-                        <strong>{{order.total | currency}}</strong>
-                    </li>
-                </ul>
+            <div class="card shadow-sm">
+                <div class="bg-light px-4 py-3 text-uppercase font-weight-bold border-bottom">
+                    Order summary
+                </div>
+                <div class="p-4">
+                    <ul class="list-unstyled mb-1">
+                        <li class="d-flex justify-content-between py-3 border-bottom">
+                            <strong class="text-muted">Order subtotal</strong>
+                            <strong>{{order.subtotal | currency}}</strong>
+                        </li>
+                        <li class="d-flex justify-content-between py-3 border-bottom">
+                            <strong class="text-muted">Shipping and handling</strong>
+                            <strong>{{order.shippingPrice | currency}}</strong>
+                        </li>
+                        <li class="d-flex justify-content-between py-3 border-bottom">
+                            <strong class="text-muted">Total</strong>
+                            <strong class="text-success fs-5">{{order.total | currency}}</strong>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
