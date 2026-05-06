@@ -86,4 +86,9 @@ export class ShopService {
       map(types => this.types = types)
     );
   }
+
+  addProduct(formData: FormData) {
+    // Trimitem datele către noul endpoint creat în ProductsController
+    return this.http.post(this.baseUrl + 'products/add-product', formData);
+  }
 }

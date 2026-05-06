@@ -16,11 +16,14 @@ import { JwtInterceptor } from './core/interceptors/jwt.interceptor';
 import { OrderDetailedComponent } from './order-detailed/order-detailed.component';
 import { OrdersModule } from './orders/orders.module';
 import { AdminComponent } from './admin/admin.component';
+import { AddProductComponent } from './producer/add-product/add-product.component';
+import { ReactiveFormsModule } from '@angular/forms';
 
 @NgModule({
   declarations: [
     AppComponent,
     AdminComponent,
+    AddProductComponent,
     // OrderDetailedComponent
   ],
   imports: [
@@ -32,6 +35,7 @@ import { AdminComponent } from './admin/admin.component';
     HomeModule,
     BreadcrumbModule,
     OrdersModule,
+    ReactiveFormsModule,
   ],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },

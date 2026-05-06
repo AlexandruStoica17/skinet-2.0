@@ -7,6 +7,7 @@ import { ServerErrorComponent } from './core/server-error/server-error.component
 import { AuthGuard } from './core/guards/auth.guard';
 import { AdminGuard } from './core/guards/admin.guard';
 import { AdminComponent } from './admin/admin.component';
+import { AddProductComponent } from './producer/add-product/add-product.component';
 
 const routes: Routes = [
   { path: '', component: HomeComponent, data: { breadcrumb: 'Home' } },
@@ -20,11 +21,6 @@ const routes: Routes = [
     component: ServerErrorComponent,
     data: { breadcrumb: 'Server Error' },
   },
-  // ADAUGĂ RUTA ASTA AICI (sus, înainte de not-found):
-  { path: 'admin', component: AdminComponent, canActivate: [AdminGuard] },
-
-  // Asta trebuie să rămână mereu ULTIMA din listă:
-  { path: '**', redirectTo: 'not-found', pathMatch: 'full' },
   {
     path: 'not-found',
     component: NotFoundComponent,
@@ -59,22 +55,19 @@ const routes: Routes = [
       import('./account/account.module').then((mod) => mod.AccountModule),
     data: { breadcrumb: { skip: true } },
   },
-   { 
+  { 
     path: 'chat', 
     loadChildren: () => import('./chat/chat.module').then(m => m.ChatModule) 
   },
   { path: 'favorites', loadChildren: () => import('./favorites/favorites.module').then(m => m.FavoritesModule) },
   { path: 'blog', loadChildren: () => import('./blog/blog.module').then(m => m.BlogModule) },
 
-  { path: '**', redirectTo: 'not-found', pathMatch: 'full' },
-  
-//   { 
-//   path: 'admin', 
-//   component: AdminComponent, // Componenta de admin pe care am făcut-o anterior
-//   canActivate: [AdminGuard]  // Paznicul nostru
-// },
+  // --- RUTELE NOASTRE DE ADMIN / PRODUCĂTOR ---
+  { path: 'admin', component: AdminComponent, canActivate: [AdminGuard] },
+  { path: 'add-product', component: AddProductComponent },
 
- 
+  // --- RUTA WILDCARD TREBUIE SĂ FIE STRICT ULTIMA! ---
+  { path: '**', redirectTo: 'not-found', pathMatch: 'full' }
 ];
 
 @NgModule({
