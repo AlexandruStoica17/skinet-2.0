@@ -23,6 +23,10 @@ namespace API.Extensions
             {
                 //identity options here
             })
+            // --- COD NOU ADAUGAT PENTRU ROLURI ---
+            .AddRoles<IdentityRole>() 
+            .AddRoleManager<RoleManager<IdentityRole>>() 
+            // -------------------------------------
             /* --- COD VECHI COMENTAT ---
             .AddEntityFrameworkStores<AppIdentityDbContext>()
             ----------------------------- */
@@ -41,7 +45,7 @@ namespace API.Extensions
                         ValidateAudience = false
                     };
 
-                 // ---> ADAUGĂ ACEASTĂ PARTE PENTRU SIGNALR <---
+                 // ---> ADAUGĂ ACEASTĂ PARTE PENTRU SIGNALR <--- (LĂSAT EXACT CUM ERA)
                  options.Events = new JwtBearerEvents
                  {
                      OnMessageReceived = context => 

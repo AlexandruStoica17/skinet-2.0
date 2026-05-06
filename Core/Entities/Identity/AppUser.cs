@@ -17,5 +17,9 @@ namespace Core.Entities.Identity
         public ICollection<FavoriteProduct> FavoriteProducts { get; set; }
         public ICollection<Message> MessagesSent { get; set; }
         public ICollection<Message> MessagesReceived { get; set; }
+        public bool IsVerified { get; set; } = false; 
+        
+        public string CompanyName { get; set; } // Pentru facturare/vitrină
+        public string DocumentUrl { get; set; } // Aici vom salva calea către PDF/Poza cu actele firmei
     }
 }

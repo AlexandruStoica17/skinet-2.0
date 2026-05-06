@@ -5,21 +5,33 @@
                 <h1 class="mb-3">Sign up</h1>
             </div>
 
-            <app-text-input [formControl]="registerForm.controls['displayName']"
-                [label]="'Display name'"></app-text-input>
-            <app-text-input [formControl]="registerForm.controls['email']" [label]="'Email address'"></app-text-input>
-            <app-text-input [formControl]="registerForm.controls['password']" [label]="'Password'"
-                [type]="'password'"></app-text-input>
+            <app-text-input [formControl]="$any(registerForm.controls['displayName'])" [label]="'Display name'"></app-text-input>
+            <app-text-input [formControl]="$any(registerForm.controls['email'])" [label]="'Email address'"></app-text-input>
+            
+            <!-- SELECTOR ROL -->
+            <div class="form-group mb-3">
+                <label for="role">Ce rol vei avea?</label>
+                <select class="form-select mt-2" formControlName="role">
+                    <option *ngFor="let role of roles" [value]="role.value">{{role.display}}</option>
+                </select>
+            </div>
 
-                <ul class="text-danger list-unstyled" *ngIf="errors">
-                    <li *ngFor="let error of errors">{{error}}</li>
-                </ul>
+            <!-- NUME FIRMĂ - Apare doar pentru producători -->
+            <app-text-input 
+                *ngIf="registerForm.get('role')?.value?.includes('Producer')"
+                [formControl]="$any(registerForm.controls['companyName'])" 
+                [label]="'Nume Companie / Fermă'">
+            </app-text-input>
+
+            <app-text-input [formControl]="$any(registerForm.controls['password'])" [label]="'Password'" [type]="'password'"></app-text-input>
+
+            <ul class="text-danger list-unstyled" *ngIf="errors">
+                <li *ngFor="let error of errors">{{error}}</li>
+            </ul>
 
             <div class="d-grid">
-                <button [disabled]="registerForm.invalid" class="btn btn-lg btn-primary mt-3" type="submit">Sign
-                    up</button>
+                <button [disabled]="registerForm.invalid" class="btn btn-lg btn-primary mt-3" type="submit">Sign up</button>
             </div>
         </form>
     </div>
-
 </div>

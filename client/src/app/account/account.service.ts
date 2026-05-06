@@ -9,6 +9,10 @@ import { Router } from '@angular/router';
   providedIn: 'root',
 })
 export class AccountService {
+  uploadVerificationDocument(formData: FormData) {
+    // Adaugă 'return' aici!
+    return this.http.post(this.baseUrl + 'account/upload-document', formData);
+  }
   baseUrl = environment.apiUrl;
   private currentUserSource = new ReplaySubject<User | null>(1);
   currentUser$ = this.currentUserSource.asObservable();
@@ -18,42 +22,41 @@ export class AccountService {
     private router: Router,
   ) {}
 
-  loadCurrentUser(token: string | null){
-    if(token === null){
+ loadCurrentUser(token: string | null) {
+    if (token === null) {
       this.currentUserSource.next(null);
       return of(null);
     }
     let headers = new HttpHeaders();
-    headers = headers.set('Authorization', `Bearer ${token}`); //foloseste ` nu '
+    headers = headers.set('Authorization', `Bearer ${token}`);
 
-    return this.http.get<User>(this.baseUrl + 'account', {headers}).pipe(
-       map(user => { 
-        if(user){
-        localStorage.setItem('token', user.token);
-        this.currentUserSource.next(user);
-        return user;}
-        
-        else{
+    return this.http.get<User>(this.baseUrl + 'account', { headers }).pipe(
+      map(user => {
+        if (user) {
+          // FOLOSIM FUNCȚIA NOASTRĂ AICI!
+          this.setCurrentUser(user); 
+          return user;
+        } else {
           return null;
         }
-        })
+      })
     )
   }
 
   login(values: any) {
     return this.http.post<User>(this.baseUrl + 'account/login', values).pipe(
-      map(user => { 
-        localStorage.setItem('token', user.token);
-        this.currentUserSource.next(user);
+      map(user => {
+        // FOLOSIM FUNCȚIA NOASTRĂ AICI!
+        this.setCurrentUser(user);
       })
     )
   }
 
-  register(values: any){
-     return this.http.post<User>(this.baseUrl + 'account/register', values).pipe(
-      map(user => { 
-        localStorage.setItem('token', user.token);
-        this.currentUserSource.next(user);
+  register(values: any) {
+    return this.http.post<User>(this.baseUrl + 'account/register', values).pipe(
+      map(user => {
+        // FOLOSIM FUNCȚIA NOASTRĂ AICI!
+        this.setCurrentUser(user);
       })
     )
   }
@@ -79,6 +82,29 @@ export class AccountService {
   changePassword(values: any) {
     // Trimitem datele către noul endpoint din C#
     return this.http.post(this.baseUrl + 'account/change-password', values);
+  }
+  setCurrentUser(user: User | null) {
+    if (user) {
+      // 1. Decodificăm token-ul
+      const decodedToken = this.getDecodedToken(user.token);
+      
+      // 2. Extragem rolul (C# folosește uneori o cheie lungă pentru roluri, așa că le verificăm pe ambele)
+      user.role = decodedToken.role || decodedToken['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
+      
+      // 3. Extragem statusul de verificare (în token e salvat ca string 'true' / 'false')
+      user.isVerified = decodedToken.isVerified === 'true';
+
+      // 4. Salvăm în localStorage și actualizăm aplicația
+      localStorage.setItem('token', user.token);
+      this.currentUserSource.next(user);
+    } else {
+      localStorage.removeItem('token');
+      this.currentUserSource.next(null);
+    }
+  }
+
+  getDecodedToken(token: string) {
+    return JSON.parse(atob(token.split('.')[1]));
   }
   
 }

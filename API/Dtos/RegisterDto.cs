@@ -12,6 +12,10 @@ namespace API.Dtos
         [RegularExpression("(?=^.{6,10}$)(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()_+}{\":;'?/>.<,])(?!.*\\s).*$", 
         ErrorMessage = "Password must have 1 Uppercase, 1 Lowercase, 1 number, 1 non alphanumeric and at least 6 characters")]
         public string Password { get; set; }
+        [Required]
+        public string Role { get; set; } // Angular ne va trimite "Buyer", "CosmeticsProducer", etc.
+
+        public string CompanyName { get; set; } // Opțional (pentru Buyer nu e nevoie, dar pentru producători da)
 
     }
 }

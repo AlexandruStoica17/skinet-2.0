@@ -2,6 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ToastrService } from 'ngx-toastr';
 import { AccountService } from '../account.service';
+import { Observable } from 'rxjs';
+import { User } from 'src/app/shared/models/user';
 
 @Component({
   selector: 'app-profile',
@@ -10,22 +12,27 @@ import { AccountService } from '../account.service';
 })
 export class ProfileComponent implements OnInit {
   addressForm!: FormGroup;
-  passwordForm!: FormGroup; // Am adăugat formularul pentru parolă
-  activeTab: 'address' | 'password' = 'address'; // Variabila care controlează ce tab vedem
+  passwordForm!: FormGroup; 
+  activeTab: 'address' | 'password' | 'verification' = 'address'; // Am adăugat 'verification'
+  
+  user$: Observable<User | null>; // Pentru a afișa tab-ul doar producătorilor
+  selectedFile: File | null = null; // Fișierul selectat de utilizator
 
   constructor(
     private fb: FormBuilder, 
     private accountService: AccountService,
     private toastr: ToastrService
-  ) { }
+  ) { 
+    this.user$ = this.accountService.currentUser$;
+  }
 
   ngOnInit(): void {
     this.createAddressForm();
-    this.createPasswordForm(); // Inițializăm și formularul de parolă la încărcare
+    this.createPasswordForm(); 
     this.getAddress();
   }
 
-  // --- LOGICA PENTRU ADRESĂ (ce aveai deja, neatins) ---
+  // --- LOGICA PENTRU ADRESĂ ---
   createAddressForm() {
     this.addressForm = this.fb.group({
       firstName: ['', Validators.required],
@@ -59,9 +66,8 @@ export class ProfileComponent implements OnInit {
     });
   }
 
-  // --- LOGICA NOUĂ PENTRU PAROLĂ ---
+  // --- LOGICA PENTRU PAROLĂ ---
   createPasswordForm() {
-    // Același Regex strict pe care l-am setat și în C#
     const passwordRegex = "(?=^.{6,10}$)(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&amp;*()_+}{&quot;:;'?/&gt;.&lt;,])(?!.*\\s).*$";
     
     this.passwordForm = this.fb.group({
@@ -74,21 +80,42 @@ export class ProfileComponent implements OnInit {
   onSubmitPassword() {
     const values = this.passwordForm.value;
 
-    // Validare simplă: ne asigurăm că Bob a scris aceeași parolă de două ori
     if (values.newPassword !== values.confirmPassword) {
       this.toastr.error('Parolele noi nu coincid!');
-      return; // Oprim execuția aici dacă nu coincid
+      return; 
     }
 
-    // Trimitem către serviciu (vezi că am adăugat logica în serviciu în pasul anterior)
     this.accountService.changePassword(values).subscribe({
       next: (res: any) => {
         this.toastr.success(res?.message || 'Parola a fost schimbată cu succes!');
-        this.passwordForm.reset(); // Curățăm câmpurile ca să nu mai fie vizibile parolele
+        this.passwordForm.reset(); 
       },
       error: error => {
         console.log(error);
         this.toastr.error('Eroare. Posibil ca parola curentă să fie incorectă.');
+      }
+    });
+  }
+
+  // --- LOGICA NOUĂ PENTRU VERIFICARE CONT ---
+  onFileSelected(event: any) {
+    this.selectedFile = event.target.files[0];
+  }
+
+  onUploadDocument() {
+    if (!this.selectedFile) return;
+
+    const formData = new FormData();
+    formData.append('file', this.selectedFile);
+
+    this.accountService.uploadVerificationDocument(formData).subscribe({
+      next: () => {
+        this.toastr.success('Document trimis! Așteaptă aprobarea administratorului.');
+        this.selectedFile = null;
+      },
+      error: error => {
+        console.log(error);
+        this.toastr.error('Eroare la încărcarea fișierului.');
       }
     });
   }

@@ -6,6 +6,7 @@ using Infrastructure.Data;
 using Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.FileProviders; // Asigură-te că pui asta sus de tot la importuri, dacă lipsește
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
@@ -33,12 +34,22 @@ app.UseAuthorization(); //middleware for us to use authorisation
 app.MapControllers(); //middleware to map controllers => our API knows where to send the HTTP requests
 app.MapHub<MessageHub>("hubs/message");
 
+// ADAUGĂ ACEST BLOC NOU: Îi spune serverului să servească fișiere din folderul "Content"
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(
+        Path.Combine(Directory.GetCurrentDirectory(), "Content")),
+    RequestPath = "/Content"
+});
+
 using var scope = app.Services.CreateScope();
 
 var services = scope.ServiceProvider;
 var context = services.GetRequiredService<StoreContext>();
 // Am sters: var identityContext = services.GetRequiredService<AppIdentityDbContext>();
-var userManager = services.GetRequiredService<UserManager<AppUser>>();  
+var userManager = services.GetRequiredService<UserManager<AppUser>>();
+// 1. Extragem și RoleManager-ul:
+var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
 var logger = services.GetRequiredService<ILogger<Program>>();
 
 try
@@ -47,7 +58,7 @@ try
     // Am sters: await identityContext.Database.MigrateAsync();
     
     await StoreContextSeed.SeedAsync(context);
-    await AppIdentityDbContextSeed.SeedUSersAsync(userManager); // Asta ramane, creaza userul initial "Bob"
+   await AppIdentityDbContextSeed.SeedUsersAsync(userManager, roleManager);
 }
 catch (Exception ex)
 {

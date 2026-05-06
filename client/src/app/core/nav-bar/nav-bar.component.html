@@ -61,6 +61,15 @@
 
                         </a>
                     </li>
+
+                   <ng-container *ngIf="(accountService.currentUser$ | async) as user">
+    <!-- Folosim includes('Admin') în loc de === 'Admin' -->
+    <li class="nav-item" *ngIf="user.role?.includes('Admin')">
+        <a class="nav-link text-danger fw-bold" routerLink="/admin" routerLinkActive="active">
+            <i class="fa fa-cogs"></i> Admin Panel
+        </a>
+    </li>
+</ng-container>
                 </ul>
             </div>
         </ng-container>
