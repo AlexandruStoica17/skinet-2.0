@@ -8,6 +8,7 @@ export interface BasketItem {
     pictureUrl: string;
     brand: string;
     type: string;
+    producerName: string; // --- PROPRIETATEA NOUĂ ---
 }
 
 export interface Basket {

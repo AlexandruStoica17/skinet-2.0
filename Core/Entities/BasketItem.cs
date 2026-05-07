@@ -14,5 +14,7 @@ namespace Core.Entities
         public string PictureUrl { get; set; }
         public string Brand { get; set; }
         public string Type { get; set; }
+        // --- PROPRIETATEA NOUĂ ---
+        public string ProducerName { get; set; }
     }
 }

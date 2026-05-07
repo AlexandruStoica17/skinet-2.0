@@ -118,7 +118,7 @@ export class BasketService {
     return basket;
   }
 
-  private mapProductItemToBasketItem(item: Product): BasketItem {
+ private mapProductItemToBasketItem(item: Product): BasketItem {
     return {
       id: item.id,
       productName: item.name,
@@ -127,18 +127,30 @@ export class BasketService {
       pictureUrl: item.pictureUrl,
       brand: item.productBrand,
       type: item.productType,
+      // --- Adaugă "|| 'Magazinul Nostru'" pentru a preveni eroarea 400 din C# ---
+      producerName: item.producerName || 'Magazinul Nostru' 
     };
   }
 
-  private calculateTotals() {
+ private calculateTotals() {
     const basket = this.getCurrentBasketValue();
     if (!basket) return;
 
-    const subtotal = basket.items.reduce((a, b) => b.price * b.quantity + a, 0);
-    const total = subtotal + basket.shippingPrice;
-    this.basketTotalSource.next({ shipping: basket.shippingPrice, total, subtotal });
-  }
+    // 1. Calculăm subtotalul corect
+    const subtotal = basket.items.reduce((a, b) => (b.price * b.quantity) + a, 0);
 
+    // 2. Numărăm magazinele unice
+    const uniqueProducers = new Set(basket.items.map(item => item.producerName));
+    const numberOfPackages = uniqueProducers.size > 0 ? uniqueProducers.size : 1;
+
+    // 3. Înmulțim taxa de transport cu numărul de pachete
+    const totalShipping = basket.shippingPrice * numberOfPackages;
+
+    // 4. Calculăm totalul final
+    const total = subtotal + totalShipping;
+
+    this.basketTotalSource.next({ shipping: totalShipping, total, subtotal });
+  }
   private isProduct(item: Product | BasketItem): item is Product {
     return (item as Product).productBrand !== undefined;
   }

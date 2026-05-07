@@ -1,0 +1,68 @@
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card shadow-sm">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+          <h3 class="mb-0 py-2"><i class="fa fa-edit text-primary me-2"></i>Editează Produs</h3>
+          <span class="badge bg-light text-dark border">ID: {{productId}}</span>
+        </div>
+        <div class="card-body p-4" *ngIf="productForm">
+          <form [formGroup]="productForm" (ngSubmit)="onSubmit()">
+            
+            <div class="form-group mb-3">
+              <label class="form-label fw-bold">Nume Produs</label>
+              <input type="text" class="form-control" formControlName="name">
+            </div>
+
+            <div class="form-group mb-3">
+              <label class="form-label fw-bold">Descriere</label>
+              <textarea class="form-control" formControlName="description" rows="4"></textarea>
+            </div>
+
+            <div class="row mb-3">
+              <div class="col-md-4 form-group">
+                <label class="form-label fw-bold">Preț (RON)</label>
+                <input type="number" step="1" class="form-control" formControlName="price">
+              </div>
+              <div class="col-md-4 form-group">
+                <label class="form-label fw-bold">Tip</label>
+                <select class="form-select" formControlName="productTypeId">
+                  <option *ngFor="let type of types" [value]="type.id">{{type.name}}</option>
+                </select>
+              </div>
+              <div class="col-md-4 form-group">
+                <label class="form-label fw-bold">Brand</label>
+                <select class="form-select" formControlName="productBrandId">
+                  <option *ngFor="let brand of brands" [value]="brand.id">{{brand.name}}</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-group mb-4">
+              <label class="form-label fw-bold">Actualizează Poza (Opțional)</label>
+              <input type="file" class="form-control" (change)="onFileSelected($event)" accept="image/*">
+              
+              <div class="mt-3 text-center">
+                <div *ngIf="imagePreview">
+                  <p class="text-info small mb-1">Poză nouă selectată:</p>
+                  <img [src]="imagePreview" class="img-thumbnail" style="max-height: 200px;">
+                </div>
+                <div *ngIf="!imagePreview && existingImageUrl">
+                  <p class="text-muted small mb-1">Poză actuală:</p>
+                  <img [src]="existingImageUrl" class="img-thumbnail" style="max-height: 200px;">
+                </div>
+              </div>
+            </div>
+
+            <div class="d-flex justify-content-end border-top pt-4">
+              <button type="button" class="btn btn-outline-secondary me-3" routerLink="/my-products">Anulează</button>
+              <button type="submit" class="btn btn-primary" [disabled]="productForm.invalid">
+                <i class="fa fa-save me-2"></i> Salvează Modificările
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

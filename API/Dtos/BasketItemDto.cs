@@ -30,5 +30,8 @@ namespace API.Dtos
 
         [Required]
         public string Type { get; set; }
+        // --- PROPRIETATEA NOUĂ ---
+        [Required]
+        public string ProducerName { get; set; }
     }
 }

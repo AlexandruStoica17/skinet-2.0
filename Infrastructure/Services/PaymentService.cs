@@ -32,12 +32,23 @@ namespace Infrastructure.Services
 
             if (basket == null) return null;
 
-            var shippingPrice = 0m;
+         var shippingPrice = 0m;
 
             if (basket.DeliveryMethodId.HasValue)
             {
                 var deliveryMethod = await _unitOfWork.Repository<DeliveryMethod>().GetByIdAsync((int)basket.DeliveryMethodId);
-                shippingPrice = deliveryMethod.Price;
+                
+                // --- LOGICA NOUĂ DE MARKETPLACE ---
+                // Numărăm câți producători unici avem (folosind "Magazinul Nostru" ca fallback pentru cele fără nume)
+                var uniqueProducersCount = basket.Items
+                    .Select(x => string.IsNullOrEmpty(x.ProducerName) ? "Magazinul Nostru" : x.ProducerName)
+                    .Distinct()
+                    .Count();
+
+                var numberOfPackages = uniqueProducersCount > 0 ? uniqueProducersCount : 1;
+
+                // Înmulțim taxa de livrare standard cu numărul de pachete
+                shippingPrice = deliveryMethod.Price * numberOfPackages;
             }
 
             foreach (var item in basket.Items)

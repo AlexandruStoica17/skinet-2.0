@@ -11,6 +11,7 @@ namespace Core.Entities
            public ProductBrand ProductBrand { get; set; }
             public int ProductBrandId { get; set; }
             // --- NOU: Aici salvăm ID-ul producătorului care a adăugat produsul ---
-        public string ProducerId { get; set; }
+       public string ProducerId { get; set; } 
+        public string ProducerName { get; set; }
     }
 }

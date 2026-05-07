@@ -18,12 +18,16 @@ import { OrdersModule } from './orders/orders.module';
 import { AdminComponent } from './admin/admin.component';
 import { AddProductComponent } from './producer/add-product/add-product.component';
 import { ReactiveFormsModule } from '@angular/forms';
+import { MyProductsComponent } from './producer/my-products/my-products.component';
+import { EditProductComponent } from './producer/edit-product/edit-product.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     AdminComponent,
     AddProductComponent,
+    MyProductsComponent,
+    EditProductComponent,
     // OrderDetailedComponent
   ],
   imports: [

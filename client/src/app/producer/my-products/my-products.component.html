@@ -1,0 +1,36 @@
+<div class="container mt-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0"><i class="fa fa-box text-info me-2"></i> Produsele Mele</h2>
+    <button class="btn btn-success" routerLink="/add-product">
+      <i class="fa fa-plus-circle me-1"></i> Adaugă Produs Nou
+    </button>
+  </div>
+
+  <div class="row" *ngIf="products.length > 0">
+    <div class="col-md-3 mb-4" *ngFor="let product of products">
+      <div class="card shadow-sm h-100 border-0">
+        <img [src]="product.pictureUrl" class="card-img-top p-3" alt="{{product.name}}" style="height: 200px; object-fit: contain; background-color: #f8f9fa;">
+        <div class="card-body d-flex flex-column">
+          <h5 class="card-title text-truncate" title="{{product.name}}">{{product.name}}</h5>
+          <p class="text-muted small mb-2">{{product.productType}} | {{product.productBrand}}</p>
+          <h6 class="text-primary mb-3 fw-bold">{{product.price}} RON</h6>
+          
+          <div class="mt-auto d-flex justify-content-between">
+           <button class="btn btn-sm btn-outline-primary w-100 me-2" routerLink="/edit-product/{{product.id}}">
+              <i class="fa fa-edit"></i> Edit
+            </button>
+            <button class="btn btn-sm btn-outline-danger w-100" (click)="deleteProduct(product.id)">
+              <i class="fa fa-trash"></i> Șterge
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="text-center mt-5 p-5 bg-light rounded shadow-sm" *ngIf="products.length === 0">
+    <i class="fa fa-shopping-basket fa-4x text-muted mb-3"></i>
+    <h4 class="text-secondary">Nu ai adăugat niciun produs încă.</h4>
+    <p class="text-muted">Folosește butonul de mai sus pentru a publica primul tău produs pe platformă!</p>
+  </div>
+</div>

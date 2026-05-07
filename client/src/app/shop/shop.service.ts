@@ -91,4 +91,16 @@ export class ShopService {
     // Trimitem datele către noul endpoint creat în ProductsController
     return this.http.post(this.baseUrl + 'products/add-product', formData);
   }
+
+  getMyProducts() {
+    return this.http.get<any[]>(this.baseUrl + 'products/my-products');
+  }
+
+  deleteProduct(id: number) {
+    return this.http.delete(this.baseUrl + 'products/delete-product/' + id);
+  }
+
+  editProduct(id: number, formData: FormData) {
+    return this.http.put(this.baseUrl + 'products/edit-product/' + id, formData);
+  }
 }

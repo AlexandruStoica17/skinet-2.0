@@ -6,6 +6,10 @@ export interface Product {
   pictureUrl: string
   productType: string
   productBrand: string
+  productTypeId: number;
+    productBrandId: number;
+    producerId: string;
+    producerName: string;
 }
 
 

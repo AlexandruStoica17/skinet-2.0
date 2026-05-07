@@ -8,6 +8,9 @@ import { AuthGuard } from './core/guards/auth.guard';
 import { AdminGuard } from './core/guards/admin.guard';
 import { AdminComponent } from './admin/admin.component';
 import { AddProductComponent } from './producer/add-product/add-product.component';
+import { MyProductsComponent } from './producer/my-products/my-products.component';
+import { EditProductComponent } from './producer/edit-product/edit-product.component';
+import { ProducerGuard } from './core/guards/producer.guard';
 
 const routes: Routes = [
   { path: '', component: HomeComponent, data: { breadcrumb: 'Home' } },
@@ -65,6 +68,13 @@ const routes: Routes = [
   // --- RUTELE NOASTRE DE ADMIN / PRODUCĂTOR ---
   { path: 'admin', component: AdminComponent, canActivate: [AdminGuard] },
   { path: 'add-product', component: AddProductComponent },
+  { path: 'my-products', component: MyProductsComponent },
+  { path: 'edit-product/:id', component: EditProductComponent },
+
+  // Rute protejate DOAR pentru producători
+  { path: 'add-product', component: AddProductComponent, canActivate: [ProducerGuard] },
+  { path: 'my-products', component: MyProductsComponent, canActivate: [ProducerGuard] },
+  { path: 'edit-product/:id', component: EditProductComponent, canActivate: [ProducerGuard] },
 
   // --- RUTA WILDCARD TREBUIE SĂ FIE STRICT ULTIMA! ---
   { path: '**', redirectTo: 'not-found', pathMatch: 'full' }

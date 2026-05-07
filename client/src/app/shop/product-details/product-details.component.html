@@ -26,6 +26,13 @@
             <div class="row mt-4">
                 <h4>Description</h4>
                 <p>{{product.description}}</p>
+                <div class="d-flex align-items-center mb-4" *ngIf="product">
+    <div class="badge bg-light text-dark border p-2 fs-6">
+        <i class="fa fa-store-alt text-primary me-2"></i>
+        Vândut și livrat de: 
+        <span class="fw-bold text-primary ms-1">{{ product.producerName || 'Magazinul Nostru' }}</span>
+    </div>
+</div>
             </div>
         </div>
     </div>
