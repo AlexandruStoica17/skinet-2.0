@@ -20,7 +20,7 @@ import { NgxGalleryModule } from '@kolkov/ngx-gallery';
     CommonModule,
     SharedModule,
     ShopRoutingModule,
-    NgxGalleryModule
+    NgxGalleryModule,
   ],
  
 })

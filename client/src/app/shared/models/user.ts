@@ -13,6 +13,7 @@ export interface Address {
   city: string;
   state: string;
   zipcode: string;
+  zipCode?: string;
 }
 
 export interface RegisterValues {

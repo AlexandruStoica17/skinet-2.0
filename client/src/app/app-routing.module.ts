@@ -11,6 +11,8 @@ import { AddProductComponent } from './producer/add-product/add-product.componen
 import { MyProductsComponent } from './producer/my-products/my-products.component';
 import { EditProductComponent } from './producer/edit-product/edit-product.component';
 import { ProducerGuard } from './core/guards/producer.guard';
+import { ProducerOrdersComponent } from './producer/producer-orders/producer-orders.component';
+
 
 const routes: Routes = [
   { path: '', component: HomeComponent, data: { breadcrumb: 'Home' } },
@@ -67,14 +69,18 @@ const routes: Routes = [
 
   // --- RUTELE NOASTRE DE ADMIN / PRODUCĂTOR ---
   { path: 'admin', component: AdminComponent, canActivate: [AdminGuard] },
-  { path: 'add-product', component: AddProductComponent },
-  { path: 'my-products', component: MyProductsComponent },
-  { path: 'edit-product/:id', component: EditProductComponent },
+  // { path: 'add-product', component: AddProductComponent },
+  // { path: 'my-products', component: MyProductsComponent },
+  // { path: 'edit-product/:id', component: EditProductComponent },
+
+  // { path: 'producer/orders', component: ProducerOrdersComponent, data: { breadcrumb: 'Producer Orders' } },
 
   // Rute protejate DOAR pentru producători
   { path: 'add-product', component: AddProductComponent, canActivate: [ProducerGuard] },
   { path: 'my-products', component: MyProductsComponent, canActivate: [ProducerGuard] },
   { path: 'edit-product/:id', component: EditProductComponent, canActivate: [ProducerGuard] },
+  // Adaugă asta lângă celelalte rute de producător:
+  { path: 'producer-orders', component: ProducerOrdersComponent, data: { breadcrumb: 'Comenzi Vânzător' } },
 
   // --- RUTA WILDCARD TREBUIE SĂ FIE STRICT ULTIMA! ---
   { path: '**', redirectTo: 'not-found', pathMatch: 'full' }

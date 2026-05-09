@@ -20,6 +20,8 @@ import { AddProductComponent } from './producer/add-product/add-product.componen
 import { ReactiveFormsModule } from '@angular/forms';
 import { MyProductsComponent } from './producer/my-products/my-products.component';
 import { EditProductComponent } from './producer/edit-product/edit-product.component';
+import { ProducerOrdersComponent } from './producer/producer-orders/producer-orders.component';
+import { CommonModule } from '@angular/common';
 
 @NgModule({
   declarations: [
@@ -28,6 +30,7 @@ import { EditProductComponent } from './producer/edit-product/edit-product.compo
     AddProductComponent,
     MyProductsComponent,
     EditProductComponent,
+    ProducerOrdersComponent,
     // OrderDetailedComponent
   ],
   imports: [
@@ -40,6 +43,7 @@ import { EditProductComponent } from './producer/edit-product/edit-product.compo
     BreadcrumbModule,
     OrdersModule,
     ReactiveFormsModule,
+    // CommonModule,
   ],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },

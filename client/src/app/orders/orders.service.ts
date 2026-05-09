@@ -18,4 +18,9 @@ baseUrl = environment.apiUrl;
   getOrderDetailed(id: number) { 
     return this.http.get<Order>(this.baseUrl + 'orders/' + id); 
   } 
+
+  getOrdersForProducer() {
+  return this.http.get<any[]>(this.baseUrl + 'orders/producer-orders');
+}
+
 }

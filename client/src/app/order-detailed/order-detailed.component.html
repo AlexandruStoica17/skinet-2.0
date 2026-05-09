@@ -27,7 +27,7 @@
                         <div class="col-6">
                             <p class="mb-1"><strong>Destinatar:</strong> {{order.shipToAddress.firstName}} {{order.shipToAddress.lastName}}</p>
                             <p class="mb-0"><strong>Adresă:</strong> {{order.shipToAddress.street}}, {{order.shipToAddress.city}}, {{order.shipToAddress.state}},
-                                 {{order.shipToAddress.zipcode}}</p>
+{{order.shipToAddress.zipCode || order.shipToAddress.zipcode}}</p>
                         </div>
                     </div>
                 </div>

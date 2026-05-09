@@ -15,6 +15,11 @@ namespace Core.Entities.OrderAggregate
         PaymentRecevied,
 
         [EnumMember(Value = "Payment Failed")]
-        PaymentFailed
+        PaymentFailed,
+
+        // ADAUGĂ ASTA PENTRU PRODUCĂTOR:
+        [EnumMember(Value = "Shipped")]
+        Shipped
+        
     }
 }
