@@ -6,13 +6,15 @@
             <ngx-gallery [options]="galleryOptions" [images]="galleryImages" class="ngx-gallery"></ngx-gallery>
         </div>
         
-        <!-- Partea Dreaptă (Logica de coș existentă) -->
+        <!-- Partea Dreaptă -->
         <div class="col-6 mt-5">
             <h2>{{product.name}}</h2>
             <p style="font-size: 2em;">{{product.price | currency}}</p>
 
-            <h5 class="text-primary mb-3" *ngIf="quantityInBasket > 0">You have {{quantityInBasket}} of this in basket
+            <h5 class="text-primary mb-3" *ngIf="quantityInBasket > 0">
+                You have {{quantityInBasket}} of this in basket
             </h5>
+
             <div class="d-flex justify-content-start align-center">
                 <i (click)="decrementQuantity()" class="fa fa-minus-circle text-warning me-2"
                     style="cursor: pointer; font-size: 2em;"></i>
@@ -20,19 +22,35 @@
                 <i (click)="incrementQuantity()" class="fa fa-plus-circle text-warning ms-2"
                     style="cursor: pointer; font-size: 2em;"></i>
                 <button class="btn btn-outline-secondary ms-4" (click)="updateBasket()"
-                    [disabled]="quantity === quantityInBasket ">{{buttonText}}</button>
-
+                    [disabled]="quantity === quantityInBasket">{{buttonText}}</button>
             </div>
+
             <div class="row mt-4">
                 <h4>Description</h4>
                 <p>{{product.description}}</p>
-                <div class="d-flex align-items-center mb-4" *ngIf="product">
-    <div class="badge bg-light text-dark border p-2 fs-6">
-        <i class="fa fa-store-alt text-primary me-2"></i>
-        Vândut și livrat de: 
-        <span class="fw-bold text-primary ms-1">{{ product.producerName || 'Magazinul Nostru' }}</span>
-    </div>
-</div>
+
+                <!-- Badge vânzător -->
+                <div class="d-flex align-items-center mb-3" *ngIf="product">
+                    <div class="badge bg-light text-dark border p-2 fs-6">
+                        <i class="fa fa-store-alt text-primary me-2"></i>
+                        Vândut și livrat de:
+                        <span class="fw-bold text-primary ms-1">{{ product.producerName || 'Magazinul Nostru' }}</span>
+                    </div>
+                </div>
+
+                <!-- 
+                    BUTON "Contactează vânzătorul"
+                    Apare DOAR dacă:
+                    - produsul are un producerEmail
+                    - userul logat NU este chiar vânzătorul (nu-și scrie sie însuși)
+                -->
+                <div class="mt-1 mb-3"
+                     *ngIf="product.producerEmail && product.producerEmail !== currentUserEmail">
+                    <button class="btn btn-outline-primary" (click)="contactSeller()">
+                        <i class="fa fa-comments me-2"></i>Contactează vânzătorul
+                    </button>
+                </div>
+
             </div>
         </div>
     </div>

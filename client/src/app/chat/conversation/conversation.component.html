@@ -1,0 +1,74 @@
+<div class="container mt-4 mb-5">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card shadow-sm">
+
+                <!-- Header -->
+                <div class="card-header bg-primary text-white d-flex align-items-center">
+                    <button class="btn btn-sm btn-light text-primary me-3" (click)="goBack()">
+                        <i class="fa fa-arrow-left"></i>
+                    </button>
+                    <i class="fa fa-comments me-2"></i>
+                    <strong>{{ recipientEmail }}</strong>
+                </div>
+
+                <!-- Istoricul mesajelor -->
+                <div class="card-body chat-body bg-light">
+
+                    <div *ngIf="(messageService.messageThread$ | async)?.length === 0"
+                         class="text-center text-muted mt-5">
+                        <p>Niciun mesaj încă. Scrie ceva pentru a începe!</p>
+                    </div>
+
+                    <ul class="list-unstyled">
+                        <li *ngFor="let msg of (messageService.messageThread$ | async)">
+                            <div class="d-flex mb-3"
+                                 [class.justify-content-end]="msg.senderUsername === currentUserEmail"
+                                 [class.justify-content-start]="msg.senderUsername !== currentUserEmail">
+
+                                <div class="chat-bubble p-3 rounded"
+                                     [class.bg-primary]="msg.senderUsername === currentUserEmail"
+                                     [class.text-white]="msg.senderUsername === currentUserEmail"
+                                     [class.bg-white]="msg.senderUsername !== currentUserEmail"
+                                     [class.border]="msg.senderUsername !== currentUserEmail">
+                                    <p class="mb-1">{{ msg.content }}</p>
+                                    <small [class.text-light]="msg.senderUsername === currentUserEmail"
+                                           [class.text-muted]="msg.senderUsername !== currentUserEmail"
+                                           style="font-size: 0.75em;">
+                                        <i class="fa fa-clock-o me-1"></i>
+                                        {{ msg.messageSent | date:'d MMM, HH:mm' }}
+                                        <span *ngIf="msg.senderUsername === currentUserEmail && msg.dateRead"
+                                              class="ms-1">
+                                            <i class="fa fa-check-circle"></i> Citit
+                                        </span>
+                                    </small>
+                                </div>
+
+                            </div>
+                        </li>
+                    </ul>
+
+                </div>
+
+                <!-- Input mesaj nou -->
+                <div class="card-footer">
+                    <form #messageForm="ngForm" (ngSubmit)="sendMessage()" autocomplete="off">
+                        <div class="input-group">
+                            <input
+                                type="text"
+                                name="messageContent"
+                                class="form-control form-control-lg"
+                                placeholder="Scrie un mesaj..."
+                                [(ngModel)]="messageContent"
+                                required>
+                            <button class="btn btn-primary" type="submit" [disabled]="!messageForm.valid">
+                                <i class="fa fa-paper-plane"></i> Trimite
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>

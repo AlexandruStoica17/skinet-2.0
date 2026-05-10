@@ -6,7 +6,7 @@ using Infrastructure.Data;
 using Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.FileProviders; // Asigură-te că pui asta sus de tot la importuri, dacă lipsește
+using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
@@ -14,27 +14,25 @@ builder.Services.AddApplicationServices(builder.Configuration);
 builder.Services.AddIdentityServices(builder.Configuration);
 builder.Services.AddSwaggerDocumentation();
 builder.Services.AddSignalR();
+
 var app = builder.Build();
 
-// Configure the HTTP request pipeline. //POSITION IS IMPORTANT
 app.UseMiddleware<ExceptionMiddleware>();
-
 app.UseStatusCodePagesWithReExecute("/errors/{0}");
-
 app.UseSwaggerDocumention();
-
 app.UseStaticFiles();
-
 app.UseCors("CorsPolicy");
-
 app.UseAuthentication();
+app.UseAuthorization();
 
-app.UseAuthorization(); //middleware for us to use authorisation
+app.MapControllers();
 
-app.MapControllers(); //middleware to map controllers => our API knows where to send the HTTP requests
+// Hub-ul de chat (conversații între doi useri)
 app.MapHub<MessageHub>("hubs/message");
 
-// ADAUGĂ ACEST BLOC NOU: Îi spune serverului să servească fișiere din folderul "Content"
+// Hub-ul de notificări (badge cu mesaje necitite) — NOU
+app.MapHub<NotificationHub>("hubs/notification");
+
 app.UseStaticFiles(new StaticFileOptions
 {
     FileProvider = new PhysicalFileProvider(
@@ -43,26 +41,21 @@ app.UseStaticFiles(new StaticFileOptions
 });
 
 using var scope = app.Services.CreateScope();
-
 var services = scope.ServiceProvider;
 var context = services.GetRequiredService<StoreContext>();
-// Am sters: var identityContext = services.GetRequiredService<AppIdentityDbContext>();
 var userManager = services.GetRequiredService<UserManager<AppUser>>();
-// 1. Extragem și RoleManager-ul:
 var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
 var logger = services.GetRequiredService<ILogger<Program>>();
 
 try
 {
     await context.Database.MigrateAsync();
-    // Am sters: await identityContext.Database.MigrateAsync();
-    
     await StoreContextSeed.SeedAsync(context);
-   await AppIdentityDbContextSeed.SeedUsersAsync(userManager, roleManager);
+    await AppIdentityDbContextSeed.SeedUsersAsync(userManager, roleManager);
 }
 catch (Exception ex)
 {
     logger.LogError(ex, "An error occured during migration");
 }
 
-app.Run(); //runs the app
+app.Run();

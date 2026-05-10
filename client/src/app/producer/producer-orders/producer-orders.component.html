@@ -1,6 +1,6 @@
 <div class="container mt-5">
     
-    <!-- SECȚIUNEA 1: TABELUL CU COMENZI (Apare doar dacă NU avem o comandă selectată) -->
+    <!-- SECȚIUNEA 1: TABELUL CU COMENZI -->
     <div *ngIf="!selectedOrder">
         <div class="row">
             <div class="col-12">
@@ -33,6 +33,13 @@
                                     </span>
                                 </td>
                                 <td class="align-middle text-right">
+                                    <!-- BUTON NOU: Scrie cumpărătorului direct din tabel -->
+                                    <a [routerLink]="['/chat']" 
+                                       [queryParams]="{user: order.buyerEmail}" 
+                                       class="btn btn-outline-info btn-sm mr-2"
+                                       title="Scrie cumpărătorului">
+                                        <i class="fa fa-comments"></i>
+                                    </a>
                                     <button (click)="viewOrder(order)" class="btn btn-outline-primary btn-sm">
                                         View Order
                                     </button>
@@ -47,22 +54,29 @@
             </div>
         </div>
     </div>
-    
 
-    <!-- SECȚIUNEA 2: DETALIILE COMENZII (Apare doar după ce dai click pe View Order) -->
+    <!-- SECȚIUNEA 2: DETALIILE COMENZII -->
     <div *ngIf="selectedOrder">
         
-        <!-- Antet cu Titlu și Butoane corect așezate -->
+        <!-- Antet cu Titlu și Butoane -->
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2>Order #{{selectedOrder?.id}} Details</h2>
             
             <div>
-                <!-- Noul Buton (Apare DOAR dacă comanda NU este deja expediată) -->
+                <!-- Buton Mark as Shipped -->
                 <button *ngIf="selectedOrder?.status !== 'Shipped'" 
                         (click)="markAsShipped()" 
                         class="btn btn-success mr-3 shadow-sm">
                     <i class="fa fa-paper-plane mr-2"></i>Mark as Shipped
                 </button>
+
+                <!-- BUTON NOU: Scrie cumpărătorului din pagina de detalii comandă -->
+                <a [routerLink]="['/chat']" 
+                   [queryParams]="{user: selectedOrder?.buyerEmail}" 
+                   class="btn btn-outline-info mr-3 shadow-sm"
+                   title="Scrie cumpărătorului">
+                    <i class="fa fa-comments mr-2"></i>Scrie cumpărătorului
+                </a>
 
                 <button (click)="backToOrders()" class="btn btn-outline-secondary shadow-sm">
                     <i class="fa fa-arrow-left mr-2"></i>Back to Orders

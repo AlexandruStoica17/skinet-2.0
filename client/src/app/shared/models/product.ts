@@ -10,6 +10,7 @@ export interface Product {
     productBrandId: number;
     producerId: string;
     producerName: string;
+    producerEmail: string; // NOU: pentru butonul "Contactează vânzătorul"
 }
 
 

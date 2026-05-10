@@ -1,59 +1,43 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
-
-
-import { take } from 'rxjs';
-import { AccountService } from '../account/account.service';
+import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { MessageService } from '../core/services/message.service';
+import { Conversation } from '../shared/models/conversation';
 
 @Component({
   selector: 'app-chat',
   templateUrl: './chat.component.html',
   styleUrls: ['./chat.component.scss']
 })
-export class ChatComponent implements OnInit, OnDestroy {
-  recipientUsername = '';
-  messageContent = '';
-  currentUserToken = '';
-  currentUsername = '';
-  connected = false;
+export class ChatComponent implements OnInit {
+  conversations: Conversation[] = [];
+  loading = false;
 
   constructor(
-    public messageService: MessageService, 
-    private accountService: AccountService
+    public messageService: MessageService,
+    private router: Router
   ) { }
 
   ngOnInit(): void {
-    // Extragem token-ul și numele utilizatorului curent logat
-    this.accountService.currentUser$.pipe(take(1)).subscribe({
-      next: user => {
-        if (user) {
-          this.currentUserToken = user.token;
-          // În API-ul tău s-ar putea ca Username-ul să fie de fapt adresa de email
-          this.currentUsername = user.email; 
-        }
+    this.loadInbox();
+  }
+
+  loadInbox() {
+    this.loading = true;
+    this.messageService.getInbox().subscribe({
+      next: conversations => {
+        this.conversations = conversations;
+        this.loading = false;
+      },
+      error: error => {
+        console.log(error);
+        this.loading = false;
       }
     });
   }
 
-  // Pornim conexiunea de SignalR
-  connectToChat() {
-    if (this.recipientUsername && this.currentUserToken) {
-      this.messageService.createHubConnection(this.currentUserToken, this.recipientUsername);
-      this.connected = true;
-    }
-  }
-
-  // Trimitem mesajul
-  sendMessage() {
-    if (this.messageContent.trim().length === 0) return;
-
-    this.messageService.sendMessage(this.recipientUsername, this.messageContent).then(() => {
-      this.messageContent = ''; // Curățăm căsuța după trimitere
+  openConversation(partnerEmail: string) {
+    this.router.navigate(['/chat', 'conversation'], {
+      queryParams: { user: partnerEmail }
     });
-  }
-
-  // Închidem conexiunea când ieșim de pe pagină
-  ngOnDestroy(): void {
-    this.messageService.stopHubConnection();
   }
 }
