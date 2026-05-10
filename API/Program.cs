@@ -15,6 +15,9 @@ builder.Services.AddIdentityServices(builder.Configuration);
 builder.Services.AddSwaggerDocumentation();
 builder.Services.AddSignalR();
 
+// Singleton — tine evidenta conexiunilor active pentru notificari in timp real
+builder.Services.AddSingleton<PresenceTracker>();
+
 var app = builder.Build();
 
 app.UseMiddleware<ExceptionMiddleware>();
@@ -27,11 +30,9 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-// Hub-ul de chat (conversații între doi useri)
 app.MapHub<MessageHub>("hubs/message");
-
-// Hub-ul de notificări (badge cu mesaje necitite) — NOU
 app.MapHub<NotificationHub>("hubs/notification");
+app.MapHub<PresenceHub>("hubs/presence");
 
 app.UseStaticFiles(new StaticFileOptions
 {

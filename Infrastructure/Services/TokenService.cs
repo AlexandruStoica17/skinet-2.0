@@ -1,13 +1,9 @@
-using System;
-using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using System.Security.Claims;
 using System.Text;
-using System.Threading.Tasks;
 using Core.Entities.Identity;
 using Core.Interfaces;
-using Microsoft.AspNetCore.Identity; // Necesar pentru UserManager
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
@@ -17,30 +13,29 @@ namespace Infrastructure.Services
     {
         private readonly IConfiguration _config;
         private readonly SymmetricSecurityKey _key;
-        private readonly UserManager<AppUser> _userManager; // Injectăm UserManager
+        private readonly UserManager<AppUser> _userManager;
 
         public TokenService(IConfiguration config, UserManager<AppUser> userManager)
         {
             _config = config;
-            _userManager = userManager; // Inițializăm UserManager
+            _userManager = userManager;
             _key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Token:Key"]));
         }
 
-        // Modificăm semnătura în async Task<string>
         public async Task<string> CreateToken(AppUser user)
         {
             var claims = new List<Claim>
             {
                 new Claim(JwtRegisteredClaimNames.Email, user.Email),
                 new Claim(JwtRegisteredClaimNames.GivenName, user.DisplayName),
-                // Adăugăm flag-ul de verificare
-                new Claim("isVerified", user.IsVerified.ToString().ToLower())
+                new Claim("isVerified", user.IsVerified.ToString().ToLower()),
+
+                // FIX: necesar pentru SignalR Clients.User(email)
+                new Claim(ClaimTypes.NameIdentifier, user.Email),
+                new Claim(ClaimTypes.Name, user.Email)
             };
 
-            // Extragem rolurile utilizatorului din Identity
             var roles = await _userManager.GetRolesAsync(user);
-
-            // Le adăugăm în lista de claims
             claims.AddRange(roles.Select(role => new Claim(ClaimTypes.Role, role)));
 
             var creds = new SigningCredentials(_key, SecurityAlgorithms.HmacSha512Signature);
@@ -54,7 +49,6 @@ namespace Infrastructure.Services
             };
 
             var tokenHandler = new JwtSecurityTokenHandler();
-
             var token = tokenHandler.CreateToken(tokenDescriptor);
 
             return tokenHandler.WriteToken(token);

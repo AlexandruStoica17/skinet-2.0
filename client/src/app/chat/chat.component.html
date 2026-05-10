@@ -2,8 +2,60 @@
     <div class="row">
         <div class="col-md-8 offset-md-2">
 
+            <!-- Header cu titlu + buton mesaj nou -->
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h4><i class="fa fa-comments me-2 text-primary"></i>Mesaje</h4>
+                <!-- NOU: buton Mesaj Nou -->
+                <button class="btn btn-primary btn-sm" (click)="showNewConversation = !showNewConversation">
+                    <i class="fa fa-plus me-1"></i> Mesaj nou
+                </button>
+            </div>
+
+            <!-- NOU: Panel "Mesaj nou" - cauta user dupa email/nume -->
+            <div class="card shadow-sm mb-3" *ngIf="showNewConversation">
+                <div class="card-body">
+                    <h6 class="mb-2"><i class="fa fa-search me-1"></i> Cauta utilizator</h6>
+                    <div class="input-group">
+                        <input type="text"
+                               class="form-control"
+                               placeholder="Scrie email sau nume..."
+                               [(ngModel)]="userSearchQuery"
+                               (input)="searchUsers()">
+                        <span class="input-group-text" *ngIf="searchingUsers">
+                            <i class="fa fa-spinner fa-spin"></i>
+                        </span>
+                    </div>
+                    <!-- Rezultate cautare useri -->
+                    <div class="list-group mt-2" *ngIf="userSearchResults.length > 0">
+                        <button *ngFor="let user of userSearchResults"
+                                class="list-group-item list-group-item-action d-flex align-items-center"
+                                (click)="startNewConversation(user.email)">
+                            <div class="rounded-circle bg-secondary text-white d-flex align-items-center
+                                        justify-content-center me-2"
+                                 style="width: 36px; height: 36px; flex-shrink: 0;">
+                                {{ user.displayName?.charAt(0)?.toUpperCase() }}
+                            </div>
+                            <div>
+                                <div class="fw-bold small">{{ user.displayName }}</div>
+                                <div class="text-muted" style="font-size: 0.8em;">{{ user.email }}</div>
+                            </div>
+                        </button>
+                    </div>
+                    <p class="text-muted small mt-2 mb-0"
+                       *ngIf="userSearchQuery.length >= 2 && userSearchResults.length === 0 && !searchingUsers">
+                        Niciun utilizator găsit.
+                    </p>
+                </div>
+            </div>
+
+            <!-- NOU: Search bar inbox -->
+            <div class="input-group mb-3">
+                <span class="input-group-text"><i class="fa fa-search"></i></span>
+                <input type="text"
+                       class="form-control"
+                       placeholder="Cauta conversatie..."
+                       [(ngModel)]="searchTerm"
+                       (input)="onSearch()">
             </div>
 
             <!-- Loading -->
@@ -14,7 +66,7 @@
             <!-- Inbox gol -->
             <div *ngIf="!loading && conversations.length === 0" class="card shadow-sm">
                 <div class="card-body text-center py-5 text-muted">
-                    <i class="fa fa-comment-o fa-3x mb-3"></i>
+                    <i class="fa fa-comment-o fa-3x mb-3 d-block"></i>
                     <p>Nu ai nicio conversație încă.</p>
                     <p class="small">Contactează un vânzător de pe pagina unui produs.</p>
                 </div>
@@ -22,38 +74,48 @@
 
             <!-- Lista conversatii -->
             <div class="list-group shadow-sm" *ngIf="!loading && conversations.length > 0">
-                <a
-                    *ngFor="let conv of conversations"
-                    class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
-                    style="cursor: pointer;"
-                    (click)="openConversation(conv.partnerEmail)">
+                <a *ngFor="let conv of conversations"
+                   class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3"
+                   style="cursor: pointer;"
+                   (click)="openConversation(conv.partnerEmail, conv.orderId)">
 
                     <div class="d-flex align-items-center">
-                        <!-- Avatar placeholder cu initiala -->
-                        <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-3"
+                        <div class="rounded-circle bg-primary text-white d-flex align-items-center
+                                    justify-content-center me-3"
                              style="width: 48px; height: 48px; font-size: 1.2em; flex-shrink: 0;">
                             {{ conv.partnerName?.charAt(0)?.toUpperCase() }}
                         </div>
-
                         <div>
                             <div class="fw-bold">{{ conv.partnerName }}</div>
-                            <div class="text-muted small text-truncate" style="max-width: 300px;">
+                             <!-- NOU: afisam titlul comenzii daca exista -->
+    <div class="text-primary small" *ngIf="conv.orderTitle">
+        <i class="fa fa-shopping-bag me-1"></i>{{ conv.orderTitle }}
+    </div>
+                            <div class="text-muted small text-truncate" style="max-width: 280px;">
                                 {{ conv.lastMessage }}
                             </div>
                         </div>
                     </div>
 
-                    <div class="text-end">
+                    <div class="text-end flex-shrink-0 ms-3">
                         <div class="text-muted small mb-1">
                             {{ conv.lastMessageSent | date:'d MMM, HH:mm' }}
                         </div>
-                        <!-- Badge mesaje necitite -->
                         <span class="badge bg-danger rounded-pill" *ngIf="conv.unreadCount > 0">
                             {{ conv.unreadCount }}
                         </span>
                     </div>
-
                 </a>
+            </div>
+
+            <!-- NOU: Pager -->
+            <div class="d-flex justify-content-center mt-3" *ngIf="totalCount > pageSize">
+                <app-pager
+                    [pageSize]="pageSize"
+                    [totalCount]="totalCount"
+                    [pageNumber]="pageNumber"
+                    (pageChanged)="onPageChanged($event)">
+                </app-pager>
             </div>
 
         </div>

@@ -1,12 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.Serialization;
-using System.Threading.Tasks;
 
 namespace Core.Entities.OrderAggregate
 {
-     public enum OrderStatus
+    public enum OrderStatus
     {
         [EnumMember(Value = "Pending")]
         Pending,
@@ -17,9 +13,11 @@ namespace Core.Entities.OrderAggregate
         [EnumMember(Value = "Payment Failed")]
         PaymentFailed,
 
-        // ADAUGĂ ASTA PENTRU PRODUCĂTOR:
         [EnumMember(Value = "Shipped")]
-        Shipped
-        
+        Shipped,
+
+        // NOU: cumparatorul confirma ca a primit comanda
+        [EnumMember(Value = "Delivered")]
+        Delivered
     }
 }

@@ -22,5 +22,9 @@ baseUrl = environment.apiUrl;
   getOrdersForProducer() {
   return this.http.get<any[]>(this.baseUrl + 'orders/producer-orders');
 }
+// NOU: cumparatorul confirma primirea comenzii
+markOrderAsDelivered(orderId: number) {
+  return this.http.put<Order>(this.baseUrl + 'orders/mark-delivered/' + orderId, {});
+}
 
 }

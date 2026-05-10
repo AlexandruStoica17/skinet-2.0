@@ -2,7 +2,6 @@ import { Component, OnInit } from '@angular/core';
 import { BasketService } from './basket/basket.service';
 import { AccountService } from './account/account.service';
 import { MessageService } from './core/services/message.service';
-import { filter, switchMap, take } from 'rxjs';
 
 @Component({
   selector: 'app-root',
@@ -15,13 +14,13 @@ export class AppComponent implements OnInit {
   constructor(
     private basketService: BasketService,
     private accountService: AccountService,
-    private messageService: MessageService  // NOU
+    private messageService: MessageService
   ) {}
 
   ngOnInit(): void {
     this.loadBasket();
     this.loadCurrentUser();
-    this.initNotifications(); // NOU
+    this.initConnections();
   }
 
   loadBasket() {
@@ -34,18 +33,14 @@ export class AppComponent implements OnInit {
     this.accountService.loadCurrentUser(token).subscribe();
   }
 
-  /**
-   * Pornim conexiunea de notificări imediat ce avem un user logat.
-   * Se oprește automat când userul dă logout (token devine null).
-   */
-  initNotifications() {
+  initConnections() {
     this.accountService.currentUser$.subscribe(user => {
       if (user?.token) {
-        // User tocmai s-a logat — pornim notificările
         this.messageService.createNotificationConnection(user.token);
+        this.messageService.createPresenceConnection(user.token);
       } else {
-        // User tocmai s-a delogat — oprim notificările
         this.messageService.stopNotificationConnection();
+        this.messageService.stopPresenceConnection();
       }
     });
   }

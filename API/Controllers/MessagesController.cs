@@ -22,27 +22,38 @@ namespace API.Controllers
             _userManager = userManager;
         }
 
-        // GET /api/messages/inbox
-        // Returnează lista conversațiilor unice, cu ultimul mesaj și numărul de necitite
+        // GET /api/messages/inbox?search=bob&pageIndex=1&pageSize=10
         [HttpGet("inbox")]
-        public async Task<ActionResult<IEnumerable<ConversationDto>>> GetInbox()
+        public async Task<ActionResult<IEnumerable<ConversationDto>>> GetInbox(
+            [FromQuery] string search = "",
+            [FromQuery] int pageIndex = 1,
+            [FromQuery] int pageSize = 10)
         {
             var currentEmail = User.RetrieveEmailFromPrincipal();
 
             var spec = new AllUserMessagesSpecification(currentEmail);
             var allMessages = await _unitOfWork.Repository<Message>().ListAsync(spec);
 
-            // Grupăm după partenerul de conversație
+            // NOU: grupam dupa OrderId (fiecare comanda = conversatie separata)
+            // Mesajele fara OrderId (chat general) sunt grupate dupa partener ca inainte
             var conversations = allMessages
                 .GroupBy(m =>
-                    m.SenderUsername == currentEmail
+                {
+                    var partnerEmail = m.SenderUsername == currentEmail
                         ? m.RecipientUsername
-                        : m.SenderUsername
-                )
+                        : m.SenderUsername;
+                    // Cheia grupului: orderId (daca exista) sau email partener (chat general)
+                    return m.OrderId.HasValue
+                        ? $"order_{m.OrderId}"
+                        : $"chat_{partnerEmail}";
+                })
                 .Select(group =>
                 {
-                    var partnerEmail = group.Key;
                     var lastMessage = group.First(); // spec are OrderByDescending deja
+
+                    var partnerEmail = lastMessage.SenderUsername == currentEmail
+                        ? lastMessage.RecipientUsername
+                        : lastMessage.SenderUsername;
 
                     var partnerUser = lastMessage.SenderUsername == currentEmail
                         ? lastMessage.Recipient
@@ -57,13 +68,90 @@ namespace API.Controllers
                         PartnerName = partnerUser?.DisplayName ?? partnerEmail,
                         LastMessage = lastMessage.Content,
                         LastMessageSent = lastMessage.MessageSent,
-                        UnreadCount = unreadCount
+                        UnreadCount = unreadCount,
+                        // NOU: OrderId si titlu pentru afisare in inbox
+                        OrderId = lastMessage.OrderId,
+                        OrderTitle = lastMessage.OrderId.HasValue
+                            ? $"Comanda #{lastMessage.OrderId}"
+                            : null
                     };
                 })
                 .OrderByDescending(c => c.LastMessageSent)
                 .ToList();
 
-            return Ok(conversations);
+            // Filtram dupa search
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                conversations = conversations
+                    .Where(c =>
+                        c.PartnerName.Contains(search, StringComparison.OrdinalIgnoreCase) ||
+                        c.PartnerEmail.Contains(search, StringComparison.OrdinalIgnoreCase) ||
+                        (c.OrderTitle != null && c.OrderTitle.Contains(search, StringComparison.OrdinalIgnoreCase)))
+                    .ToList();
+            }
+
+            // Paginare
+            var totalCount = conversations.Count;
+            var paged = conversations
+                .Skip((pageIndex - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            Response.Headers.Add("X-Pagination-Total", totalCount.ToString());
+
+            return Ok(paged);
+        }
+
+        // POST /api/messages/review
+        [HttpPost("review")]
+        public async Task<ActionResult> SubmitReview(ReviewDto reviewDto)
+        {
+            var buyerEmail = User.RetrieveEmailFromPrincipal();
+
+            var existingReviews = await _unitOfWork.Repository<Review>().ListAllAsync();
+            var alreadyReviewed = existingReviews.Any(r =>
+                r.OrderId == reviewDto.OrderId && r.BuyerEmail == buyerEmail);
+
+            if (alreadyReviewed)
+                return BadRequest(new { message = "Ai lăsat deja un review pentru această comandă." });
+
+            var review = new Review
+            {
+                OrderId = reviewDto.OrderId,
+                BuyerEmail = buyerEmail,
+                ProducerEmail = reviewDto.ProducerEmail,
+                Rating = reviewDto.Rating,
+                Comment = reviewDto.Comment
+            };
+
+            _unitOfWork.Repository<Review>().Add(review);
+            await _unitOfWork.Complete();
+
+            return Ok(new { message = "Review trimis cu succes! Mulțumim!" });
+        }
+
+        // GET /api/messages/search-user?query=bob
+        [HttpGet("search-user")]
+        public async Task<ActionResult<IEnumerable<UserSearchResultDto>>> SearchUser([FromQuery] string query)
+        {
+            if (string.IsNullOrWhiteSpace(query) || query.Length < 2)
+                return Ok(new List<UserSearchResultDto>());
+
+            var currentEmail = User.RetrieveEmailFromPrincipal();
+
+            var users = _userManager.Users
+                .Where(u =>
+                    u.Email != currentEmail &&
+                    (u.Email.Contains(query) || u.DisplayName.Contains(query)))
+                .Take(10)
+                .Select(u => new UserSearchResultDto
+                {
+                    Email = u.Email,
+                    DisplayName = u.DisplayName
+                })
+                .ToList();
+
+            return Ok(users);
         }
     }
 }

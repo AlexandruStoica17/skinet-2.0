@@ -7,4 +7,7 @@ export interface Message {
     content: string;
     dateRead?: Date;
     messageSent: Date;
+    // NOU: pentru butonul de review
+    isReviewPrompt?: boolean;
+    orderId?: number;
 }

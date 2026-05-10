@@ -1,7 +1,5 @@
 namespace API.Dtos
 {
-    // Reprezintă o conversație rezumată în inbox:
-    // partenerul + ultimul mesaj + număr necitite
     public class ConversationDto
     {
         public string PartnerEmail { get; set; }
@@ -9,5 +7,9 @@ namespace API.Dtos
         public string LastMessage { get; set; }
         public DateTime LastMessageSent { get; set; }
         public int UnreadCount { get; set; }
+
+        // NOU: fiecare conversatie e legata de o comanda specifica
+        public int? OrderId { get; set; }
+        public string OrderTitle { get; set; } // ex: "Comanda #42"
     }
 }

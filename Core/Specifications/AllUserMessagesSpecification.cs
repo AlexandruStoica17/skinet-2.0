@@ -2,8 +2,6 @@ using Core.Entities;
 
 namespace Core.Specifications
 {
-    // Aduce toate mesajele în care userul curent e sender SAU recipient
-    // Folosit pentru a construi lista de conversații (inbox)
     public class AllUserMessagesSpecification : BaseSpecification<Message>
     {
         public AllUserMessagesSpecification(string currentEmail)

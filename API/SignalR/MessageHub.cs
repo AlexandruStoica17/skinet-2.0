@@ -18,17 +18,20 @@ namespace API.SignalR
         private readonly IMapper _mapper;
         private readonly UserManager<AppUser> _userManager;
         private readonly IHubContext<NotificationHub> _notificationHub;
+        private readonly IHubContext<PresenceHub> _presenceHub;
 
         public MessageHub(
             IUnitOfWork unitOfWork,
             IMapper mapper,
             UserManager<AppUser> userManager,
-            IHubContext<NotificationHub> notificationHub)
+            IHubContext<NotificationHub> notificationHub,
+            IHubContext<PresenceHub> presenceHub)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
             _userManager = userManager;
             _notificationHub = notificationHub;
+            _presenceHub = presenceHub;
         }
 
         public override async Task OnConnectedAsync()
@@ -37,30 +40,39 @@ namespace API.SignalR
             var otherUser = httpContext.Request.Query["user"].ToString();
             var currentEmail = Context.User.RetrieveEmailFromPrincipal();
 
-            var groupName = GetGroupName(currentEmail, otherUser);
+            // NOU: citim orderId din query (optional: /hubs/message?user=bob@...&orderId=42)
+            int? orderId = null;
+            if (int.TryParse(httpContext.Request.Query["orderId"].ToString(), out var parsedOrderId))
+                orderId = parsedOrderId;
+
+            // Numele grupului include orderId daca exista, altfel e chat general
+            var groupName = orderId.HasValue
+                ? GetGroupName(currentEmail, otherUser) + $"_order_{orderId}"
+                : GetGroupName(currentEmail, otherUser);
+
             await Groups.AddToGroupAsync(Context.ConnectionId, groupName);
 
-            // Trimitem istoricul conversației
-            var spec = new MessageThreadSpecification(currentEmail, otherUser);
+            // NOU: aducem mesajele filtrate dupa orderId (sau fara orderId pentru chat general)
+            var spec = orderId.HasValue
+                ? new MessageThreadSpecification(currentEmail, otherUser, orderId.Value)
+                : new MessageThreadSpecification(currentEmail, otherUser);
+
             var messages = await _unitOfWork.Repository<Message>().ListAsync(spec);
 
-            // Marcăm ca citite mesajele primite în această conversație
-            var unreadMessages = messages
+            // Marcam ca citite
+            var unread = messages
                 .Where(m => m.RecipientUsername == currentEmail && m.DateRead == null)
                 .ToList();
 
-            if (unreadMessages.Any())
+            if (unread.Any())
             {
-                foreach (var msg in unreadMessages)
-                    msg.DateRead = DateTime.UtcNow;
-
+                unread.ForEach(m => m.DateRead = DateTime.UtcNow);
                 await _unitOfWork.Complete();
-
-                // Actualizăm badge-ul în NotificationHub pentru userul curent
                 await PushUnreadCount(currentEmail);
             }
 
-            await Clients.Caller.SendAsync("ReceiveMessageThread", _mapper.Map<IEnumerable<MessageDto>>(messages));
+            await Clients.Caller.SendAsync("ReceiveMessageThread",
+                _mapper.Map<IEnumerable<MessageDto>>(messages));
         }
 
         public async Task SendMessage(CreateMessageDto createMessageDto)
@@ -83,18 +95,33 @@ namespace API.SignalR
                 RecipientUsername = recipient.Email,
                 SenderId = sender.Id,
                 RecipientId = recipient.Id,
-                Content = createMessageDto.Content
+                Content = createMessageDto.Content,
+                // NOU: salvam OrderId pe mesaj daca exista
+                OrderId = createMessageDto.OrderId
             };
 
             _unitOfWork.Repository<Message>().Add(message);
 
             if (await _unitOfWork.Complete() > 0)
             {
-                var groupName = GetGroupName(sender.Email, recipient.Email);
-                await Clients.Group(groupName).SendAsync("NewMessage", _mapper.Map<MessageDto>(message));
+                // NOU: grupul include orderId daca exista
+                var groupName = createMessageDto.OrderId.HasValue
+                    ? GetGroupName(sender.Email, recipient.Email) + $"_order_{createMessageDto.OrderId}"
+                    : GetGroupName(sender.Email, recipient.Email);
 
-                // Notificăm destinatarul că are un mesaj nou (actualizează badge-ul)
+                await Clients.Group(groupName).SendAsync("NewMessage",
+                    _mapper.Map<MessageDto>(message));
+
                 await PushUnreadCount(recipient.Email);
+
+                var recipientConnections = await PresenceTracker.GetConnectionsForUser(recipient.Email);
+                if (recipientConnections.Any())
+                {
+                    await _presenceHub.Clients.Clients(recipientConnections).SendAsync(
+                        "NewMessageReceived",
+                        new { senderEmail = sender.Email, senderName = sender.DisplayName }
+                    );
+                }
             }
         }
 
@@ -103,15 +130,10 @@ namespace API.SignalR
             await base.OnDisconnectedAsync(exception);
         }
 
-        /// <summary>
-        /// Calculează și trimite noul contor de necitite prin NotificationHub.
-        /// </summary>
         private async Task PushUnreadCount(string recipientEmail)
         {
             var spec = new UnreadMessagesSpecification(recipientEmail);
             var count = await _unitOfWork.Repository<Message>().CountAsync(spec);
-
-            // Trimitem tuturor conexiunilor active ale acelui user (poate fi pe mai multe tab-uri)
             await _notificationHub.Clients.User(recipientEmail).SendAsync("UnreadCount", count);
         }
 

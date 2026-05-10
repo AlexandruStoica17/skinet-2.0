@@ -5,6 +5,11 @@ using Core.Entities;
 using Core.Entities.OrderAggregate;
 using Core.Interfaces;
 using Core.Specifications;
+using Microsoft.AspNetCore.Identity;
+using Core.Entities.Identity;
+
+// Alias pentru a evita ambiguitate intre cele doua clase Address
+using ShippingAddress = Core.Entities.OrderAggregate.Address;
 
 namespace Infrastructure.Services
 {
@@ -12,26 +17,26 @@ namespace Infrastructure.Services
     {
         private readonly IBasketRepository _basketRepo;
         private readonly IUnitOfWork _unitOfWork;
+        // NOU: pentru a gasi userul vanzator si a trimite mesaje automate
+        private readonly UserManager<AppUser> _userManager;
 
-        public OrderService(IBasketRepository basketRepo, IUnitOfWork unitOfWork)
+        public OrderService(IBasketRepository basketRepo, IUnitOfWork unitOfWork, UserManager<AppUser> userManager)
         {
             _unitOfWork = unitOfWork;
             _basketRepo = basketRepo;
+            _userManager = userManager;
         }
 
-        public async Task<Order> CreateOrderAsync(string buyerEmail, int deliveryMethodId, string basketId, Address shippingAddress)
+        public async Task<Order> CreateOrderAsync(string buyerEmail, int deliveryMethodId, string basketId, ShippingAddress shippingAddress)
         {
-            // 1. Luăm coșul din baza de date
             var basket = await _basketRepo.GetBasketAsync(basketId);
 
-            // 2. Creăm produsele comandate (aici e logica de Marketplace)
             var items = new List<OrderItem>();
             foreach (var item in basket.Items)
             {
                 var productItem = await _unitOfWork.Repository<Product>().GetByIdAsync(item.Id);
                 var itemOrdered = new ProductItemOrdered(productItem.Id, productItem.Name, productItem.PictureUrl);
                 
-                // Fallback-uri pentru producător
                 var producerId = string.IsNullOrEmpty(productItem.ProducerId) ? "Admin" : productItem.ProducerId;
                 var producerName = string.IsNullOrEmpty(productItem.ProducerName) ? "Magazinul Nostru" : productItem.ProducerName;
 
@@ -39,17 +44,13 @@ namespace Infrastructure.Services
                 items.Add(orderItem);
             }
 
-            // 3. Luăm metoda de livrare
             var deliveryMethod = await _unitOfWork.Repository<DeliveryMethod>().GetByIdAsync(deliveryMethodId);
-
-            // 4. Calculăm subtotalul
             var subtotal = items.Sum(item => item.Price * item.Quantity);
 
-            // 5. Verificăm dacă există deja o comandă cu acest PaymentIntent (din Stripe)
             var spec = new OrderByPaymentIntentIdSpecification(basket.PaymentIntentId);
             var order = await _unitOfWork.Repository<Order>().GetEntityWithSpec(spec);
 
-            if(order != null)
+            if (order != null)
             {
                 order.ShipToAddress = shippingAddress;
                 order.DeliveryMethod = deliveryMethod;
@@ -58,15 +59,59 @@ namespace Infrastructure.Services
             }
             else
             {
-                // Creăm comanda nouă
                 order = new Order(items, buyerEmail, shippingAddress, deliveryMethod, subtotal, basket.PaymentIntentId);
-                _unitOfWork.Repository<Order>().Add(order); 
+                _unitOfWork.Repository<Order>().Add(order);
             }
 
-            // 6. Salvăm în baza de date SQL
             var result = await _unitOfWork.Complete();
-
             if (result <= 0) return null;
+
+            // NOU: Trimitem mesaje automate cu OrderId — fiecare comanda = conversatie separata
+            var buyer = await _userManager.FindByEmailAsync(buyerEmail);
+            if (buyer != null)
+            {
+                // Grupam produsele dupa producator (poate fi mai multi in acelasi cos)
+                var producerIds = items.Select(i => i.ProducerId).Distinct().ToList();
+
+                foreach (var producerId in producerIds)
+                {
+                    var producer = await _userManager.FindByIdAsync(producerId);
+                    if (producer == null) continue;
+
+                    // Mesaj catre CUMPARATOR: confirmare comanda, cu OrderId
+                    var msgToBuyer = new Message
+                    {
+                        SenderId = producer.Id,
+                        SenderUsername = producer.Email,
+                        RecipientId = buyer.Id,
+                        RecipientUsername = buyer.Email,
+                        Sender = producer,
+                        Recipient = buyer,
+                        // NOU: OrderId leaga mesajul de aceasta comanda specifica
+                        OrderId = order.Id,
+                        Content = $"✅ Comanda #{order.Id} a fost plasată cu succes! Vei fi notificat când comanda este expediată."
+                    };
+
+                    // Mesaj catre VANZATOR: notificare comanda noua, cu OrderId
+                    var msgToProducer = new Message
+                    {
+                        SenderId = buyer.Id,
+                        SenderUsername = buyer.Email,
+                        RecipientId = producer.Id,
+                        RecipientUsername = producer.Email,
+                        Sender = buyer,
+                        Recipient = producer,
+                        // NOU: acelasi OrderId
+                        OrderId = order.Id,
+                        Content = $"🛒 Comandă nouă #{order.Id} de la {buyer.DisplayName}! Intră în comenzile tale pentru detalii."
+                    };
+
+                    _unitOfWork.Repository<Message>().Add(msgToBuyer);
+                    _unitOfWork.Repository<Message>().Add(msgToProducer);
+                }
+
+                await _unitOfWork.Complete();
+            }
 
             return order;
         }
@@ -84,7 +129,7 @@ namespace Infrastructure.Services
 
         public async Task<IReadOnlyList<Order>> GetOrdersForUserAsync(string buyerEmail)
         {
-            var spec =  new OrdersWithItemsAndOrderingSpecification(buyerEmail);
+            var spec = new OrdersWithItemsAndOrderingSpecification(buyerEmail);
             return await _unitOfWork.Repository<Order>().ListAsync(spec);
         }
     }

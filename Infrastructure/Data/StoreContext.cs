@@ -29,6 +29,8 @@ namespace Infrastructure.Data
         public DbSet<Photo> Photos { get; set; }
         public DbSet<Message> Messages { get; set; }
         public DbSet<BlogPost> BlogPosts { get; set; }
+        // NOU: reviews
+        public DbSet<Review> Reviews { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // CRITIC pentru Identity: Trebuie lăsat aici sus!
