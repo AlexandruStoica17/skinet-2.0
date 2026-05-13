@@ -3,12 +3,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using Core.Entities;
 using Core.Entities.OrderAggregate;
+using Core.Entities.Identity;
 using Core.Interfaces;
 using Core.Specifications;
 using Microsoft.AspNetCore.Identity;
-using Core.Entities.Identity;
 
-// Alias pentru a evita ambiguitate intre cele doua clase Address
 using ShippingAddress = Core.Entities.OrderAggregate.Address;
 
 namespace Infrastructure.Services
@@ -17,7 +16,6 @@ namespace Infrastructure.Services
     {
         private readonly IBasketRepository _basketRepo;
         private readonly IUnitOfWork _unitOfWork;
-        // NOU: pentru a gasi userul vanzator si a trimite mesaje automate
         private readonly UserManager<AppUser> _userManager;
 
         public OrderService(IBasketRepository basketRepo, IUnitOfWork unitOfWork, UserManager<AppUser> userManager)
@@ -66,11 +64,10 @@ namespace Infrastructure.Services
             var result = await _unitOfWork.Complete();
             if (result <= 0) return null;
 
-            // NOU: Trimitem mesaje automate cu OrderId — fiecare comanda = conversatie separata
+            // Trimitem mesaje automate cu OrderId — fiecare comanda = conversatie separata
             var buyer = await _userManager.FindByEmailAsync(buyerEmail);
             if (buyer != null)
             {
-                // Grupam produsele dupa producator (poate fi mai multi in acelasi cos)
                 var producerIds = items.Select(i => i.ProducerId).Distinct().ToList();
 
                 foreach (var producerId in producerIds)
@@ -78,7 +75,8 @@ namespace Infrastructure.Services
                     var producer = await _userManager.FindByIdAsync(producerId);
                     if (producer == null) continue;
 
-                    // Mesaj catre CUMPARATOR: confirmare comanda, cu OrderId
+                    // FIX: mesajul pentru CUMPARATOR — sender = producer, recipient = buyer
+                    // Apare in chat-ul cumparatorului pe DREAPTA (ca si cum producatorul i-a scris)
                     var msgToBuyer = new Message
                     {
                         SenderId = producer.Id,
@@ -87,12 +85,14 @@ namespace Infrastructure.Services
                         RecipientUsername = buyer.Email,
                         Sender = producer,
                         Recipient = buyer,
-                        // NOU: OrderId leaga mesajul de aceasta comanda specifica
                         OrderId = order.Id,
                         Content = $"✅ Comanda #{order.Id} a fost plasată cu succes! Vei fi notificat când comanda este expediată."
                     };
 
-                    // Mesaj catre VANZATOR: notificare comanda noua, cu OrderId
+                    // FIX: mesajul pentru VANZATOR — sender = buyer, recipient = producer
+                    // Apare in chat-ul vanzatorului pe STANGA (ca si cum cumparatorul i-a scris)
+                    // IMPORTANT: are OrderId diferit de msgToBuyer? NU — acelasi orderId
+                    // Dar sunt mesaje SEPARATE: fiecare user vede doar mesajele unde e sender sau recipient
                     var msgToProducer = new Message
                     {
                         SenderId = buyer.Id,
@@ -101,11 +101,11 @@ namespace Infrastructure.Services
                         RecipientUsername = producer.Email,
                         Sender = buyer,
                         Recipient = producer,
-                        // NOU: acelasi OrderId
                         OrderId = order.Id,
                         Content = $"🛒 Comandă nouă #{order.Id} de la {buyer.DisplayName}! Intră în comenzile tale pentru detalii."
                     };
 
+                    // Salvam ambele in DB — fiecare user vede doar mesajele lui prin spec
                     _unitOfWork.Repository<Message>().Add(msgToBuyer);
                     _unitOfWork.Repository<Message>().Add(msgToProducer);
                 }

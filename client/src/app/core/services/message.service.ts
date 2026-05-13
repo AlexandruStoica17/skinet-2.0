@@ -59,10 +59,10 @@ export class MessageService {
     );
   }
 
-  // NOU: trimite review
-  submitReview(reviewData: { orderId: number; producerEmail: string; rating: number; comment: string }) {
-    return this.http.post(this.baseUrl + 'messages/review', reviewData);
-  }
+  // // NOU: trimite review
+  // submitReview(reviewData: { orderId: number; producerEmail: string; rating: number; comment: string }) {
+  //   return this.http.post(this.baseUrl + 'messages/review', reviewData);
+  // }
 
   // ─── SignalR: Notification Hub ─────────────────────────────────────────────
 
@@ -130,16 +130,15 @@ export class MessageService {
 
   // ─── SignalR: Message Hub ──────────────────────────────────────────────────
 
- // Modifici createHubConnection sa accepte orderId optional:
-createHubConnection(token: string, otherUsername: string, orderId?: number) {
+ createHubConnection(token: string, otherUsername: string, orderId?: number) {
     // NOU: adaugam orderId in URL daca exista
     let url = this.hubUrl + 'message?user=' + otherUsername;
     if (orderId) url += '&orderId=' + orderId;
 
     this.hubConnection = new HubConnectionBuilder()
-        .withUrl(url, { accessTokenFactory: () => token })
-        .withAutomaticReconnect()
-        .build();
+      .withUrl(url, { accessTokenFactory: () => token })
+      .withAutomaticReconnect()
+      .build();
 
     this.hubConnection.start().catch(error => console.log(error));
 
@@ -155,22 +154,25 @@ createHubConnection(token: string, otherUsername: string, orderId?: number) {
         }
       });
     });
-  }
+}
 
-  stopHubConnection() {
-    if (this.hubConnection) {
-      this.hubConnection.stop();
-      this.hubConnection = undefined;
-      this.messageThreadSource.next([]);
-    }
-  }
-
-  // Modifici sendMessage sa trimita orderId:
 async sendMessage(username: string, content: string, orderId?: number) {
     return this.hubConnection?.invoke('SendMessage', {
-        recipientUsername: username,
-        content,
-        orderId: orderId ?? null  // NOU
+      recipientUsername: username,
+      content,
+      orderId: orderId ?? null  // NOU
     }).catch(error => console.log(error));
+}
+
+// NOU: trimite review
+submitReview(data: { orderId: number; producerEmail: string; rating: number; comment: string }) {
+    return this.http.post(this.baseUrl + 'messages/review', data);
+}
+
+// Add this method inside MessageService in message.service.ts
+stopHubConnection() {
+  if (this.hubConnection) {
+    this.hubConnection.stop().catch(error => console.log(error));
+  }
 }
 }

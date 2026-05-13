@@ -7,7 +7,7 @@ import { Order } from '../shared/models/order';
   providedIn: 'root' 
 }) 
 export class OrdersService { 
-baseUrl = environment.apiUrl; 
+  baseUrl = environment.apiUrl; 
  
   constructor(private http: HttpClient) { } 
  
@@ -20,11 +20,11 @@ baseUrl = environment.apiUrl;
   } 
 
   getOrdersForProducer() {
-  return this.http.get<any[]>(this.baseUrl + 'orders/producer-orders');
-}
-// NOU: cumparatorul confirma primirea comenzii
-markOrderAsDelivered(orderId: number) {
-  return this.http.put<Order>(this.baseUrl + 'orders/mark-delivered/' + orderId, {});
-}
+    return this.http.get<any[]>(this.baseUrl + 'orders/producer-orders');
+  }
 
+  // NOU: cumparatorul confirma primirea comenzii
+  markOrderAsDelivered(orderId: number) {
+    return this.http.put<Order>(this.baseUrl + 'orders/mark-delivered/' + orderId, {});
+  }
 }

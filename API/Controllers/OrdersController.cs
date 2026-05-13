@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
@@ -5,7 +6,6 @@ using System.Threading.Tasks;
 using API.Dtos;
 using API.Errors;
 using API.Extensions;
-using API.SignalR;
 using AutoMapper;
 using Core.Entities;
 using Core.Entities.Identity;
@@ -15,7 +15,6 @@ using Core.Specifications;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SignalR;
 
 namespace API.Controllers
 {
@@ -26,20 +25,14 @@ namespace API.Controllers
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _unitOfWork;
         private readonly UserManager<AppUser> _userManager;
-        private readonly IHubContext<MessageHub> _messageHub; // NOU: pentru mesaje automate in timp real
 
-        public OrdersController(
-            IOrderService orderService,
-            IMapper mapper,
-            IUnitOfWork unitOfWork,
-            UserManager<AppUser> userManager,
-            IHubContext<MessageHub> messageHub) // NOU
+        public OrdersController(IOrderService orderService, IMapper mapper,
+            IUnitOfWork unitOfWork, UserManager<AppUser> userManager)
         {
             _mapper = mapper;
             _orderService = orderService;
             _unitOfWork = unitOfWork;
             _userManager = userManager;
-            _messageHub = messageHub;
         }
 
         [HttpPost]
@@ -96,7 +89,6 @@ namespace API.Controllers
             return Ok(ordersToReturn);
         }
 
-        // Vanzatorul marcheaza comanda ca expediata + trimite mesaj automat in chat
         [HttpPut("ship-order/{id}")]
         public async Task<ActionResult<OrderToReturnDto>> ShipOrder(int id)
         {
@@ -105,21 +97,21 @@ namespace API.Controllers
 
             if (order == null) return NotFound(new ApiResponse(404));
 
-            // NOU: schimbam statusul
             order.Status = OrderStatus.Shipped;
             _unitOfWork.Repository<Order>().Update(order);
             var result = await _unitOfWork.Complete();
 
             if (result <= 0) return BadRequest(new ApiResponse(400, "Problem updating order status"));
 
-            // NOU: Trimitem mesaj automat in chat catre cumparator
+            // Mesaj automat cu OrderId in chat-ul comenzii
             var producerEmail = User.RetrieveEmailFromPrincipal();
             var producer = await _userManager.FindByEmailAsync(producerEmail);
             var buyer = await _userManager.FindByEmailAsync(order.BuyerEmail);
 
             if (producer != null && buyer != null)
             {
-                var msg = new Message
+                // Mesaj catre cumparator: expediat
+                var msgToBuyer = new Message
                 {
                     SenderId = producer.Id,
                     SenderUsername = producer.Email,
@@ -127,54 +119,56 @@ namespace API.Controllers
                     RecipientUsername = buyer.Email,
                     Sender = producer,
                     Recipient = buyer,
+                    OrderId = order.Id,
                     Content = $"🚚 Comanda #{order.Id} a fost expediată! Vei primi coletul în curând."
                 };
-                _unitOfWork.Repository<Message>().Add(msg);
-                await _unitOfWork.Complete();
 
-                // Trimitem mesajul in timp real daca cumparatorul e in conversatie
-                var groupName = GetGroupName(producer.Email, buyer.Email);
-                await _messageHub.Clients.Group(groupName).SendAsync("NewMessage",
-                    new MessageDto
-                    {
-                        Id = msg.Id,
-                        SenderId = msg.SenderId,
-                        SenderUsername = msg.SenderUsername,
-                        RecipientId = msg.RecipientId,
-                        RecipientUsername = msg.RecipientUsername,
-                        Content = msg.Content,
-                        MessageSent = msg.MessageSent
-                    });
+                // Mesaj catre vanzator: confirmare
+                var msgToProducer = new Message
+                {
+                    SenderId = buyer.Id,
+                    SenderUsername = buyer.Email,
+                    RecipientId = producer.Id,
+                    RecipientUsername = producer.Email,
+                    Sender = buyer,
+                    Recipient = producer,
+                    OrderId = order.Id,
+                    Content = $"✅ Ai marcat comanda #{order.Id} ca expediată."
+                };
+
+                _unitOfWork.Repository<Message>().Add(msgToBuyer);
+                _unitOfWork.Repository<Message>().Add(msgToProducer);
+                await _unitOfWork.Complete();
             }
 
             return _mapper.Map<Order, OrderToReturnDto>(order);
         }
 
-        // NOU: Cumparatorul confirma ca a primit comanda + mesaj automat + prompt review
+        // NOU: cumparatorul confirma ca a primit comanda
         [HttpPut("mark-delivered/{id}")]
         public async Task<ActionResult<OrderToReturnDto>> MarkDelivered(int id)
         {
             var buyerEmail = User.RetrieveEmailFromPrincipal();
-            var order = await _orderService.GetOrderByIdAsync(id, buyerEmail);
+
+            // Aducem comanda fara restrictie de email (cumparatorul o poate accesa)
+            var spec = new OrdersWithItemsAndOrderingSpecification(id, buyerEmail);
+            var order = await _unitOfWork.Repository<Order>().GetEntityWithSpec(spec);
 
             if (order == null) return NotFound(new ApiResponse(404));
-            if (order.Status != OrderStatus.Shipped)
-                return BadRequest(new ApiResponse(400, "Comanda nu este in status Shipped."));
 
-            // Schimbam statusul
             order.Status = OrderStatus.Delivered;
             _unitOfWork.Repository<Order>().Update(order);
             await _unitOfWork.Complete();
 
-            // NOU: Trimitem mesaj automat la ambii participanti
             var buyer = await _userManager.FindByEmailAsync(buyerEmail);
             var firstItem = order.OrderItems.FirstOrDefault();
+
             if (buyer != null && firstItem != null)
             {
                 var producer = await _userManager.FindByIdAsync(firstItem.ProducerId);
                 if (producer != null)
                 {
-                    // Mesaj catre VANZATOR
+                    // Mesaj catre vanzator: comanda primita
                     var msgToProducer = new Message
                     {
                         SenderId = buyer.Id,
@@ -183,10 +177,11 @@ namespace API.Controllers
                         RecipientUsername = producer.Email,
                         Sender = buyer,
                         Recipient = producer,
+                        OrderId = order.Id,
                         Content = $"✅ {buyer.DisplayName} a confirmat primirea comenzii #{order.Id}."
                     };
 
-                    // Mesaj catre CUMPARATOR: invitatie review
+                    // Mesaj catre cumparator: invitatie review
                     var msgToBuyer = new Message
                     {
                         SenderId = producer.Id,
@@ -195,42 +190,18 @@ namespace API.Controllers
                         RecipientUsername = buyer.Email,
                         Sender = producer,
                         Recipient = buyer,
-                        Content = $"⭐ Multumim pentru comanda #{order.Id}! Lasa un review pentru a ajuta alti cumparatori.",
-                        // NOU: marcam mesajul ca review prompt
+                        OrderId = order.Id,
                         IsReviewPrompt = true,
-                        OrderId = order.Id
+                        Content = $"⭐ Mulțumim pentru comanda #{order.Id}! Lasă un review pentru a ajuta alți cumpărători."
                     };
 
                     _unitOfWork.Repository<Message>().Add(msgToProducer);
                     _unitOfWork.Repository<Message>().Add(msgToBuyer);
                     await _unitOfWork.Complete();
-
-                    // Trimitem in timp real
-                    var groupName = GetGroupName(producer.Email, buyer.Email);
-                    await _messageHub.Clients.Group(groupName).SendAsync("NewMessage",
-                        new MessageDto
-                        {
-                            Id = msgToBuyer.Id,
-                            SenderId = msgToBuyer.SenderId,
-                            SenderUsername = msgToBuyer.SenderUsername,
-                            RecipientId = msgToBuyer.RecipientId,
-                            RecipientUsername = msgToBuyer.RecipientUsername,
-                            Content = msgToBuyer.Content,
-                            MessageSent = msgToBuyer.MessageSent,
-                            IsReviewPrompt = true,
-                            OrderId = order.Id
-                        });
                 }
             }
 
             return _mapper.Map<Order, OrderToReturnDto>(order);
-        }
-
-        // Helper: acelasi GetGroupName ca in MessageHub
-        private string GetGroupName(string caller, string other)
-        {
-            var stringCompare = string.CompareOrdinal(caller, other) < 0;
-            return stringCompare ? $"{caller}-{other}" : $"{other}-{caller}";
         }
     }
 }

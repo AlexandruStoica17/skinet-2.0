@@ -6,6 +6,7 @@ import { ChatRoutingModule } from './chat-routing.module';
 import { ChatComponent } from './chat.component';
 import { ConversationComponent } from './conversation/conversation.component';
 import { SharedModule } from '../shared/shared.module'; // NOU: pentru app-pager
+import { OrdersService } from '../orders/orders.service';
 
 @NgModule({
   declarations: [
@@ -17,7 +18,8 @@ import { SharedModule } from '../shared/shared.module'; // NOU: pentru app-pager
     ChatRoutingModule,
     FormsModule,
     RouterModule,
-    SharedModule  // NOU: contine app-pager
+    SharedModule,
+   
   ]
 })
 export class ChatModule { }

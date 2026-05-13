@@ -40,26 +40,27 @@ namespace API.SignalR
             var otherUser = httpContext.Request.Query["user"].ToString();
             var currentEmail = Context.User.RetrieveEmailFromPrincipal();
 
-            // NOU: citim orderId din query (optional: /hubs/message?user=bob@...&orderId=42)
+            // Citim orderId din URL: /hubs/message?user=bob@...&orderId=11
             int? orderId = null;
-            if (int.TryParse(httpContext.Request.Query["orderId"].ToString(), out var parsedOrderId))
-                orderId = parsedOrderId;
+            var orderIdStr = httpContext.Request.Query["orderId"].ToString();
+            if (!string.IsNullOrEmpty(orderIdStr) && int.TryParse(orderIdStr, out var parsed))
+                orderId = parsed;
 
-            // Numele grupului include orderId daca exista, altfel e chat general
+            // Grupul include orderId — conversatii separate per comanda
             var groupName = orderId.HasValue
                 ? GetGroupName(currentEmail, otherUser) + $"_order_{orderId}"
                 : GetGroupName(currentEmail, otherUser);
 
             await Groups.AddToGroupAsync(Context.ConnectionId, groupName);
 
-            // NOU: aducem mesajele filtrate dupa orderId (sau fara orderId pentru chat general)
+            // Alegem spec-ul corect: cu sau fara orderId
             var spec = orderId.HasValue
                 ? new MessageThreadSpecification(currentEmail, otherUser, orderId.Value)
                 : new MessageThreadSpecification(currentEmail, otherUser);
 
             var messages = await _unitOfWork.Repository<Message>().ListAsync(spec);
 
-            // Marcam ca citite
+            // Marcam ca citite mesajele primite
             var unread = messages
                 .Where(m => m.RecipientUsername == currentEmail && m.DateRead == null)
                 .ToList();
@@ -96,7 +97,6 @@ namespace API.SignalR
                 SenderId = sender.Id,
                 RecipientId = recipient.Id,
                 Content = createMessageDto.Content,
-                // NOU: salvam OrderId pe mesaj daca exista
                 OrderId = createMessageDto.OrderId
             };
 
@@ -104,7 +104,7 @@ namespace API.SignalR
 
             if (await _unitOfWork.Complete() > 0)
             {
-                // NOU: grupul include orderId daca exista
+                // Grupul corect: cu sau fara orderId
                 var groupName = createMessageDto.OrderId.HasValue
                     ? GetGroupName(sender.Email, recipient.Email) + $"_order_{createMessageDto.OrderId}"
                     : GetGroupName(sender.Email, recipient.Email);

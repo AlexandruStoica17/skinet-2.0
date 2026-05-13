@@ -10,6 +10,10 @@
                     </button>
                     <i class="fa fa-comments me-2"></i>
                     <strong>{{ recipientEmail }}</strong>
+                    <!-- NOU: afisam titlul comenzii daca suntem intr-un chat de comanda -->
+                    <span class="badge bg-white text-primary ms-2" *ngIf="orderId">
+                        Comanda #{{ orderId }}
+                    </span>
                 </div>
 
                 <!-- Istoricul mesajelor -->
@@ -20,7 +24,7 @@
                         <p>Niciun mesaj încă. Scrie ceva pentru a începe!</p>
                     </div>
 
-                    <ul class="list-unstyled mb-0">
+                    <ul class="list-unstyled">
                         <li *ngFor="let msg of (messageService.messageThread$ | async)">
                             <div class="d-flex mb-3"
                                  [class.justify-content-end]="msg.senderUsername === currentUserEmail"
@@ -34,40 +38,41 @@
 
                                     <p class="mb-1" style="white-space: pre-wrap;">{{ msg.content }}</p>
 
-                                    <!-- NOU: Buton "Comanda primita" - apare doar la cumparator pe mesajul de shipped -->
-                                    <div *ngIf="msg.content.includes('a fost expediată') && msg.senderUsername !== currentUserEmail && msg.orderId"
-                                         class="mt-2">
-                                        <button class="btn btn-success btn-sm"
+                                    <!-- NOU: Buton "Am primit comanda" -->
+                                    <!-- Apare DOAR la cumparator, pe mesajul de "expediat", o singura data -->
+                                    <div *ngIf="msg.content.includes('a fost expediată') 
+                                                && msg.senderUsername !== currentUserEmail 
+                                                && msg.orderId">
+                                        <button class="btn btn-success btn-sm mt-2"
                                                 (click)="markDelivered(msg.orderId!)">
                                             <i class="fa fa-check me-1"></i> Am primit comanda
                                         </button>
                                     </div>
 
-                                    <!-- NOU: Buton "Lasa review" - apare la mesajul de review prompt -->
-                                    <div *ngIf="msg.isReviewPrompt && msg.senderUsername !== currentUserEmail && !reviewSubmitted"
-                                         class="mt-2">
-                                        <button class="btn btn-warning btn-sm"
+                                    <!-- NOU: Buton "Lasa review" pe mesajul de review prompt -->
+                                    <div *ngIf="msg.isReviewPrompt 
+                                                && msg.senderUsername !== currentUserEmail 
+                                                && !reviewSubmitted">
+                                        <button class="btn btn-warning btn-sm mt-2"
                                                 (click)="openReviewForm(msg.orderId!)">
                                             <i class="fa fa-star me-1"></i> Lasă un review
                                         </button>
                                     </div>
 
                                     <!-- Confirmare review trimis -->
-                                    <div *ngIf="msg.isReviewPrompt && reviewSubmitted" class="mt-1">
-                                        <span class="badge bg-success">
-                                            <i class="fa fa-check me-1"></i> Review trimis!
-                                        </span>
-                                    </div>
+                                    <span class="badge bg-success mt-1"
+                                          *ngIf="msg.isReviewPrompt && reviewSubmitted">
+                                        <i class="fa fa-check me-1"></i> Review trimis!
+                                    </span>
 
                                     <small [class.text-light]="msg.senderUsername === currentUserEmail"
                                            [class.text-muted]="msg.senderUsername !== currentUserEmail"
-                                           style="font-size: 0.75em;">
+                                           style="font-size: 0.75em; display: block;">
                                         {{ msg.messageSent | date:'d MMM, HH:mm' }}
-                                        <span *ngIf="msg.senderUsername === currentUserEmail">
-                                            <i class="fa ms-1"
-                                               [class.fa-check]="!msg.dateRead"
-                                               [class.fa-check-circle]="msg.dateRead"></i>
-                                        </span>
+                                        <i class="fa ms-1"
+                                           *ngIf="msg.senderUsername === currentUserEmail"
+                                           [class.fa-check]="!msg.dateRead"
+                                           [class.fa-check-circle]="msg.dateRead"></i>
                                     </small>
                                 </div>
                             </div>
@@ -75,11 +80,13 @@
                     </ul>
                 </div>
 
-                <!-- NOU: Formular review inline (apare sub chat cand dai click pe "Lasa review") -->
+                <!-- NOU: Formular review inline -->
                 <div class="card-body border-top bg-warning bg-opacity-10" *ngIf="showReviewForm">
-                    <h6 class="mb-3"><i class="fa fa-star text-warning me-1"></i> Review pentru comanda #{{ reviewOrderId }}</h6>
+                    <h6 class="mb-3">
+                        <i class="fa fa-star text-warning me-1"></i>
+                        Review pentru comanda #{{ reviewOrderId }}
+                    </h6>
 
-                    <!-- Rating cu stelute -->
                     <div class="mb-3">
                         <label class="form-label fw-bold">Rating:</label>
                         <div class="d-flex gap-2">
@@ -94,7 +101,6 @@
                         </div>
                     </div>
 
-                    <!-- Comentariu -->
                     <div class="mb-3">
                         <label class="form-label fw-bold">Comentariu (opțional):</label>
                         <textarea class="form-control"
@@ -111,7 +117,8 @@
                             <i class="fa fa-paper-plane me-1"></i>
                             {{ reviewSubmitting ? 'Se trimite...' : 'Trimite Review' }}
                         </button>
-                        <button class="btn btn-outline-secondary" (click)="showReviewForm = false">
+                        <button class="btn btn-outline-secondary"
+                                (click)="showReviewForm = false">
                             Anulează
                         </button>
                     </div>
@@ -127,7 +134,8 @@
                                    placeholder="Scrie un mesaj..."
                                    [(ngModel)]="messageContent"
                                    required>
-                            <button class="btn btn-primary" type="submit" [disabled]="!messageForm.valid">
+                            <button class="btn btn-primary" type="submit"
+                                    [disabled]="!messageForm.valid">
                                 <i class="fa fa-paper-plane me-1"></i> Trimite
                             </button>
                         </div>

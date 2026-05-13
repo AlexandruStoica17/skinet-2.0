@@ -4,7 +4,7 @@ namespace Core.Specifications
 {
     public class MessageThreadSpecification : BaseSpecification<Message>
     {
-        // Constructor original — pentru chat general intre doi useri (fara orderId)
+        // Chat general - aduce DOAR mesajele fara OrderId
         public MessageThreadSpecification(string currentUsername, string recipientUsername)
             : base(m =>
                 m.OrderId == null &&
@@ -19,7 +19,9 @@ namespace Core.Specifications
             AddOrderBy(x => x.MessageSent);
         }
 
-        // NOU: Constructor pentru chat legat de o comanda specifica
+        // Chat comanda - aduce DOAR mesajele cu OrderId respectiv
+        // FIX principal: fiecare user vede doar mesajele unde e implicat ca sender sau recipient
+        // => mesajul catre vanzator (sender=buyer, recipient=producer) NU apare la cumparator
         public MessageThreadSpecification(string currentUsername, string recipientUsername, int orderId)
             : base(m =>
                 m.OrderId == orderId &&

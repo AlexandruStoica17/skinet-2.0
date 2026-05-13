@@ -16,6 +16,9 @@ export class ConversationComponent implements OnInit, OnDestroy {
   currentUserEmail = '';
   currentUserToken = '';
 
+  // NOU: orderId din URL
+  orderId?: number;
+
   // NOU: review form
   showReviewForm = false;
   reviewOrderId: number | null = null;
@@ -23,14 +26,13 @@ export class ConversationComponent implements OnInit, OnDestroy {
   reviewComment = '';
   reviewSubmitting = false;
   reviewSubmitted = false;
-  orderId?: number;
 
   constructor(
     public messageService: MessageService,
     private accountService: AccountService,
     private route: ActivatedRoute,
     private router: Router,
-    private ordersService: OrdersService // NOU: pentru mark-delivered
+    private ordersService: OrdersService // NOU
   ) { }
 
   ngOnInit(): void {
@@ -40,23 +42,26 @@ export class ConversationComponent implements OnInit, OnDestroy {
           this.currentUserEmail = user.email;
           this.currentUserToken = user.token;
 
-         // In ngOnInit, dupa ce setam recipientEmail:
-this.route.queryParams.pipe(take(1)).subscribe(params => {
-    if (params['user']) {
-        this.recipientEmail = params['user'];
-        // NOU: citim orderId din URL daca exista
-        if (params['orderId']) {
-            this.orderId = +params['orderId'];
-        }
-        this.messageService.createHubConnection(
-            this.currentUserToken,
-            this.recipientEmail,
-            this.orderId  // NOU: trimitem orderId la hub
-        );
-    } else {
-        this.router.navigate(['/chat']);
-    }
-});
+          this.route.queryParams.pipe(take(1)).subscribe(params => {
+            if (!params['user']) {
+              this.router.navigate(['/chat']);
+              return;
+            }
+
+            this.recipientEmail = params['user'];
+
+            // NOU: citim orderId din URL (?orderId=11)
+            if (params['orderId']) {
+              this.orderId = +params['orderId'];
+            }
+
+            // NOU: trimitem orderId la hub
+            this.messageService.createHubConnection(
+              this.currentUserToken,
+              this.recipientEmail,
+              this.orderId
+            );
+          });
         }
       }
     });
@@ -66,13 +71,14 @@ this.route.queryParams.pipe(take(1)).subscribe(params => {
     if (this.messageContent.trim().length === 0) return;
     // NOU: trimitem si orderId
     this.messageService.sendMessage(this.recipientEmail, this.messageContent, this.orderId)
-        .then(() => { this.messageContent = ''; });
-}
-  // NOU: cumparatorul confirma ca a primit comanda
+      .then(() => { this.messageContent = ''; });
+  }
+
+  // NOU: cumparatorul confirma primirea comenzii
   markDelivered(orderId: number) {
     this.ordersService.markOrderAsDelivered(orderId).subscribe({
       next: () => {
-        // Mesajul automat va aparea in chat prin SignalR
+        // Mesajele automate vor aparea prin SignalR
       },
       error: err => console.log(err)
     });

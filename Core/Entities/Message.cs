@@ -20,10 +20,10 @@ namespace Core.Entities
         public bool SenderDeleted { get; set; }
         public bool RecipientDeleted { get; set; }
 
-        // NOU: leaga mesajul de o comanda specifica — fiecare comanda = conversatie separata
+        // NOU: leaga mesajul de o comanda specifica
         public int? OrderId { get; set; }
 
-        // NOU: marcheaza mesajul ca prompt de review (apare buton "Lasa review")
+        // NOU: marcheaza mesajul ca prompt de review
         public bool IsReviewPrompt { get; set; } = false;
     }
 }
