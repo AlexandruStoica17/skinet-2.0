@@ -13,5 +13,10 @@ namespace Core.Entities
             // --- NOU: Aici salvăm ID-ul producătorului care a adăugat produsul ---
        public string ProducerId { get; set; } 
         public string ProducerName { get; set; }
+
+        public string SkinType { get; set; }    // e.g. "Oily, Dry, Combination, All"
+        public string Usage { get; set; }        // e.g. "Face, Hands, Body, Eyes"
+        public string Benefits { get; set; }     // e.g. "Hydration, SPF, Brightening"
+        public string Formula { get; set; }  
     }
 }

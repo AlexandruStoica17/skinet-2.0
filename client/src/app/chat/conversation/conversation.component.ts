@@ -4,6 +4,8 @@ import { take } from 'rxjs';
 import { AccountService } from '../../account/account.service';
 import { MessageService } from '../../core/services/message.service';
 import { OrdersService } from '../../orders/orders.service';
+import { ReviewService } from '../../core/services/review.service';
+import { OrderItem } from '../../shared/models/order';
 
 @Component({
   selector: 'app-conversation',
@@ -15,15 +17,23 @@ export class ConversationComponent implements OnInit, OnDestroy {
   messageContent = '';
   currentUserEmail = '';
   currentUserToken = '';
-
-  // NOU: orderId din URL
   orderId?: number;
 
-  // NOU: review form
+  deliveredMarked = false;
+  showDeliveryButton = false; // Folosit pentru bara de actiune
+
+  // Review vanzator
   showReviewForm = false;
   reviewOrderId: number | null = null;
-  reviewRating = 5;
-  reviewComment = '';
+  sellerRating = 5;
+  sellerComment = '';
+
+  // Reviews produse
+  orderItems: OrderItem[] = [];
+  productRatings: { [productId: number]: number } = {};
+  productComments: { [productId: number]: string } = {};
+  productReviewsDone: { [productId: number]: boolean } = {};
+
   reviewSubmitting = false;
   reviewSubmitted = false;
 
@@ -32,7 +42,8 @@ export class ConversationComponent implements OnInit, OnDestroy {
     private accountService: AccountService,
     private route: ActivatedRoute,
     private router: Router,
-    private ordersService: OrdersService // NOU
+    private ordersService: OrdersService,
+    private reviewService: ReviewService
   ) { }
 
   ngOnInit(): void {
@@ -49,18 +60,43 @@ export class ConversationComponent implements OnInit, OnDestroy {
             }
 
             this.recipientEmail = params['user'];
+            if (params['orderId']) this.orderId = +params['orderId'];
 
-            // NOU: citim orderId din URL (?orderId=11)
-            if (params['orderId']) {
-              this.orderId = +params['orderId'];
-            }
-
-            // NOU: trimitem orderId la hub
             this.messageService.createHubConnection(
-              this.currentUserToken,
-              this.recipientEmail,
-              this.orderId
+              this.currentUserToken, this.recipientEmail, this.orderId
             );
+
+            // ---> MODIFICAT AICI: Verificam statusul comenzii si daca afisam bara de confirmare
+            this.messageService.messageThread$.subscribe(messages => {
+              const alreadyDelivered = messages.some(m =>
+                m.content.includes('a confirmat primirea') || m.isReviewPrompt
+              );
+              
+              const shippedMsg = messages.find(m => m.content.includes('a fost expediată'));
+              const isBuyer = shippedMsg && shippedMsg.recipientUsername === this.currentUserEmail;
+
+              if (alreadyDelivered) {
+                this.deliveredMarked = true;
+                this.showDeliveryButton = false;
+              } else if (shippedMsg && isBuyer) {
+                this.showDeliveryButton = true;
+              }
+            });
+
+            // Incarcam produsele comenzii daca avem orderId
+            if (this.orderId) {
+              this.ordersService.getOrderDetailed(this.orderId).subscribe({
+                next: order => {
+                  this.orderItems = order.orderItems;
+                  // Initializam rating-ul la 5 pentru fiecare produs
+                  order.orderItems.forEach(item => {
+                    this.productRatings[item.productId] = 5;
+                    this.productComments[item.productId] = '';
+                    this.productReviewsDone[item.productId] = false;
+                  });
+                }
+              });
+            }
           });
         }
       }
@@ -69,43 +105,92 @@ export class ConversationComponent implements OnInit, OnDestroy {
 
   sendMessage() {
     if (this.messageContent.trim().length === 0) return;
-    // NOU: trimitem si orderId
     this.messageService.sendMessage(this.recipientEmail, this.messageContent, this.orderId)
       .then(() => { this.messageContent = ''; });
   }
 
-  // NOU: cumparatorul confirma primirea comenzii
+  // ---> MODIFICAT AICI: Adaugat refresh instant la SignalR
   markDelivered(orderId: number) {
+    if (this.deliveredMarked) return;
     this.ordersService.markOrderAsDelivered(orderId).subscribe({
-      next: () => {
-        // Mesajele automate vor aparea prin SignalR
+      next: () => { 
+        this.deliveredMarked = true; 
+        this.showDeliveryButton = false;
+
+        // Oprim și repornim conexiunea pentru a aduce instant noul mesaj de sistem cu Review
+        this.messageService.stopHubConnection();
+        setTimeout(() => {
+          this.messageService.createHubConnection(this.currentUserToken, this.recipientEmail, this.orderId);
+        }, 200); // O scurtă întârziere pentru a ne asigura că vechea conexiune s-a închis
       },
-      error: err => console.log(err)
+      error: err => {
+        if (err.status === 400) {
+            this.deliveredMarked = true;
+            this.showDeliveryButton = false;
+        }
+        console.log(err);
+      }
     });
   }
 
-  // NOU: deschide formularul de review
   openReviewForm(orderId: number) {
     this.reviewOrderId = orderId;
     this.showReviewForm = true;
     this.reviewSubmitted = false;
   }
 
-  // NOU: trimite review-ul
-  submitReview() {
+  // Trimite review-ul pentru vanzator + toate produsele dintr-o data
+  submitAllReviews() {
     if (!this.reviewOrderId) return;
     this.reviewSubmitting = true;
 
+    // 1. Review vanzator
     this.messageService.submitReview({
       orderId: this.reviewOrderId,
       producerEmail: this.recipientEmail,
-      rating: this.reviewRating,
-      comment: this.reviewComment
+      rating: this.sellerRating,
+      comment: this.sellerComment
     }).subscribe({
       next: () => {
-        this.reviewSubmitting = false;
-        this.reviewSubmitted = true;
-        this.showReviewForm = false;
+        // 2. Review pentru fiecare produs
+        const productReviewCalls = this.orderItems.map(item =>
+          this.reviewService.submitProductReview({
+            productId: item.productId,
+            orderId: this.reviewOrderId!,
+            rating: this.productRatings[item.productId] ?? 5,
+            comment: this.productComments[item.productId] ?? ''
+          })
+        );
+
+        // Trimitem toate review-urile de produs in paralel
+        let completed = 0;
+        if (productReviewCalls.length === 0) {
+          this.reviewSubmitting = false;
+          this.reviewSubmitted = true;
+          this.showReviewForm = false;
+          return;
+        }
+
+        productReviewCalls.forEach(call => {
+          call.subscribe({
+            next: () => {
+              completed++;
+              if (completed === productReviewCalls.length) {
+                this.reviewSubmitting = false;
+                this.reviewSubmitted = true;
+                this.showReviewForm = false;
+              }
+            },
+            error: () => {
+              completed++;
+              if (completed === productReviewCalls.length) {
+                this.reviewSubmitting = false;
+                this.reviewSubmitted = true;
+                this.showReviewForm = false;
+              }
+            }
+          });
+        });
       },
       error: err => {
         console.log(err);
@@ -114,11 +199,6 @@ export class ConversationComponent implements OnInit, OnDestroy {
     });
   }
 
-  goBack() {
-    this.router.navigate(['/chat']);
-  }
-
-  ngOnDestroy(): void {
-    this.messageService.stopHubConnection();
-  }
+  goBack() { this.router.navigate(['/chat']); }
+  ngOnDestroy(): void { this.messageService.stopHubConnection(); }
 }

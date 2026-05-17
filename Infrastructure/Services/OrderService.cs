@@ -64,7 +64,6 @@ namespace Infrastructure.Services
             var result = await _unitOfWork.Complete();
             if (result <= 0) return null;
 
-            // Trimitem mesaje automate cu OrderId — fiecare comanda = conversatie separata
             var buyer = await _userManager.FindByEmailAsync(buyerEmail);
             if (buyer != null)
             {
@@ -75,9 +74,8 @@ namespace Infrastructure.Services
                     var producer = await _userManager.FindByIdAsync(producerId);
                     if (producer == null) continue;
 
-                    // FIX: mesajul pentru CUMPARATOR — sender = producer, recipient = buyer
-                    // Apare in chat-ul cumparatorului pe DREAPTA (ca si cum producatorul i-a scris)
-                    var msgToBuyer = new Message
+                    // ---> MODIFICAT AICI: Am înlocuit cele 2 mesaje duplicate cu un singur mesaj de sistem
+                    var systemMsg = new Message
                     {
                         SenderId = producer.Id,
                         SenderUsername = producer.Email,
@@ -86,28 +84,11 @@ namespace Infrastructure.Services
                         Sender = producer,
                         Recipient = buyer,
                         OrderId = order.Id,
-                        Content = $"✅ Comanda #{order.Id} a fost plasată cu succes! Vei fi notificat când comanda este expediată."
+                        IsSystemMessage = true,
+                        Content = $"🛒 Platforma: Comanda #{order.Id} a fost plasată cu succes!"
                     };
 
-                    // FIX: mesajul pentru VANZATOR — sender = buyer, recipient = producer
-                    // Apare in chat-ul vanzatorului pe STANGA (ca si cum cumparatorul i-a scris)
-                    // IMPORTANT: are OrderId diferit de msgToBuyer? NU — acelasi orderId
-                    // Dar sunt mesaje SEPARATE: fiecare user vede doar mesajele unde e sender sau recipient
-                    var msgToProducer = new Message
-                    {
-                        SenderId = buyer.Id,
-                        SenderUsername = buyer.Email,
-                        RecipientId = producer.Id,
-                        RecipientUsername = producer.Email,
-                        Sender = buyer,
-                        Recipient = producer,
-                        OrderId = order.Id,
-                        Content = $"🛒 Comandă nouă #{order.Id} de la {buyer.DisplayName}! Intră în comenzile tale pentru detalii."
-                    };
-
-                    // Salvam ambele in DB — fiecare user vede doar mesajele lui prin spec
-                    _unitOfWork.Repository<Message>().Add(msgToBuyer);
-                    _unitOfWork.Repository<Message>().Add(msgToProducer);
+                    _unitOfWork.Repository<Message>().Add(systemMsg);
                 }
 
                 await _unitOfWork.Complete();
@@ -121,9 +102,10 @@ namespace Infrastructure.Services
             return await _unitOfWork.Repository<DeliveryMethod>().ListAllAsync();
         }
 
-        public async Task<Order> GetOrderByIdAsync(int id, string buyerEmail)
+       public async Task<Order> GetOrderByIdAsync(int id, string buyerEmail)
         {
-            var spec = new OrdersWithItemsAndOrderingSpecification(id, buyerEmail);
+            var user = await _userManager.FindByEmailAsync(buyerEmail);
+            var spec = new OrdersWithItemsAndOrderingSpecification(id, buyerEmail, user?.Id);
             return await _unitOfWork.Repository<Order>().GetEntityWithSpec(spec);
         }
 

@@ -66,4 +66,39 @@
 
         </div>
     </div>
+    <!-- NEW: Product suggestions from blog post content -->
+<div class="mt-5" *ngIf="suggestedProducts.length > 0">
+    <hr>
+    <h5 class="fw-bold mb-2">
+        <i class="fa fa-shopping-bag text-success me-2"></i>
+        Shop ingredients & products from this article
+    </h5>
+    <p class="text-muted small mb-3">
+        Find these ingredients and products directly on our platform:
+    </p>
+    <div class="row row-cols-2 row-cols-md-4 g-3 mb-5">
+        <div class="col" *ngFor="let product of suggestedProducts">
+            <div class="card h-100 shadow-sm border-0">
+                <img [src]="product.pictureUrl" [alt]="product.name"
+                     class="card-img-top"
+                     style="height: 150px; object-fit: cover;">
+                <div class="card-body p-2">
+                    <p class="card-title small fw-bold mb-1 text-truncate">
+                        {{ product.name }}
+                    </p>
+                    <p class="card-text text-success fw-bold mb-1">
+                        {{ product.price | currency }}
+                    </p>
+                    <small class="text-muted">{{ product.producerName }}</small>
+                </div>
+                <div class="card-footer p-2 bg-white border-0">
+                    <a [routerLink]="['/shop', product.id]"
+                       class="btn btn-sm btn-outline-primary w-100">
+                        View Product
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 </div>

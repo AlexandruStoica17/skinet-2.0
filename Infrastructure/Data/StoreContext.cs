@@ -31,6 +31,8 @@ namespace Infrastructure.Data
         public DbSet<BlogPost> BlogPosts { get; set; }
         // NOU: reviews
         public DbSet<Review> Reviews { get; set; }
+        // NOU: reviews pentru produse individuale
+public DbSet<ProductReview> ProductReviews { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             // CRITIC pentru Identity: Trebuie lăsat aici sus!

@@ -4,17 +4,75 @@
     padding: 10px 20px;
     font-size: 1.1em;
 
-    &:focus {
-        outline: none;
-    }
-
-    &.active {
-        border-radius: 10px;
-    }
-
+    &:focus { outline: none; }
+    &.active { border-radius: 10px; }
     &:not(.active):hover {
         color: #fff;
         background-color: rgba(233, 86, 32, 0.705);
         border-radius: 10px;
     }
 }
+
+/* Multiselect checkbox filters */
+.filter-check {
+    cursor: pointer;
+    padding: 6px 4px;
+    border-radius: 6px;
+    transition: background 0.15s;
+
+    &:hover {
+        background: rgba(233, 86, 32, 0.08);
+    }
+
+    .form-check-input:checked {
+        background-color: #e95620;
+        border-color: #e95620;
+    }
+
+    .form-check-label {
+        cursor: pointer;
+        font-size: 0.95em;
+    }
+}
+
+/* Dual range price slider */
+.price-range-wrapper {
+    height: 30px;
+    display: flex;
+    align-items: center;
+}
+
+.price-range {
+    position: absolute;
+    width: 100%;
+    pointer-events: none;
+    background: transparent;
+    appearance: none;
+    -webkit-appearance: none;
+    height: 4px;
+
+    &::-webkit-slider-thumb {
+        pointer-events: all;
+        appearance: none;
+        -webkit-appearance: none;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: #0d6efd;
+        cursor: pointer;
+        border: 2px solid white;
+        box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+    }
+
+    &::-moz-range-thumb {
+        pointer-events: all;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
+        background: #0d6efd;
+        cursor: pointer;
+        border: 2px solid white;
+    }
+}
+
+.price-range-max { z-index: 2; }

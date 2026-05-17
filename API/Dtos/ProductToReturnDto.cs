@@ -14,5 +14,11 @@ namespace API.Dtos
         public int ProductBrandId { get; set; } // <--- ADAUGĂ ASTA
         public string ProducerName { get; set; }
          public string ProducerEmail { get; set; } // NOU: necesar pentru butonul de chat
+
+          // NEW filters
+        public string SkinType { get; set; }
+        public string Usage { get; set; }
+        public string Benefits { get; set; }
+        public string Formula { get; set; }
     }
 }

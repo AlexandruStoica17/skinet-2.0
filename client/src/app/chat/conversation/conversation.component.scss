@@ -7,3 +7,37 @@
     max-width: 75%;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
+
+.system-message-wrapper {
+    display: flex;
+    justify-content: center;
+    margin: 16px 0; /* Spațiu sus-jos pentru a respira */
+    width: 100%;
+
+.system-message-pill {
+        background-color: #f0f2f5; /* Un gri foarte deschis, neutru */
+        color: #606770; /* Text gri închis pentru contrast bun, dar neintruziv */
+        padding: 6px 14px;
+        border-radius: 20px; /* Formă de pastilă (pill) */
+        font-size: 0.85rem;
+        text-align: center;
+        max-width: 85%; /* Evităm să atingă marginile pe telefoane */
+        border: 1px solid #e4e6eb;
+
+        i {
+            color: #8a8d91;
+            margin-right: 5px;
+        }
+
+        .content {
+            font-weight: 500;
+        }
+
+        .time {
+            display: inline-block;
+            margin-left: 8px;
+            font-size: 0.75rem;
+            color: #90949c;
+        }
+}
+}

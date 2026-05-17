@@ -23,5 +23,11 @@ namespace API.Dtos
         // Aici vom primi poza din Angular
         [Required]
         public IFormFile Picture { get; set; } 
+
+         // NEW filters
+        public string SkinType { get; set; }
+        public string Usage { get; set; }
+        public string Benefits { get; set; }
+        public string Formula { get; set; }
     }
 }

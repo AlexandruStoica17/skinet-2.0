@@ -14,5 +14,6 @@ namespace API.Dtos
         // NOU
         public int? OrderId { get; set; }
         public bool IsReviewPrompt { get; set; }
+        public bool IsSystemMessage { get; set; }
     }
 }

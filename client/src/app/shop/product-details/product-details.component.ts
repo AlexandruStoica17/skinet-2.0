@@ -1,12 +1,14 @@
-import { Component, OnInit } from '@angular/core';
 import { Product } from 'src/app/shared/models/product';
+import { ProductReview } from 'src/app/shared/models/review';
 import { ShopService } from '../shop.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { BreadcrumbService } from 'xng-breadcrumb';
 import { BasketService } from 'src/app/basket/basket.service';
 import { AccountService } from 'src/app/account/account.service';
+import { ReviewService } from 'src/app/core/services/review.service';
 import { take } from 'rxjs';
 import { NgxGalleryAnimation, NgxGalleryImage, NgxGalleryOptions, NgxGalleryImageSize } from '@kolkov/ngx-gallery';
+import { Component, OnInit } from '@angular/core';
 
 @Component({
   selector: 'app-product-details',
@@ -17,7 +19,13 @@ export class ProductDetailsComponent implements OnInit {
   product?: Product;
   quantity = 1;
   quantityInBasket = 0;
-  currentUserEmail = ''; // NOU: email-ul userului logat, pentru a ascunde butonul față de propriile produse
+  currentUserEmail = '';
+
+  productReviews: ProductReview[] = [];
+  avgRating = 0;
+
+  // NEW: related product suggestions based on name/description keywords
+  suggestedProducts: Product[] = [];
 
   galleryOptions!: NgxGalleryOptions[];
   galleryImages!: NgxGalleryImage[];
@@ -27,8 +35,9 @@ export class ProductDetailsComponent implements OnInit {
     private activatedRoute: ActivatedRoute,
     private bcService: BreadcrumbService,
     private basketService: BasketService,
-    private accountService: AccountService, // NOU
-    private router: Router                  // NOU
+    private accountService: AccountService,
+    private router: Router,
+    private reviewService: ReviewService
   ) {
     this.bcService.set('@productDetails', ' ');
   }
@@ -49,7 +58,6 @@ export class ProductDetailsComponent implements OnInit {
       }
     ];
 
-    // NOU: Preluăm email-ul userului curent logat
     this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
       if (user) this.currentUserEmail = user.email;
     });
@@ -72,6 +80,30 @@ export class ProductDetailsComponent implements OnInit {
             }
           }
         });
+
+        // Load reviews for this product
+        this.reviewService.getProductReviews(+id).subscribe({
+          next: (reviews: ProductReview[]) => {
+            this.productReviews = reviews;
+            this.avgRating = reviews.length > 0
+              ? Math.round(
+                  reviews.reduce((sum: number, r: ProductReview) => sum + r.rating, 0)
+                  / reviews.length * 10
+                ) / 10
+              : 0;
+          },
+          error: err => console.log(err)
+        });
+
+        // NEW: Load related product suggestions based on keywords from name + description
+        const text = product.name + ' ' + (product.description || '');
+        const keywords = this.shopService.extractKeywords(text);
+        if (keywords) {
+          this.shopService.getSuggestions(keywords, +id, 4).subscribe({
+            next: suggestions => this.suggestedProducts = suggestions,
+            error: err => console.log(err)
+          });
+        }
       },
       error: error => console.log(error)
     });
@@ -91,7 +123,6 @@ export class ProductDetailsComponent implements OnInit {
     return imageUrls;
   }
 
-  // NOU: Navighează la chat cu vânzătorul pre-selectat
   contactSeller() {
     if (this.product?.producerEmail) {
       this.router.navigate(['/chat'], {
@@ -100,13 +131,8 @@ export class ProductDetailsComponent implements OnInit {
     }
   }
 
-  incrementQuantity() {
-    this.quantity++;
-  }
-
-  decrementQuantity() {
-    this.quantity--;
-  }
+  incrementQuantity() { this.quantity++; }
+  decrementQuantity() { this.quantity--; }
 
   updateBasket() {
     if (this.product) {

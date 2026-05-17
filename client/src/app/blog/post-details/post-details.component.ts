@@ -2,7 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { BlogService } from 'src/app/core/services/blog.service';
 import { Post } from 'src/app/shared/models/post';
-import { AccountService } from 'src/app/account/account.service'; // Pentru a verifica logarea
+import { AccountService } from 'src/app/account/account.service';
+import { Product } from 'src/app/shared/models/product';   // NEW
+import { ShopService } from 'src/app/shop/shop.service';   // NEW
 
 @Component({
   selector: 'app-post-details',
@@ -11,13 +13,17 @@ import { AccountService } from 'src/app/account/account.service'; // Pentru a ve
 })
 export class PostDetailsComponent implements OnInit {
   post?: Post;
-  comments: any[] = []; // Lista de comentarii
-  newCommentContent = ''; // Textul din formular
+  comments: any[] = [];
+  newCommentContent = '';
+
+  // NEW: products suggested from blog post content keywords
+  suggestedProducts: Product[] = [];
 
   constructor(
     private blogService: BlogService,
     private route: ActivatedRoute,
-    public accountService: AccountService // public ca să-l folosim în HTML
+    public accountService: AccountService,
+    private shopService: ShopService  // NEW
   ) { }
 
   ngOnInit(): void {
@@ -30,7 +36,17 @@ export class PostDetailsComponent implements OnInit {
       this.blogService.getPost(+id).subscribe({
         next: post => {
           this.post = post;
-          this.loadComments(post.id); // Încărcăm comentariile după ce avem postarea
+          this.loadComments(post.id);
+
+          // NEW: Extract keywords from title + content + summary and fetch related products
+          const text = (post.title || '') + ' ' + (post.content || '') + ' ' + (post.summary || '');
+          const keywords = this.shopService.extractKeywords(text);
+          if (keywords) {
+            this.shopService.getSuggestions(keywords, 0, 4).subscribe({
+              next: suggestions => this.suggestedProducts = suggestions,
+              error: err => console.log(err)
+            });
+          }
         },
         error: error => console.log(error)
       });
@@ -50,15 +66,12 @@ export class PostDetailsComponent implements OnInit {
     const commentDto = {
       postId: this.post.id,
       content: this.newCommentContent
-      // Dacă backend-ul tău cere și AppUserId aici, îl vom adăuga. 
-      // De obicei, e preluat din Token în C#.
     };
 
     this.blogService.addComment(commentDto).subscribe({
-      next: (comment) => {
-        // Adăugăm comentariul nou direct în listă fără să dăm refresh
+      next: comment => {
         this.comments.push(comment);
-        this.newCommentContent = ''; // Golim câmpul de text
+        this.newCommentContent = '';
       },
       error: error => console.log(error)
     });

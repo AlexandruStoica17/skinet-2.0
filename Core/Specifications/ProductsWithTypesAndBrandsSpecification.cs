@@ -1,4 +1,3 @@
-using System.Linq.Expressions;
 using Core.Entities;
 
 namespace Core.Specifications
@@ -6,36 +5,42 @@ namespace Core.Specifications
     public class ProductsWithTypesAndBrandsSpecification : BaseSpecification<Product>
     {
         public ProductsWithTypesAndBrandsSpecification(ProductSpecParams productParams)
-        : base(x => 
-        (string.IsNullOrEmpty(productParams.Search) || x.Name.ToLower().Contains(productParams.Search)) && 
-        (!productParams.BrandId.HasValue || x.ProductBrandId == productParams.BrandId) && 
-        (!productParams.TypeId.HasValue || x.ProductTypeId == productParams.TypeId)
+        : base(x =>
+            // Search
+            (string.IsNullOrEmpty(productParams.Search) || x.Name.ToLower().Contains(productParams.Search)) &&
+            // Brand
+            (!productParams.BrandId.HasValue || x.ProductBrandId == productParams.BrandId) &&
+            // Type
+            (!productParams.TypeId.HasValue || x.ProductTypeId == productParams.TypeId) &&
+            // Price range
+            (productParams.MinPrice == 0 || x.Price >= productParams.MinPrice) &&
+            (productParams.MaxPrice == 0 || x.Price <= productParams.MaxPrice)
         )
         {
             AddInclude(x => x.ProductType);
             AddInclude(x => x.ProductBrand);
             AddOrderBy(x => x.Name);
-            ApplyPaging(productParams.PageSize * (productParams.PageIndex -1 ), productParams.PageSize);
+            ApplyPaging(productParams.PageSize * (productParams.PageIndex - 1), productParams.PageSize);
 
             if (!string.IsNullOrEmpty(productParams.Sort))
             {
                 switch (productParams.Sort)
                 {
                     case "priceAsc":
-                    AddOrderBy(p => p.Price);
-                    break;
+                        AddOrderBy(p => p.Price);
+                        break;
                     case "priceDesc":
-                    AddOrderByDescending(p => p.Price);
-                    break;
+                        AddOrderByDescending(p => p.Price);
+                        break;
                     default:
-                    AddOrderBy(n => n.Name);
-                    break;
+                        AddOrderBy(n => n.Name);
+                        break;
                 }
             }
         }
 
-        public ProductsWithTypesAndBrandsSpecification(int id) 
-        : base(x => x.Id == id) //inlocuieste Expression<Func<T, bool>> criteria
+        public ProductsWithTypesAndBrandsSpecification(int id)
+        : base(x => x.Id == id)
         {
             AddInclude(x => x.ProductType);
             AddInclude(x => x.ProductBrand);

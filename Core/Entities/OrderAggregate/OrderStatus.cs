@@ -16,7 +16,7 @@ namespace Core.Entities.OrderAggregate
         [EnumMember(Value = "Shipped")]
         Shipped,
 
-        // NOU: cumparatorul confirma ca a primit comanda
+        // NOU: cumparatorul confirma primirea
         [EnumMember(Value = "Delivered")]
         Delivered
     }

@@ -40,27 +40,27 @@ namespace API.SignalR
             var otherUser = httpContext.Request.Query["user"].ToString();
             var currentEmail = Context.User.RetrieveEmailFromPrincipal();
 
-            // Citim orderId din URL: /hubs/message?user=bob@...&orderId=11
+            // Citim orderId din URL
             int? orderId = null;
             var orderIdStr = httpContext.Request.Query["orderId"].ToString();
             if (!string.IsNullOrEmpty(orderIdStr) && int.TryParse(orderIdStr, out var parsed))
                 orderId = parsed;
 
-            // Grupul include orderId — conversatii separate per comanda
+            // Grupul include orderId pentru conversatii separate per comanda
             var groupName = orderId.HasValue
                 ? GetGroupName(currentEmail, otherUser) + $"_order_{orderId}"
                 : GetGroupName(currentEmail, otherUser);
 
             await Groups.AddToGroupAsync(Context.ConnectionId, groupName);
 
-            // Alegem spec-ul corect: cu sau fara orderId
+            // Spec corect: cu sau fara orderId
             var spec = orderId.HasValue
                 ? new MessageThreadSpecification(currentEmail, otherUser, orderId.Value)
                 : new MessageThreadSpecification(currentEmail, otherUser);
 
             var messages = await _unitOfWork.Repository<Message>().ListAsync(spec);
 
-            // Marcam ca citite mesajele primite
+            // Marcam ca citite
             var unread = messages
                 .Where(m => m.RecipientUsername == currentEmail && m.DateRead == null)
                 .ToList();
@@ -69,6 +69,7 @@ namespace API.SignalR
             {
                 unread.ForEach(m => m.DateRead = DateTime.UtcNow);
                 await _unitOfWork.Complete();
+                // FIX: recalculam unread count corect dupa marcare
                 await PushUnreadCount(currentEmail);
             }
 
@@ -85,7 +86,6 @@ namespace API.SignalR
 
             var sender = await _userManager.FindByEmailAsync(email);
             var recipient = await _userManager.FindByEmailAsync(createMessageDto.RecipientUsername);
-
             if (recipient == null) throw new HubException("Utilizatorul nu a fost găsit.");
 
             var message = new Message
@@ -104,7 +104,6 @@ namespace API.SignalR
 
             if (await _unitOfWork.Complete() > 0)
             {
-                // Grupul corect: cu sau fara orderId
                 var groupName = createMessageDto.OrderId.HasValue
                     ? GetGroupName(sender.Email, recipient.Email) + $"_order_{createMessageDto.OrderId}"
                     : GetGroupName(sender.Email, recipient.Email);
@@ -114,6 +113,7 @@ namespace API.SignalR
 
                 await PushUnreadCount(recipient.Email);
 
+                // Notificare toast prin PresenceHub
                 var recipientConnections = await PresenceTracker.GetConnectionsForUser(recipient.Email);
                 if (recipientConnections.Any())
                 {

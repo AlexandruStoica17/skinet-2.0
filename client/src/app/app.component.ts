@@ -36,7 +36,9 @@ export class AppComponent implements OnInit {
   initConnections() {
     this.accountService.currentUser$.subscribe(user => {
       if (user?.token) {
+        // NotificationHub: badge cu unread count
         this.messageService.createNotificationConnection(user.token);
+        // PresenceHub: toast notificari in timp real
         this.messageService.createPresenceConnection(user.token);
       } else {
         this.messageService.stopNotificationConnection();

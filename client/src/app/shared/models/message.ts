@@ -10,4 +10,5 @@ export interface Message {
     // NOU: pentru butonul de review
     isReviewPrompt?: boolean;
     orderId?: number;
+    isSystemMessage?: boolean;
 }

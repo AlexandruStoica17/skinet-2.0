@@ -25,5 +25,6 @@ namespace Core.Entities
 
         // NOU: marcheaza mesajul ca prompt de review
         public bool IsReviewPrompt { get; set; } = false;
+        public bool IsSystemMessage { get; set; }
     }
 }

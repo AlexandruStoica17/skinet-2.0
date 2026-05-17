@@ -7,6 +7,7 @@ import { ProductDetailsComponent } from './product-details/product-details.compo
 import { RouterModule } from '@angular/router';
 import { ShopRoutingModule } from './shop-routing.module';
 import { NgxGalleryModule } from '@kolkov/ngx-gallery';
+import { FormsModule } from '@angular/forms';
 
 
 
@@ -21,6 +22,7 @@ import { NgxGalleryModule } from '@kolkov/ngx-gallery';
     SharedModule,
     ShopRoutingModule,
     NgxGalleryModule,
+    FormsModule,
   ],
  
 })

@@ -1,18 +1,4 @@
 [
-  {
-    "Id": 1,
-    "Name": "Boards"
-  },
-  {
-    "Id": 2,
-    "Name": "Hats"
-  },
-  {
-    "Id": 3,
-    "Name": "Boots"
-  },
-  {
-    "Id": 4,
-    "Name": "Gloves"
-  }
+  { "id": 1, "name": "Cosmetics" },
+  { "id": 2, "name": "Ingredients" }
 ]

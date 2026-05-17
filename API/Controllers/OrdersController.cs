@@ -74,18 +74,14 @@ namespace API.Controllers
         {
             var email = User.FindFirstValue(ClaimTypes.Email);
             var user = await _userManager.FindByEmailAsync(email);
-
             var spec = new OrdersForProducerSpecification(user.Id);
             var orders = await _unitOfWork.Repository<Order>().ListAsync(spec);
-
             var ordersToReturn = _mapper.Map<IReadOnlyList<Order>, IReadOnlyList<OrderToReturnDto>>(orders);
-
             foreach (var order in ordersToReturn)
             {
                 order.OrderItems = order.OrderItems.Where(i => i.ProducerId == user.Id).ToList();
                 order.Subtotal = order.OrderItems.Sum(i => i.Price * i.Quantity);
             }
-
             return Ok(ordersToReturn);
         }
 
@@ -94,24 +90,24 @@ namespace API.Controllers
         {
             var spec = new OrdersWithItemsAndOrderingSpecification(id, null);
             var order = await _unitOfWork.Repository<Order>().GetEntityWithSpec(spec);
-
             if (order == null) return NotFound(new ApiResponse(404));
+
+            if (order.Status == OrderStatus.Shipped || order.Status == OrderStatus.Delivered)
+                return BadRequest(new ApiResponse(400, "Comanda a fost deja expediată."));
 
             order.Status = OrderStatus.Shipped;
             _unitOfWork.Repository<Order>().Update(order);
             var result = await _unitOfWork.Complete();
-
             if (result <= 0) return BadRequest(new ApiResponse(400, "Problem updating order status"));
 
-            // Mesaj automat cu OrderId in chat-ul comenzii
             var producerEmail = User.RetrieveEmailFromPrincipal();
             var producer = await _userManager.FindByEmailAsync(producerEmail);
             var buyer = await _userManager.FindByEmailAsync(order.BuyerEmail);
 
             if (producer != null && buyer != null)
             {
-                // Mesaj catre cumparator: expediat
-                var msgToBuyer = new Message
+                // ---> MODIFICAT AICI: Am înlocuit cu un singur mesaj de sistem pentru Expediere
+                var systemMsg = new Message
                 {
                     SenderId = producer.Id,
                     SenderUsername = producer.Email,
@@ -120,41 +116,28 @@ namespace API.Controllers
                     Sender = producer,
                     Recipient = buyer,
                     OrderId = order.Id,
-                    Content = $"🚚 Comanda #{order.Id} a fost expediată! Vei primi coletul în curând."
+                    IsSystemMessage = true,
+                    Content = $"🚚 Platforma: Comanda #{order.Id} a fost expediată! Vei primi coletul în curând."
                 };
 
-                // Mesaj catre vanzator: confirmare
-                var msgToProducer = new Message
-                {
-                    SenderId = buyer.Id,
-                    SenderUsername = buyer.Email,
-                    RecipientId = producer.Id,
-                    RecipientUsername = producer.Email,
-                    Sender = buyer,
-                    Recipient = producer,
-                    OrderId = order.Id,
-                    Content = $"✅ Ai marcat comanda #{order.Id} ca expediată."
-                };
-
-                _unitOfWork.Repository<Message>().Add(msgToBuyer);
-                _unitOfWork.Repository<Message>().Add(msgToProducer);
+                _unitOfWork.Repository<Message>().Add(systemMsg);
                 await _unitOfWork.Complete();
             }
 
             return _mapper.Map<Order, OrderToReturnDto>(order);
         }
 
-        // NOU: cumparatorul confirma ca a primit comanda
         [HttpPut("mark-delivered/{id}")]
         public async Task<ActionResult<OrderToReturnDto>> MarkDelivered(int id)
         {
             var buyerEmail = User.RetrieveEmailFromPrincipal();
-
-            // Aducem comanda fara restrictie de email (cumparatorul o poate accesa)
             var spec = new OrdersWithItemsAndOrderingSpecification(id, buyerEmail);
             var order = await _unitOfWork.Repository<Order>().GetEntityWithSpec(spec);
 
             if (order == null) return NotFound(new ApiResponse(404));
+
+            if (order.Status != OrderStatus.Shipped)
+                return BadRequest(new ApiResponse(400, "Comanda nu poate fi marcată ca primită."));
 
             order.Status = OrderStatus.Delivered;
             _unitOfWork.Repository<Order>().Update(order);
@@ -168,21 +151,8 @@ namespace API.Controllers
                 var producer = await _userManager.FindByIdAsync(firstItem.ProducerId);
                 if (producer != null)
                 {
-                    // Mesaj catre vanzator: comanda primita
-                    var msgToProducer = new Message
-                    {
-                        SenderId = buyer.Id,
-                        SenderUsername = buyer.Email,
-                        RecipientId = producer.Id,
-                        RecipientUsername = producer.Email,
-                        Sender = buyer,
-                        Recipient = producer,
-                        OrderId = order.Id,
-                        Content = $"✅ {buyer.DisplayName} a confirmat primirea comenzii #{order.Id}."
-                    };
-
-                    // Mesaj catre cumparator: invitatie review
-                    var msgToBuyer = new Message
+                    // ---> MODIFICAT AICI: Am înlocuit cu un singur mesaj de sistem + Review prompt
+                    var systemMsg = new Message
                     {
                         SenderId = producer.Id,
                         SenderUsername = producer.Email,
@@ -191,12 +161,12 @@ namespace API.Controllers
                         Sender = producer,
                         Recipient = buyer,
                         OrderId = order.Id,
-                        IsReviewPrompt = true,
-                        Content = $"⭐ Mulțumim pentru comanda #{order.Id}! Lasă un review pentru a ajuta alți cumpărători."
+                        IsSystemMessage = true,
+                        IsReviewPrompt = true, 
+                        Content = $"✅ Platforma: {buyer.DisplayName} a confirmat primirea comenzii #{order.Id}. Mulțumim, te rugăm să lași un review!"
                     };
 
-                    _unitOfWork.Repository<Message>().Add(msgToProducer);
-                    _unitOfWork.Repository<Message>().Add(msgToBuyer);
+                    _unitOfWork.Repository<Message>().Add(systemMsg);
                     await _unitOfWork.Complete();
                 }
             }

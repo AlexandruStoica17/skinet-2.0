@@ -5,8 +5,9 @@ import { RouterModule } from '@angular/router';
 import { ChatRoutingModule } from './chat-routing.module';
 import { ChatComponent } from './chat.component';
 import { ConversationComponent } from './conversation/conversation.component';
-import { SharedModule } from '../shared/shared.module'; // NOU: pentru app-pager
-import { OrdersService } from '../orders/orders.service';
+import { SharedModule } from '../shared/shared.module'; // pentru app-pager
+
+// IMPORTANT: OrdersService NU se pune in imports[] — e providedIn: 'root', se injecteaza direct in constructor
 
 @NgModule({
   declarations: [
@@ -18,8 +19,7 @@ import { OrdersService } from '../orders/orders.service';
     ChatRoutingModule,
     FormsModule,
     RouterModule,
-    SharedModule,
-   
+    SharedModule  // contine app-pager
   ]
 })
 export class ChatModule { }

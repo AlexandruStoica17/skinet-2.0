@@ -33,7 +33,6 @@ export class MessageService {
 
   // ─── REST ──────────────────────────────────────────────────────────────────
 
-  // NOU: inbox cu search + paginare, returneaza { conversations, totalCount }
   getInbox(search = '', pageIndex = 1, pageSize = 10) {
     let params = new HttpParams()
       .set('search', search)
@@ -51,7 +50,6 @@ export class MessageService {
     );
   }
 
-  // NOU: cauta useri pentru a incepe o conversatie noua
   searchUsers(query: string) {
     return this.http.get<{ email: string; displayName: string }[]>(
       this.baseUrl + 'messages/search-user',
@@ -59,12 +57,11 @@ export class MessageService {
     );
   }
 
-  // // NOU: trimite review
-  // submitReview(reviewData: { orderId: number; producerEmail: string; rating: number; comment: string }) {
-  //   return this.http.post(this.baseUrl + 'messages/review', reviewData);
-  // }
+  submitReview(data: { orderId: number; producerEmail: string; rating: number; comment: string }) {
+    return this.http.post(this.baseUrl + 'messages/review', data);
+  }
 
-  // ─── SignalR: Notification Hub ─────────────────────────────────────────────
+  // ─── SignalR: Notification Hub (badge unread count) ────────────────────────
 
   createNotificationConnection(token: string) {
     if (this.notificationConnection) return;
@@ -78,6 +75,7 @@ export class MessageService {
 
     this.notificationConnection.start().catch(error => console.log(error));
 
+    // Primim contorul real de la server (nu il calculam noi)
     this.notificationConnection.on('UnreadCount', (count: number) => {
       this.unreadCountSource.next(count);
     });
@@ -90,7 +88,7 @@ export class MessageService {
     }
   }
 
-  // ─── SignalR: Presence Hub ─────────────────────────────────────────────────
+  // ─── SignalR: Presence Hub (toast in timp real) ────────────────────────────
 
   createPresenceConnection(token: string) {
     if (this.presenceConnection) return;
@@ -104,20 +102,23 @@ export class MessageService {
 
     this.presenceConnection.start().catch(error => console.log(error));
 
-    // Toast cu click pentru a deschide conversatia - exact ca in DatingApp
+    // FIX: toast cu click direct la conversatie
     this.presenceConnection.on('NewMessageReceived', ({ senderEmail, senderName }) => {
-      this.toastr.info(senderName + ' ti-a trimis un mesaj nou. Click pentru a vedea.')
-        .onTap
-        .pipe(take(1))
-        .subscribe(() => {
+      // FIX: nu afisam toast daca suntem deja in conversatia cu acel user
+      const currentUrl = this.router.url;
+      const isInConversation = currentUrl.includes('/chat/conversation') &&
+                               currentUrl.includes(encodeURIComponent(senderEmail));
+
+      if (!isInConversation) {
+        this.toastr.info(`${senderName} ți-a trimis un mesaj nou. Click pentru a vedea.`, '', {
+          timeOut: 5000,
+          progressBar: true
+        }).onTap.pipe(take(1)).subscribe(() => {
           this.router.navigate(['/chat', 'conversation'], {
             queryParams: { user: senderEmail }
           });
         });
-
-      this.unreadCount$.pipe(take(1)).subscribe(count => {
-        this.unreadCountSource.next(count + 1);
-      });
+      }
     });
   }
 
@@ -128,10 +129,10 @@ export class MessageService {
     }
   }
 
-  // ─── SignalR: Message Hub ──────────────────────────────────────────────────
+  // ─── SignalR: Message Hub (conversatie activa) ─────────────────────────────
 
- createHubConnection(token: string, otherUsername: string, orderId?: number) {
-    // NOU: adaugam orderId in URL daca exista
+  createHubConnection(token: string, otherUsername: string, orderId?: number) {
+    // FIX: adaugam orderId in URL
     let url = this.hubUrl + 'message?user=' + otherUsername;
     if (orderId) url += '&orderId=' + orderId;
 
@@ -144,9 +145,10 @@ export class MessageService {
 
     this.hubConnection.on('ReceiveMessageThread', messages => {
       this.messageThreadSource.next(messages);
-      this.unreadCountSource.next(0);
+      // FIX: NU resetam badge-ul la 0 global — serverul trimite contorul corect prin PushUnreadCount
     });
 
+    // FIX: mesajele noi apar instant fara refresh
     this.hubConnection.on('NewMessage', message => {
       this.messageThread$.pipe(take(1)).subscribe({
         next: messages => {
@@ -154,25 +156,21 @@ export class MessageService {
         }
       });
     });
-}
+  }
 
-async sendMessage(username: string, content: string, orderId?: number) {
+  stopHubConnection() {
+    if (this.hubConnection) {
+      this.hubConnection.stop();
+      this.hubConnection = undefined;
+      this.messageThreadSource.next([]);
+    }
+  }
+
+  async sendMessage(username: string, content: string, orderId?: number) {
     return this.hubConnection?.invoke('SendMessage', {
       recipientUsername: username,
       content,
-      orderId: orderId ?? null  // NOU
+      orderId: orderId ?? null
     }).catch(error => console.log(error));
-}
-
-// NOU: trimite review
-submitReview(data: { orderId: number; producerEmail: string; rating: number; comment: string }) {
-    return this.http.post(this.baseUrl + 'messages/review', data);
-}
-
-// Add this method inside MessageService in message.service.ts
-stopHubConnection() {
-  if (this.hubConnection) {
-    this.hubConnection.stop().catch(error => console.log(error));
   }
-}
 }

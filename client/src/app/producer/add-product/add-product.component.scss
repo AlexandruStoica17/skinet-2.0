@@ -1,0 +1,20 @@
+.filter-multiselect-box {
+    max-height: 180px;
+    overflow-y: auto;
+    background: #fafafa;
+
+    .form-check {
+        padding: 4px 8px;
+        border-radius: 4px;
+        cursor: pointer;
+
+        &:hover { background: rgba(13, 110, 253, 0.06); }
+
+        .form-check-input:checked {
+            background-color: #e95620;
+            border-color: #e95620;
+        }
+
+        .form-check-label { cursor: pointer; }
+    }
+}
