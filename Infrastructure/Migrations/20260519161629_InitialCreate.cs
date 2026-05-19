@@ -3,10 +3,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace Infrastructure.Data.Migrations
+namespace Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCosmeticDb : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -31,6 +31,9 @@ namespace Infrastructure.Data.Migrations
                 {
                     Id = table.Column<string>(type: "TEXT", nullable: false),
                     DisplayName = table.Column<string>(type: "TEXT", nullable: true),
+                    IsVerified = table.Column<bool>(type: "INTEGER", nullable: false),
+                    CompanyName = table.Column<string>(type: "TEXT", nullable: true),
+                    DocumentUrl = table.Column<string>(type: "TEXT", nullable: true),
                     UserName = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "TEXT", maxLength: 256, nullable: true),
@@ -49,6 +52,24 @@ namespace Infrastructure.Data.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_AspNetUsers", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "BlogPosts",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Title = table.Column<string>(type: "TEXT", nullable: true),
+                    Summary = table.Column<string>(type: "TEXT", nullable: true),
+                    Content = table.Column<string>(type: "TEXT", nullable: true),
+                    ImageUrl = table.Column<string>(type: "TEXT", nullable: true),
+                    Author = table.Column<string>(type: "TEXT", nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_BlogPosts", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -81,6 +102,25 @@ namespace Infrastructure.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "ProductReviews",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    ProductId = table.Column<int>(type: "INTEGER", nullable: false),
+                    OrderId = table.Column<int>(type: "INTEGER", nullable: false),
+                    BuyerEmail = table.Column<string>(type: "TEXT", nullable: false),
+                    BuyerName = table.Column<string>(type: "TEXT", nullable: false),
+                    Rating = table.Column<int>(type: "INTEGER", nullable: false),
+                    Comment = table.Column<string>(type: "TEXT", maxLength: 1000, nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ProductReviews", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ProductTypes",
                 columns: table => new
                 {
@@ -91,6 +131,24 @@ namespace Infrastructure.Data.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_ProductTypes", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Reviews",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    OrderId = table.Column<int>(type: "INTEGER", nullable: false),
+                    BuyerEmail = table.Column<string>(type: "TEXT", nullable: false),
+                    ProducerEmail = table.Column<string>(type: "TEXT", nullable: false),
+                    Rating = table.Column<int>(type: "INTEGER", nullable: false),
+                    Comment = table.Column<string>(type: "TEXT", maxLength: 1000, nullable: true),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Reviews", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -225,6 +283,42 @@ namespace Infrastructure.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Messages",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    SenderId = table.Column<string>(type: "TEXT", nullable: true),
+                    SenderUsername = table.Column<string>(type: "TEXT", nullable: true),
+                    RecipientId = table.Column<string>(type: "TEXT", nullable: true),
+                    RecipientUsername = table.Column<string>(type: "TEXT", nullable: true),
+                    Content = table.Column<string>(type: "TEXT", nullable: true),
+                    DateRead = table.Column<DateTime>(type: "TEXT", nullable: true),
+                    MessageSent = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    SenderDeleted = table.Column<bool>(type: "INTEGER", nullable: false),
+                    RecipientDeleted = table.Column<bool>(type: "INTEGER", nullable: false),
+                    OrderId = table.Column<int>(type: "INTEGER", nullable: true),
+                    IsReviewPrompt = table.Column<bool>(type: "INTEGER", nullable: false),
+                    IsSystemMessage = table.Column<bool>(type: "INTEGER", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Messages", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Messages_AspNetUsers_RecipientId",
+                        column: x => x.RecipientId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_Messages_AspNetUsers_SenderId",
+                        column: x => x.SenderId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Photos",
                 columns: table => new
                 {
@@ -305,7 +399,13 @@ namespace Infrastructure.Data.Migrations
                     Price = table.Column<double>(type: "decimal(18,2)", nullable: false),
                     PictureUrl = table.Column<string>(type: "TEXT", nullable: false),
                     ProductTypeId = table.Column<int>(type: "INTEGER", nullable: false),
-                    ProductBrandId = table.Column<int>(type: "INTEGER", nullable: false)
+                    ProductBrandId = table.Column<int>(type: "INTEGER", nullable: false),
+                    ProducerId = table.Column<string>(type: "TEXT", nullable: true),
+                    ProducerName = table.Column<string>(type: "TEXT", nullable: true),
+                    SkinType = table.Column<string>(type: "TEXT", nullable: true),
+                    Usage = table.Column<string>(type: "TEXT", nullable: true),
+                    Benefits = table.Column<string>(type: "TEXT", nullable: true),
+                    Formula = table.Column<string>(type: "TEXT", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -362,6 +462,8 @@ namespace Infrastructure.Data.Migrations
                     ItemOrdered_PictureUrl = table.Column<string>(type: "TEXT", nullable: true),
                     Price = table.Column<double>(type: "decimal(18,2)", nullable: false),
                     Quantity = table.Column<int>(type: "INTEGER", nullable: false),
+                    ProducerId = table.Column<string>(type: "TEXT", nullable: true),
+                    ProducerName = table.Column<string>(type: "TEXT", nullable: true),
                     OrderId = table.Column<int>(type: "INTEGER", nullable: true)
                 },
                 constraints: table =>
@@ -464,6 +566,16 @@ namespace Infrastructure.Data.Migrations
                 column: "ProductId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Messages_RecipientId",
+                table: "Messages",
+                column: "RecipientId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Messages_SenderId",
+                table: "Messages",
+                column: "SenderId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_OrderItems_OrderId",
                 table: "OrderItems",
                 column: "OrderId");
@@ -482,6 +594,12 @@ namespace Infrastructure.Data.Migrations
                 name: "IX_Posts_AppUserId",
                 table: "Posts",
                 column: "AppUserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ProductReviews_ProductId_OrderId_BuyerEmail",
+                table: "ProductReviews",
+                columns: new[] { "ProductId", "OrderId", "BuyerEmail" },
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Products_ProductBrandId",
@@ -516,16 +634,28 @@ namespace Infrastructure.Data.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
+                name: "BlogPosts");
+
+            migrationBuilder.DropTable(
                 name: "Comments");
 
             migrationBuilder.DropTable(
                 name: "FavoriteProducts");
 
             migrationBuilder.DropTable(
+                name: "Messages");
+
+            migrationBuilder.DropTable(
                 name: "OrderItems");
 
             migrationBuilder.DropTable(
                 name: "Photos");
+
+            migrationBuilder.DropTable(
+                name: "ProductReviews");
+
+            migrationBuilder.DropTable(
+                name: "Reviews");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");

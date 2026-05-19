@@ -1,4 +1,4 @@
 [
-  { "id": 1, "name": "Cosmetics" },
-  { "id": 2, "name": "Ingredients" }
+  { "Id": 1, "Name": "Cosmetics" },
+  { "Id": 2, "Name": "Ingredients" }
 ]

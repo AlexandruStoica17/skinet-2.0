@@ -3,19 +3,16 @@ using System;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace Infrastructure.Data.Migrations
+namespace Infrastructure.Migrations
 {
     [DbContext(typeof(StoreContext))]
-    [Migration("20260510135701_AddOrderIdAndReviewPromptToMessage")]
-    partial class AddOrderIdAndReviewPromptToMessage
+    partial class StoreContextModelSnapshot : ModelSnapshot
     {
-        /// <inheritdoc />
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.25");
@@ -224,6 +221,9 @@ namespace Infrastructure.Data.Migrations
                     b.Property<bool>("IsReviewPrompt")
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("IsSystemMessage")
+                        .HasColumnType("INTEGER");
+
                     b.Property<DateTime>("MessageSent")
                         .HasColumnType("TEXT");
 
@@ -396,8 +396,14 @@ namespace Infrastructure.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("Benefits")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Description")
                         .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Formula")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Name")
@@ -424,6 +430,12 @@ namespace Infrastructure.Data.Migrations
                     b.Property<int>("ProductTypeId")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("SkinType")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Usage")
+                        .HasColumnType("TEXT");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ProductBrandId");
@@ -445,6 +457,44 @@ namespace Infrastructure.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("ProductBrands");
+                });
+
+            modelBuilder.Entity("Core.Entities.ProductReview", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("BuyerEmail")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("BuyerName")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Comment")
+                        .HasMaxLength(1000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("OrderId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Rating")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId", "OrderId", "BuyerEmail")
+                        .IsUnique();
+
+                    b.ToTable("ProductReviews");
                 });
 
             modelBuilder.Entity("Core.Entities.ProductType", b =>

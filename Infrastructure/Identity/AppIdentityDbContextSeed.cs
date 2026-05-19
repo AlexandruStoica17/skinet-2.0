@@ -5,92 +5,289 @@ namespace Infrastructure.Identity
 {
     public class AppIdentityDbContextSeed
     {
-        // COD VECHI COMENTAT
-        // public static async Task SeedUSersAsync(UserManager<AppUser> userManager)
-        
-        // COD NOU
-        public static async Task SeedUsersAsync(UserManager<AppUser> userManager, RoleManager<IdentityRole> roleManager)
+        public static async Task SeedUsersAsync(
+            UserManager<AppUser> userManager,
+            RoleManager<IdentityRole> roleManager)
         {
-            // 1. COD NOU: Definim și creăm rolurile necesare platformei
-            var roles = new List<IdentityRole>
+            // ── Roles ────────────────────────────────────────────────────────
+            var roles = new[]
             {
-                new IdentityRole { Name = "Admin" },
-                new IdentityRole { Name = "CosmeticsProducer" },
-                new IdentityRole { Name = "IngredientsProducer" },
-                new IdentityRole { Name = "Buyer" },
-                new IdentityRole { Name = "Blogger" }
+                "Admin",
+                "CosmeticsProducer",
+                "IngredientsProducer",
+                "Buyer",
+                "Blogger"
             };
 
             foreach (var role in roles)
             {
-                if (!await roleManager.RoleExistsAsync(role.Name))
-                {
-                    await roleManager.CreateAsync(role);
-                }
+                if (!await roleManager.RoleExistsAsync(role))
+                    await roleManager.CreateAsync(new IdentityRole(role));
             }
 
-            if (!userManager.Users.Any())
+            // ── Skip if users already exist ──────────────────────────────────
+            if (userManager.Users.Any()) return;
+
+            // ── Admin ────────────────────────────────────────────────────────
+            var admin = new AppUser
             {
-                /* --- COD VECHI COMENTAT PENTRU BOB ---
-                var user = new AppUser
+                DisplayName = "Admin",
+                Email = "admin@skinet.com",
+                UserName = "admin@skinet.com",
+                IsVerified = true,
+                Address = new Address
                 {
-                     DisplayName = "Bob",
-                    Email = "bob@test.com",
-                    UserName = "bob@test.com",
-                    Address = new Address
-                    {
-                        FirstName = "Bob",
-                        LastName = "Bobbity",
-                        Street = "10 The Street",
-                        City = "New York",
-                        State = "NY",
-                        Zipcode = "90210"
-                    } 
-                };
-                 await userManager.CreateAsync(user, "Pa$$w0rd");
-                ---------------------------------------- */
+                    FirstName = "Site",
+                    LastName = "Admin",
+                    Street = "1 Admin Street",
+                    City = "New York",
+                    State = "NY",
+                    Zipcode = "15795"
+                }
+            };
+            await userManager.CreateAsync(admin, "Admin@123");
+            await userManager.AddToRoleAsync(admin, "Admin");
 
-                // 2. COD NOU: Creăm Adminul
-                var admin = new AppUser
+            // ── Cosmetics Producers (3) ───────────────────────────────────────
+            var cosmeticsProducers = new[]
+            {
+                new AppUser
                 {
-                    DisplayName = "Super Admin",
-                    Email = "admin@test.com",
-                    UserName = "admin@test.com",
-                    IsVerified = true, // Contul adminului e mereu verificat
+                    DisplayName = "LuxeSkin Studio",
+                    Email       = "luxeskin@skinet.com",
+                    UserName    = "luxeskin@skinet.com",
+                    IsVerified  = true,
+                    CompanyName = "LuxeSkin Studio SRL",
                     Address = new Address
                     {
-                        FirstName = "Super",
-                        LastName = "Admin",
-                        Street = "Strada Adminilor 1",
-                        City = "București",
-                        State = "B",
-                        Zipcode = "123456" // Observă că la tine e Zipcode, nu ZipCode. Am păstrat cum era.
+                        FirstName = "LuxeSkin",
+                        LastName  = "Studio",
+                        Street    = "LuxeSkin Street",
+                        City      = "New York",
+                        State     = "NY",
+                        Zipcode   = "15648"
                     }
-                };
-
-                await userManager.CreateAsync(admin, "Pa$$w0rd");
-                await userManager.AddToRoleAsync(admin, "Admin"); // Îi dăm rolul!
-
-                // 3. COD NOU (BOB MODIFICAT): Recreăm utilizatorul Bob, dar îi dăm rol și status
-                var bob = new AppUser
+                },
+                new AppUser
                 {
-                    DisplayName = "Bob",
-                    Email = "bob@test.com",
-                    UserName = "bob@test.com",
-                    IsVerified = true, // Bob e cumpărător, nu are nevoie de aprobarea firmei
+                    DisplayName = "PureGlow Lab",
+                    Email       = "pureglow@skinet.com",
+                    UserName    = "pureglow@skinet.com",
+                    IsVerified  = true,
+                    CompanyName = "PureGlow Lab SRL",
                     Address = new Address
                     {
-                        FirstName = "Bob",
-                        LastName = "Bobbity",
-                        Street = "10 The Street",
-                        City = "New York",
-                        State = "NY",
-                        Zipcode = "90210"
+                        FirstName = "PureGlow",
+                        LastName  = "Lab",
+                        Street    = "PureGlow Street",
+                        City      = "New York",
+                        State     = "NY",
+                        Zipcode   = "30154"
                     }
-                };
+                },
+                new AppUser
+                {
+                    DisplayName = "BotanicaBeauty",
+                    Email       = "botanica@skinet.com",
+                    UserName    = "botanica@skinet.com",
+                    IsVerified  = true,
+                    CompanyName = "BotanicaBeauty SRL",
+                    Address = new Address
+                    {
+                        FirstName = "Botanica",
+                        LastName  = "Beauty",
+                        Street    = "BotanicaBeauty Street",
+                        City      = "New York",
+                        State     = "NY",
+                        Zipcode   = "48752"
+                    }
+                }
+            };
 
-                await userManager.CreateAsync(bob, "Pa$$w0rd");
-                await userManager.AddToRoleAsync(bob, "Buyer"); // Bob e doar cumpărător
+            foreach (var producer in cosmeticsProducers)
+            {
+                await userManager.CreateAsync(producer, "Producer@123");
+                await userManager.AddToRoleAsync(producer, "CosmeticsProducer");
+            }
+
+            // ── Ingredients Producers (3) ─────────────────────────────────────
+            var ingredientProducers = new[]
+            {
+                new AppUser
+                {
+                    DisplayName = "NatureSource",
+                    Email       = "naturesource@skinet.com",
+                    UserName    = "naturesource@skinet.com",
+                    IsVerified  = true,
+                    CompanyName = "NatureSource SRL",
+                    Address = new Address
+                    {
+                        FirstName = "Nature",
+                        LastName  = "Source",
+                        Street    = "NatureSource Street",
+                        City      = "New York",
+                        State     = "NY",
+                        Zipcode   = "15601"
+                    }
+                },
+                new AppUser
+                {
+                    DisplayName = "RawEssentials",
+                    Email       = "rawessentials@skinet.com",
+                    UserName    = "rawessentials@skinet.com",
+                    IsVerified  = true,
+                    CompanyName = "RawEssentials SRL",
+                    Address = new Address
+                    {
+                        FirstName = "Raw",
+                        LastName  = "Essentials",
+                        Street    = "RawEssentials Street",
+                        City      = "New York",
+                        State     = "NY",
+                        Zipcode   = "55401"
+                    }
+                },
+                new AppUser
+                {
+                    DisplayName = "HerbalRoots",
+                    Email       = "herbalroots@skinet.com",
+                    UserName    = "herbalroots@skinet.com",
+                    IsVerified  = true,
+                    CompanyName = "HerbalRoots SRL",
+                    Address = new Address
+                    {
+                        FirstName = "Herbal",
+                        LastName  = "Roots",
+                        Street    = "HerbalRoots Blvd",
+                        City      = "New York",
+                        State     = "NY",
+                        Zipcode   = "41001"
+                    }
+                }
+            };
+
+            foreach (var producer in ingredientProducers)
+            {
+                await userManager.CreateAsync(producer, "Producer@123");
+                await userManager.AddToRoleAsync(producer, "IngredientsProducer");
+            }
+
+            // ── Buyers (3) ───────────────────────────────────────────────────
+            var buyers = new[]
+            {
+                new AppUser
+                {
+                    DisplayName = "Alice",
+                    Email       = "alice@skinet.com",
+                    UserName    = "alice@skinet.com",
+                    IsVerified  = true,
+                    Address = new Address
+                    {
+                        FirstName = "Alice",
+                        LastName  = "Johnson",
+                        Street    = "14 Rose Street",
+                          City      = "New York",
+                        State     = "NY",
+                        Zipcode   = "010001"
+                    }
+                },
+                new AppUser
+                {
+                    DisplayName = "Maria",
+                    Email       = "maria@skinet.com",
+                    UserName    = "maria@skinet.com",
+                    IsVerified  = true,
+                    Address = new Address
+                    {
+                        FirstName = "Maria",
+                        LastName  = "Popescu",
+                        Street    = "2 Tulips Street",
+                         City      = "New York",
+                        State     = "NY",
+                        Zipcode   = "400010"
+                    }
+                },
+                new AppUser
+                {
+                    DisplayName = "Elena",
+                    Email       = "elena@skinet.com",
+                    UserName    = "elena@skinet.com",
+                    IsVerified  = true,
+                    Address = new Address
+                    {
+                        FirstName = "Elena",
+                        LastName  = "Ionescu",
+                        Street    = "New Street",
+                          City      = "New York",
+                        State     = "NY",
+                        Zipcode   = "900001"
+                    }
+                }
+            };
+
+            foreach (var buyer in buyers)
+            {
+                await userManager.CreateAsync(buyer, "Buyer@123");
+                await userManager.AddToRoleAsync(buyer, "Buyer");
+            }
+
+            // ── Bloggers (3) ─────────────────────────────────────────────────
+            var bloggers = new[]
+            {
+                new AppUser
+                {
+                    DisplayName = "SkincareDiary",
+                    Email       = "skincarediary@skinet.com",
+                    UserName    = "skincarediary@skinet.com",
+                    IsVerified  = true,
+                    Address = new Address
+                    {
+                        FirstName = "Skincare",
+                        LastName  = "Diary",
+                        Street    = "1 Beauty Blvd",
+                         City      = "New York",
+                        State     = "NY",
+                        Zipcode   = "02001"
+                    }
+                },
+                new AppUser
+                {
+                    DisplayName = "GreenBeautyBlog",
+                    Email       = "greenbeauty@skinet.com",
+                    UserName    = "greenbeauty@skinet.com",
+                    IsVerified  = true,
+                    Address = new Address
+                    {
+                        FirstName = "Green",
+                        LastName  = "Beauty",
+                        Street    = "9 Eco Street",
+                          City      = "New York",
+                        State     = "NY",
+                        Zipcode   = "40020"
+                    }
+                },
+                new AppUser
+                {
+                    DisplayName = "NaturalGlowBlog",
+                    Email       = "naturalglow@skinet.com",
+                    UserName    = "naturalglow@skinet.com",
+                    IsVerified  = true,
+                    Address = new Address
+                    {
+                        FirstName = "Natural",
+                        LastName  = "Glow",
+                        Street    = "NaturalGlow Street",
+                          City      = "New York",
+                        State     = "NY",
+                        Zipcode   = "30010"
+                    }
+                }
+            };
+
+            foreach (var blogger in bloggers)
+            {
+                await userManager.CreateAsync(blogger, "Blogger@123");
+                await userManager.AddToRoleAsync(blogger, "Blogger");
             }
         }
     }
