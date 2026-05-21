@@ -32,6 +32,9 @@ namespace Infrastructure.Data
         // NOU: reviews
         public DbSet<Review> Reviews { get; set; }
         // NOU: reviews pentru produse individuale
+
+        // NOU: poze multiple pentru produse
+public DbSet<ProductPhoto> ProductPhotos { get; set; }
 public DbSet<ProductReview> ProductReviews { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

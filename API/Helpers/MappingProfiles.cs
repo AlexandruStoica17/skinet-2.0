@@ -11,11 +11,13 @@ namespace API.Helpers
     {
         public MappingProfiles()
         {
-            CreateMap<Product, ProductToReturnDto>()
-            .ForMember(d => d.ProductBrand, o => o.MapFrom(s => s.ProductBrand.Name))
-            .ForMember(d => d.ProductType, o => o.MapFrom(s => s.ProductType.Name))
-            .ForMember(d => d.PictureUrl, o => o.MapFrom<ProductUrlResolver>())
-            .ForMember(d => d.ProducerName, o => o.MapFrom(s => s.ProducerName));
+           CreateMap<Product, ProductToReturnDto>()
+    .ForMember(d => d.ProductBrand, o => o.MapFrom(s => s.ProductBrand.Name))
+    .ForMember(d => d.ProductType, o => o.MapFrom(s => s.ProductType.Name))
+    .ForMember(d => d.PictureUrl, o => o.MapFrom<ProductUrlResolver>())
+    .ForMember(d => d.Photos, o => o.MapFrom(s => s.Photos));
+
+
 
             CreateMap<Core.Entities.Identity.Address, AddressDto>().ReverseMap();
             CreateMap<CustomerBasketDto, CustomerBasket>();
@@ -30,6 +32,9 @@ namespace API.Helpers
             .ForMember(d => d.ProductName, o => o.MapFrom(s => s.ItemOrdered.ProductName))
             .ForMember(d => d.PictureUrl, o => o.MapFrom(s => s.ItemOrdered.PictureUrl))
             .ForMember(d => d.PictureUrl, o => o.MapFrom<OrderItemUrlResolver>());
+
+            CreateMap<ProductPhoto, ProductPhotoDto>()
+    .ForMember(d => d.Url, o => o.MapFrom<ProductPhotoUrlResolver>());
 
             // --- AICI ESTE CONFIGURAREA NOUĂ PENTRU BLOG ---
             CreateMap<Post, PostToReturnDto>()

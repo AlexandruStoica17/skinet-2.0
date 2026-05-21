@@ -47,23 +47,33 @@ namespace API.Controllers
             return _mapper.Map<Post, PostToReturnDto>(post);
         }
 
-        [HttpPost]
-        public async Task<ActionResult<PostToReturnDto>> CreatePost(PostCreateDto postToCreate)
-        {
-            var post = _mapper.Map<PostCreateDto, Post>(postToCreate);
-            post.CreatedAt = DateTime.UtcNow;
+       [Authorize(Roles = "Blogger")]
+[HttpPost]
+public async Task<ActionResult<PostToReturnDto>> CreatePost(PostCreateDto postToCreate)
+{
+    var email = User.FindFirstValue(ClaimTypes.Email);
+    var user = await _userManager.FindByEmailAsync(email);
 
-            _unitOfWork.Repository<Post>().Add(post);
+    if (user == null)
+        return Unauthorized(new ApiResponse(401, "Trebuie să fii logat ca blogger."));
 
-            var result = await _unitOfWork.Complete();
+    var post = _mapper.Map<PostCreateDto, Post>(postToCreate);
 
-            if (result <= 0) return BadRequest(new ApiResponse(400, "Problem creating post"));
+    post.CreatedAt = DateTime.UtcNow;
+    post.AppUserId = user.Id;
 
-            var spec = new PostsWithAuthorSpecification(post.Id);
-            var postToReturn = await _unitOfWork.Repository<Post>().GetEntityWithSpec(spec);
+    _unitOfWork.Repository<Post>().Add(post);
 
-            return Ok(_mapper.Map<Post, PostToReturnDto>(postToReturn));
-        }
+    var result = await _unitOfWork.Complete();
+
+    if (result <= 0)
+        return BadRequest(new ApiResponse(400, "Problem creating post"));
+
+    var spec = new PostsWithAuthorSpecification(post.Id);
+    var postToReturn = await _unitOfWork.Repository<Post>().GetEntityWithSpec(spec);
+
+    return Ok(_mapper.Map<Post, PostToReturnDto>(postToReturn));
+}
 
         // 1. Obține toate comentariile pentru o postare specifică
         // GET: api/blog/1/comments

@@ -136,4 +136,19 @@ export class ShopService {
       .slice(0, 10)
       .join(',');
   }
+
+  setMainPhoto(productId: number, photoId: number) {
+  return this.http.put(this.baseUrl + `products/set-main-photo/${productId}/${photoId}`, {});
+}
+
+deleteProductPhoto(productId: number, photoId: number) {
+  return this.http.delete(this.baseUrl + `products/delete-photo/${productId}/${photoId}`);
+}
+
+moveProductPhoto(productId: number, photoId: number, direction: 'up' | 'down') {
+  return this.http.put(
+    this.baseUrl + `products/move-photo/${productId}/${photoId}?direction=${direction}`,
+    {}
+  );
+}
 }

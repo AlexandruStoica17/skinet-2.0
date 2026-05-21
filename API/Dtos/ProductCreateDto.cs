@@ -29,5 +29,7 @@ namespace API.Dtos
         public string Usage { get; set; }
         public string Benefits { get; set; }
         public string Formula { get; set; }
+        // NOU: permite upload de mai multe poze
+public List<IFormFile> Pictures { get; set; } = new();
     }
 }

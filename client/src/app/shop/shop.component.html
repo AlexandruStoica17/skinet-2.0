@@ -1,162 +1,261 @@
-<div class="container">
-    <div class="row" *ngIf="types.length > 0 && brands.length > 0">
+<div class="container mt-5">
+  <div class="row">
+    <section class="col-12 col-md-3 mb-4">
+      <h5 class="text-warning ms-3">Sort</h5>
 
-        <!-- ── SIDEBAR ── -->
-        <section class="col-3">
+      <select
+        class="form-select mb-4"
+        [value]="shopParams.sort"
+        (change)="onSortSelected($event)">
+        <option *ngFor="let sort of sortOptions" [value]="sort.value">
+          {{ sort.name }}
+        </option>
+      </select>
 
-            <h5 class="text-warning ms-3">Sort</h5>
-            <select class="form-select mb-4" (change)="onSortSelected($event)">
-                <option *ngFor="let sort of sortOptions"
-                        [selected]="shopParams.sort === sort.value"
-                        [value]="sort.value">{{sort.name}}</option>
-            </select>
+      <h5 class="text-warning ms-3">Brands</h5>
 
-            <!-- Brands -->
-            <h5 class="text-warning ms-3">Brands</h5>
-            <ul class="list-group my-3">
-                <li class="list-group-item"
-                    *ngFor="let brand of brands"
-                    [class.active]="brand.id === shopParams.brandId"
-                    (click)="onBrandSelected(brand.id)">
-                    {{brand.name}}
-                </li>
-            </ul>
+      <ul class="list-group mb-4">
+        <li
+          class="list-group-item"
+          *ngFor="let brand of brands"
+          [class.active]="brand.id === shopParams.brandId"
+          (click)="onBrandSelected(brand.id)">
+          {{ brand.name }}
+        </li>
+      </ul>
 
-            <!-- Types -->
-            <h5 class="text-warning ms-3">Types</h5>
-            <ul class="list-group my-3">
-                <li class="list-group-item"
-                    *ngFor="let type of types"
-                    [class.active]="type.id === shopParams.typeId"
-                    (click)="onTypeSelected(type.id)">
-                    {{type.name}}
-                </li>
-            </ul>
+      <h5 class="text-warning ms-3">Types</h5>
 
-            <!-- Price Range -->
-            <h5 class="text-warning ms-3 mt-3">Price</h5>
-            <div class="px-3 mb-4">
-                <div class="d-flex justify-content-between mb-1">
-                    <span class="badge bg-primary">${{priceMin}}</span>
-                    <span class="badge bg-primary">
-                        {{priceMax >= PRICE_ABSOLUTE_MAX ? 'Any' : '$' + priceMax}}
-                    </span>
-                </div>
-                <div class="position-relative price-range-wrapper">
-                    <input type="range" class="form-range price-range"
-                           min="0" [max]="PRICE_ABSOLUTE_MAX" step="10"
-                           [value]="priceMin"
-                           (input)="onMinPriceChange($event)">
-                    <input type="range" class="form-range price-range price-range-max"
-                           min="0" [max]="PRICE_ABSOLUTE_MAX" step="10"
-                           [value]="priceMax"
-                           (input)="onMaxPriceChange($event)">
-                </div>
-                <div class="d-flex align-items-center gap-2 mt-2">
-                    <input type="number" class="form-control form-control-sm text-center"
-                           [value]="priceMin" min="0" [max]="priceMax"
-                           (change)="priceMin = +$any($event.target).value; applyPriceFilter()">
-                    <span class="text-muted">–</span>
-                    <input type="number" class="form-control form-control-sm text-center"
-                           [value]="priceMax" [min]="priceMin" [max]="PRICE_ABSOLUTE_MAX"
-                           (change)="priceMax = +$any($event.target).value; applyPriceFilter()">
-                    <button class="btn btn-sm btn-primary" (click)="applyPriceFilter()">
-                        <i class="fa fa-arrow-right"></i>
-                    </button>
-                </div>
-            </div>
+      <ul class="list-group mb-4">
+        <li
+          class="list-group-item"
+          *ngFor="let type of types"
+          [class.active]="type.id === shopParams.typeId"
+          (click)="onTypeSelected(type.id)">
+          {{ type.name }}
+        </li>
+      </ul>
 
-            <!-- MULTISELECT: Skin Type -->
-            <h5 class="text-warning ms-3 mt-2">Skin Type</h5>
-            <div class="px-3 mb-3">
-                <div *ngFor="let opt of skinTypeOptions"
-                     class="form-check filter-check"
-                     (click)="toggleFilter('skinTypes', opt)">
-                    <input type="checkbox" class="form-check-input"
-                           [checked]="isSelected('skinTypes', opt)" readonly>
-                    <label class="form-check-label">{{opt}}</label>
-                </div>
-            </div>
+      <h5 class="text-warning ms-3">Price</h5>
 
-            <!-- MULTISELECT: Usage Area -->
-            <h5 class="text-warning ms-3 mt-2">Usage Area</h5>
-            <div class="px-3 mb-3">
-                <div *ngFor="let opt of usageOptions"
-                     class="form-check filter-check"
-                     (click)="toggleFilter('usages', opt)">
-                    <input type="checkbox" class="form-check-input"
-                           [checked]="isSelected('usages', opt)" readonly>
-                    <label class="form-check-label">{{opt}}</label>
-                </div>
-            </div>
+      <div class="px-3 mb-4">
+        <div class="d-flex justify-content-between small mb-2">
+          <span>${{ priceMin }}</span>
+          <span>{{ priceMax >= PRICE_ABSOLUTE_MAX ? 'Any' : '$' + priceMax }}</span>
+        </div>
 
-            <!-- MULTISELECT: Benefits -->
-            <h5 class="text-warning ms-3 mt-2">Benefits</h5>
-            <div class="px-3 mb-3">
-                <div *ngFor="let opt of benefitOptions"
-                     class="form-check filter-check"
-                     (click)="toggleFilter('benefits', opt)">
-                    <input type="checkbox" class="form-check-input"
-                           [checked]="isSelected('benefits', opt)" readonly>
-                    <label class="form-check-label">{{opt}}</label>
-                </div>
-            </div>
+        <div class="price-range-wrapper position-relative">
+          <input
+            type="range"
+            class="price-range price-range-min"
+            min="0"
+            [max]="PRICE_ABSOLUTE_MAX"
+            [value]="priceMin"
+            (input)="onMinPriceChange($event)"
+          >
 
-            <!-- MULTISELECT: Formula -->
-            <h5 class="text-warning ms-3 mt-2">Formula</h5>
-            <div class="px-3 mb-3">
-                <div *ngFor="let opt of formulaOptions"
-                     class="form-check filter-check"
-                     (click)="toggleFilter('formulas', opt)">
-                    <input type="checkbox" class="form-check-input"
-                           [checked]="isSelected('formulas', opt)" readonly>
-                    <label class="form-check-label">{{opt}}</label>
-                </div>
-            </div>
+          <input
+            type="range"
+            class="price-range price-range-max"
+            min="0"
+            [max]="PRICE_ABSOLUTE_MAX"
+            [value]="priceMax"
+            (input)="onMaxPriceChange($event)"
+          >
+        </div>
 
-            <!-- Rating -->
-            <h5 class="text-warning ms-3 mt-2">Rating</h5>
-            <ul class="list-group my-3">
-                <li class="list-group-item"
-                    [class.active]="shopParams.minRating === 0"
-                    (click)="onRatingSelected(0)">All ratings</li>
-                <li class="list-group-item"
-                    *ngFor="let r of ratingOptions"
-                    [class.active]="shopParams.minRating === r.value"
-                    (click)="onRatingSelected(r.value)">{{r.label}}</li>
-            </ul>
+        <div class="d-flex align-items-center mt-3">
+          <input
+            type="number"
+            class="form-control form-control-sm me-2"
+            [value]="priceMin"
+            (change)="onMinPriceChange($event)"
+          >
 
-        </section>
+          <span class="text-muted">–</span>
 
-        <!-- ── PRODUCTS ── -->
-        <section class="col-9">
-            <div class="d-flex justify-content-between align-items-center pb-2">
-                <app-paging-header [totalCount]="totalCount"
-                                   [pageNumber]="shopParams.pageNumber"
-                                   [pageSize]="shopParams.pageSize">
-                </app-paging-header>
-                <div class="d-flex mt-2">
-                    <input (keyup.enter)="onSearch()" type="text"
-                           placeholder="Search" class="form-control me-2" #search>
-                    <button (click)="onSearch()" class="btn btn-outline-primary mx-2">Search</button>
-                    <button (click)="onReset()" class="btn btn-outline-primary">Reset</button>
-                </div>
-            </div>
+          <input
+            type="number"
+            class="form-control form-control-sm mx-2"
+            [value]="priceMax"
+            (change)="onMaxPriceChange($event)"
+          >
 
-            <div class="row row-cols-3 g-3 mb-4">
-                <div class="col" *ngFor="let product of products">
-                    <app-product-item [product]="product"></app-product-item>
-                </div>
-            </div>
+          <button class="btn btn-sm btn-primary" type="button" (click)="applyPriceFilter()">
+            <i class="fa fa-arrow-right"></i>
+          </button>
+        </div>
+      </div>
 
-            <div class="d-flex justify-content-center" *ngIf="totalCount > 0">
-                <app-pager [totalCount]="totalCount"
-                           [pageSize]="shopParams.pageSize"
-                           [pageNumber]="shopParams.pageNumber"
-                           (pageChanged)="onPageChanged($event)">
-                </app-pager>
-            </div>
-        </section>
+      <!-- MODIFICAT: filtre multichoice colapsabile -->
+      <div class="filter-section">
+        <button class="filter-toggle" type="button" (click)="toggleFilterSection('skinTypes')">
+          <span>Skin Type</span>
+          <small *ngIf="getSelectedCount('skinTypes') > 0">
+            {{ getSelectedCount('skinTypes') }} selected
+          </small>
+          <i class="fa" [ngClass]="filterSectionsOpen.skinTypes ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+        </button>
 
-    </div>
+        <div class="filter-body" *ngIf="filterSectionsOpen.skinTypes">
+          <div class="form-check filter-check" *ngFor="let opt of skinTypeOptions">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              [checked]="isSelected('skinTypes', opt)"
+              (change)="toggleFilter('skinTypes', opt)"
+              [id]="'skin-' + opt"
+            >
+
+            <label class="form-check-label" [for]="'skin-' + opt">
+              {{ opt }}
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="filter-section">
+        <button class="filter-toggle" type="button" (click)="toggleFilterSection('usages')">
+          <span>Usage Area</span>
+          <small *ngIf="getSelectedCount('usages') > 0">
+            {{ getSelectedCount('usages') }} selected
+          </small>
+          <i class="fa" [ngClass]="filterSectionsOpen.usages ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+        </button>
+
+        <div class="filter-body" *ngIf="filterSectionsOpen.usages">
+          <div class="form-check filter-check" *ngFor="let opt of usageOptions">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              [checked]="isSelected('usages', opt)"
+              (change)="toggleFilter('usages', opt)"
+              [id]="'usage-' + opt"
+            >
+
+            <label class="form-check-label" [for]="'usage-' + opt">
+              {{ opt }}
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="filter-section">
+        <button class="filter-toggle" type="button" (click)="toggleFilterSection('benefits')">
+          <span>Benefits</span>
+          <small *ngIf="getSelectedCount('benefits') > 0">
+            {{ getSelectedCount('benefits') }} selected
+          </small>
+          <i class="fa" [ngClass]="filterSectionsOpen.benefits ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+        </button>
+
+        <div class="filter-body" *ngIf="filterSectionsOpen.benefits">
+          <div class="form-check filter-check" *ngFor="let opt of benefitOptions">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              [checked]="isSelected('benefits', opt)"
+              (change)="toggleFilter('benefits', opt)"
+              [id]="'benefit-' + opt"
+            >
+
+            <label class="form-check-label" [for]="'benefit-' + opt">
+              {{ opt }}
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="filter-section">
+        <button class="filter-toggle" type="button" (click)="toggleFilterSection('formulas')">
+          <span>Formula</span>
+          <small *ngIf="getSelectedCount('formulas') > 0">
+            {{ getSelectedCount('formulas') }} selected
+          </small>
+          <i class="fa" [ngClass]="filterSectionsOpen.formulas ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+        </button>
+
+        <div class="filter-body" *ngIf="filterSectionsOpen.formulas">
+          <div class="form-check filter-check" *ngFor="let opt of formulaOptions">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              [checked]="isSelected('formulas', opt)"
+              (change)="toggleFilter('formulas', opt)"
+              [id]="'formula-' + opt"
+            >
+
+            <label class="form-check-label" [for]="'formula-' + opt">
+              {{ opt }}
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="filter-section">
+        <button class="filter-toggle" type="button" (click)="toggleFilterSection('ratings')">
+          <span>Rating</span>
+          <small *ngIf="shopParams.minRating > 0">
+            {{ shopParams.minRating }}+ stars
+          </small>
+          <i class="fa" [ngClass]="filterSectionsOpen.ratings ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+        </button>
+
+        <div class="filter-body" *ngIf="filterSectionsOpen.ratings">
+          <ul class="list-group">
+            <li
+              class="list-group-item"
+              *ngFor="let r of ratingOptions"
+              [class.active]="shopParams.minRating === r.value"
+              (click)="onRatingSelected(r.value)">
+              {{ r.label }}
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section class="col-12 col-md-9">
+      <div class="d-flex justify-content-between align-items-center pb-2">
+        <app-paging-header
+          [totalCount]="totalCount"
+          [pageNumber]="shopParams.pageNumber"
+          [pageSize]="shopParams.pageSize">
+        </app-paging-header>
+
+        <div class="d-flex">
+          <input
+            type="text"
+            #search
+            class="form-control me-2"
+            placeholder="Search"
+            (keyup.enter)="onSearch()"
+          >
+
+          <button class="btn btn-outline-primary me-2" type="button" (click)="onSearch()">
+            Search
+          </button>
+
+          <button class="btn btn-outline-secondary" type="button" (click)="onReset()">
+            Reset
+          </button>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-12 col-sm-6 col-lg-4 mb-4" *ngFor="let product of products">
+          <app-product-item [product]="product"></app-product-item>
+        </div>
+      </div>
+
+      <div class="d-flex justify-content-center" *ngIf="totalCount > shopParams.pageSize">
+        <app-pager
+          [totalCount]="totalCount"
+          [pageSize]="shopParams.pageSize"
+          [pageNumber]="shopParams.pageNumber"
+          (pageChanged)="onPageChanged($event)">
+        </app-pager>
+      </div>
+    </section>
+  </div>
 </div>

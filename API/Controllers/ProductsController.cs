@@ -48,7 +48,7 @@ namespace API.Controllers
 public async Task<ActionResult<Pagination<ProductToReturnDto>>> GetProducts(
     [FromQuery] ProductSpecParams productParams)
 {
-    var spec = new ProductsWithTypesAndBrandsSpecification(productParams);
+   var spec = new ProductsWithTypesAndBrandsSpecification(productParams, applyPaging: false);
     var countSpec = new ProductWithFiltersForCountSpecification(productParams);
 
     var products = await _productsRepo.ListAsync(spec);
@@ -119,24 +119,26 @@ public async Task<ActionResult<Pagination<ProductToReturnDto>>> GetProducts(
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
-        public async Task<ActionResult<ProductToReturnDto>> GetProduct(int id)
-        {
-            var spec = new ProductsWithTypesAndBrandsSpecification(id);
-            var product = await _productsRepo.GetEntityWithSpec(spec);
+      public async Task<ActionResult<ProductToReturnDto>> GetProduct(int id)
+{
+    var product = await _context.Products
+        .Include(p => p.ProductType)
+        .Include(p => p.ProductBrand)
+        .Include(p => p.Photos)
+        .FirstOrDefaultAsync(p => p.Id == id);
 
-            if (product == null) return NotFound(new ApiResponse(404));
+    if (product == null) return NotFound(new ApiResponse(404));
 
-            var dto = _mapper.Map<Product, ProductToReturnDto>(product);
+    var dto = _mapper.Map<Product, ProductToReturnDto>(product);
 
-            // NOU: Populăm email-ul producătorului pentru butonul de chat
-            if (!string.IsNullOrEmpty(product.ProducerId))
-            {
-                var producer = await _userManager.FindByIdAsync(product.ProducerId);
-                if (producer != null) dto.ProducerEmail = producer.Email;
-            }
+    if (!string.IsNullOrEmpty(product.ProducerId))
+    {
+        var producer = await _userManager.FindByIdAsync(product.ProducerId);
+        if (producer != null) dto.ProducerEmail = producer.Email;
+    }
 
-            return dto;
-        }
+    return dto;
+}
 
         [HttpGet("brands")]
         public async Task<ActionResult<IReadOnlyList<ProductBrand>>> GetProductBrands()
@@ -240,11 +242,11 @@ public async Task<ActionResult<ProductToReturnDto>> AddProduct([FromForm] Produc
             if (user == null) return Unauthorized();
 
             var products = await _context.Products
-                .Include(p => p.ProductType)
-                .Include(p => p.ProductBrand)
-                .Where(p => p.ProducerId == user.Id)
-                .ToListAsync();
-
+    .Include(p => p.ProductType)
+    .Include(p => p.ProductBrand)
+    .Include(p => p.Photos)
+    .Where(p => p.ProducerId == user.Id)
+    .ToListAsync();
             return Ok(_mapper.Map<IReadOnlyList<Product>, IReadOnlyList<ProductToReturnDto>>(products));
         }
 
@@ -270,65 +272,116 @@ public async Task<ActionResult<ProductToReturnDto>> AddProduct([FromForm] Produc
         }
 
         [Authorize(Roles = "CosmeticsProducer,IngredientsProducer")]
-        [HttpPut("edit-product/{id}")]
-        public async Task<ActionResult> EditProduct(int id, [FromForm] ProductEditDto productDto)
+[HttpPut("edit-product/{id}")]
+public async Task<ActionResult> EditProduct(int id, [FromForm] ProductEditDto productDto)
+{
+    var email = User.FindFirstValue(ClaimTypes.Email);
+    var user = await _userManager.FindByEmailAsync(email);
+
+    if (user == null) return Unauthorized();
+
+    // MODIFICAT: includem Photos ca să putem gestiona galeria produsului
+    var product = await _context.Products
+        .Include(p => p.Photos)
+        .FirstOrDefaultAsync(p => p.Id == id);
+
+    if (product == null) return NotFound("Produsul nu a fost găsit.");
+
+    if (product.ProducerId != user.Id) return Forbid();
+
+    product.Name = productDto.Name;
+    product.Description = productDto.Description;
+    product.Price = productDto.Price;
+    product.ProductTypeId = productDto.ProductTypeId;
+    product.ProductBrandId = productDto.ProductBrandId;
+    product.ProducerName = user.DisplayName;
+
+    // MODIFICAT: dacă produsul vechi avea doar PictureUrl,
+    // îl adăugăm în Photos folosind product.PictureUrl, nu photoUrl.
+    if (!string.IsNullOrEmpty(product.PictureUrl) &&
+        !product.Photos.Any(p => p.Url == product.PictureUrl))
+    {
+        var oldPhotoOrder = product.Photos.Any()
+            ? product.Photos.Max(p => p.DisplayOrder) + 1
+            : 1;
+
+        product.Photos.Add(new ProductPhoto
         {
-            var email = User.FindFirstValue(ClaimTypes.Email);
-            var user = await _userManager.FindByEmailAsync(email);
-            if (user == null) return Unauthorized();
+            Url = product.PictureUrl,
+            IsMain = true,
+            DisplayOrder = oldPhotoOrder,
+            ProductId = product.Id
+        });
+    }
 
-            var product = await _context.Products.FindAsync(id);
-            if (product == null) return NotFound("Produsul nu a fost găsit.");
+    // NOU: salvăm toate pozele noi selectate în pagina de editare
+    if (productDto.Pictures != null && productDto.Pictures.Count > 0)
+    {
+        foreach (var picture in productDto.Pictures)
+        {
+            if (picture.Length <= 0) continue;
 
-            if (product.ProducerId != user.Id) return Forbid();
+            // Aici se creează photoUrl, deci poate fi folosit doar după această linie.
+            var photoUrl = await SaveProductImageAsync(picture);
 
-            product.Name = productDto.Name;
-            product.Description = productDto.Description;
-            product.Price = productDto.Price;
-            product.ProductTypeId = productDto.ProductTypeId;
-            product.ProductBrandId = productDto.ProductBrandId;
-            product.ProducerName = user.DisplayName;
+            var nextOrder = product.Photos.Any()
+                ? product.Photos.Max(p => p.DisplayOrder) + 1
+                : 1;
 
-            if (productDto.Picture != null && productDto.Picture.Length > 0)
+            product.Photos.Add(new ProductPhoto
             {
-                var fileName = Guid.NewGuid().ToString() + Path.GetExtension(productDto.Picture.FileName);
-                var folderPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "products");
-                if (!Directory.Exists(folderPath)) Directory.CreateDirectory(folderPath);
+                Url = photoUrl,
+                IsMain = false,
+                DisplayOrder = nextOrder,
+                ProductId = product.Id
+            });
 
-                var filePath = Path.Combine(folderPath, fileName);
-                using (var fileStream = new FileStream(filePath, FileMode.Create))
+            // Dacă produsul nu avea poză principală, prima poză nouă devine principală
+            if (string.IsNullOrEmpty(product.PictureUrl))
+            {
+                product.PictureUrl = photoUrl;
+
+                var mainPhoto = product.Photos.FirstOrDefault(p => p.Url == photoUrl);
+
+                if (mainPhoto != null)
                 {
-                    await productDto.Picture.CopyToAsync(fileStream);
+                    mainPhoto.IsMain = true;
                 }
-                product.PictureUrl = "images/products/" + fileName;
             }
-
-            _context.Products.Update(product);
-            var result = await _context.SaveChangesAsync() > 0;
-
-            if (!result) return BadRequest("Eroare la salvarea modificărilor.");
-
-            return Ok(new { message = "Produs actualizat cu succes!" });
         }
+    }
 
+    _context.Products.Update(product);
+
+    var result = await _context.SaveChangesAsync() > 0;
+
+    if (!result) return BadRequest("Eroare la salvarea modificărilor.");
+
+    return Ok(new { message = "Produs actualizat cu succes!" });
+}
         // NEW: Recently added products for the "What's New" page
         // GET /api/products/recent?count=12
-        [HttpGet("recent")]
-        public async Task<ActionResult<IReadOnlyList<ProductToReturnDto>>> GetRecentProducts(
-            [FromQuery] int count = 12)
-        {
-            // Fetch all products and order by Id descending (newest first)
-            var spec = new ProductsWithTypesAndBrandsSpecification(
-                new ProductSpecParams { PageSize = 200, PageIndex = 1 });
-            var allProducts = await _productsRepo.ListAsync(spec);
+       
+       [HttpGet("recent")]
+public async Task<ActionResult<IReadOnlyList<ProductToReturnDto>>> GetRecentProducts(
+    [FromQuery] int count = 12)
+{
+    // MODIFICAT: produsele sunt considerate "new" doar 30 de zile.
+    // Ele rămân în continuare disponibile și în Shop.
+    var oneMonthAgo = DateTime.UtcNow.AddMonths(-1);
 
-            var recentProducts = allProducts
-                .OrderByDescending(p => p.Id)
-                .Take(count)
-                .ToList();
+    var recentProducts = await _context.Products
+    .Include(p => p.ProductType)
+    .Include(p => p.ProductBrand)
+    .Include(p => p.Photos)
+    .Where(p => p.CreatedAt >= oneMonthAgo)
+    .OrderByDescending(p => p.CreatedAt)
+    .ThenByDescending(p => p.Id)
+    .Take(count)
+    .ToListAsync();
 
-            return Ok(_mapper.Map<IReadOnlyList<Product>, IReadOnlyList<ProductToReturnDto>>(recentProducts));
-        }
+    return Ok(_mapper.Map<IReadOnlyList<Product>, IReadOnlyList<ProductToReturnDto>>(recentProducts));
+}
 
         // NEW: Related product suggestions based on keywords from name/description
         // GET /api/products/suggestions?keywords=lavender,oil&excludeId=5&count=4
@@ -350,8 +403,9 @@ public async Task<ActionResult<ProductToReturnDto>> AddProduct([FromForm] Produc
             if (!keywordList.Any())
                 return Ok(new List<ProductToReturnDto>());
 
-            var spec = new ProductsWithTypesAndBrandsSpecification(
-                new ProductSpecParams { PageSize = 1000, PageIndex = 1 });
+          var spec = new ProductsWithTypesAndBrandsSpecification(
+    new ProductSpecParams { PageSize = 1000, PageIndex = 1 },
+    applyPaging: false);
             var allProducts = await _productsRepo.ListAsync(spec);
 
             // Score each product by how many keywords match name or description
@@ -373,6 +427,165 @@ public async Task<ActionResult<ProductToReturnDto>> AddProduct([FromForm] Produc
             return Ok(_mapper.Map<IReadOnlyList<Product>, IReadOnlyList<ProductToReturnDto>>(suggestions));
         }
 
+private async Task<string> SaveProductImageAsync(IFormFile picture)
+{
+    var fileName = Guid.NewGuid().ToString() + Path.GetExtension(picture.FileName);
 
+    var folderPath = Path.Combine(
+        Directory.GetCurrentDirectory(),
+        "wwwroot",
+        "images",
+        "products"
+    );
+
+    if (!Directory.Exists(folderPath))
+    {
+        Directory.CreateDirectory(folderPath);
+    }
+
+    var filePath = Path.Combine(folderPath, fileName);
+
+    using (var fileStream = new FileStream(filePath, FileMode.Create))
+    {
+        await picture.CopyToAsync(fileStream);
+    }
+
+    return "images/products/" + fileName;
+}
+[Authorize(Roles = "CosmeticsProducer,IngredientsProducer")]
+[HttpPut("set-main-photo/{productId}/{photoId}")]
+public async Task<ActionResult> SetMainPhoto(int productId, int photoId)
+{
+    var email = User.FindFirstValue(ClaimTypes.Email);
+    var user = await _userManager.FindByEmailAsync(email);
+
+    if (user == null) return Unauthorized();
+
+    var product = await _context.Products
+        .Include(p => p.Photos)
+        .FirstOrDefaultAsync(p => p.Id == productId);
+
+    if (product == null) return NotFound("Produsul nu a fost găsit.");
+
+    if (product.ProducerId != user.Id) return Forbid();
+
+    var photo = product.Photos.FirstOrDefault(p => p.Id == photoId);
+
+    if (photo == null) return NotFound("Poza nu a fost găsită.");
+
+    foreach (var p in product.Photos)
+    {
+        p.IsMain = false;
+    }
+
+    photo.IsMain = true;
+    product.PictureUrl = photo.Url;
+
+    await _context.SaveChangesAsync();
+
+    return Ok(new { message = "Poza principală a fost actualizată." });
+}
+
+[Authorize(Roles = "CosmeticsProducer,IngredientsProducer")]
+[HttpDelete("delete-photo/{productId}/{photoId}")]
+public async Task<ActionResult> DeletePhoto(int productId, int photoId)
+{
+    var email = User.FindFirstValue(ClaimTypes.Email);
+    var user = await _userManager.FindByEmailAsync(email);
+
+    if (user == null) return Unauthorized();
+
+    var product = await _context.Products
+        .Include(p => p.Photos)
+        .FirstOrDefaultAsync(p => p.Id == productId);
+
+    if (product == null) return NotFound("Produsul nu a fost găsit.");
+
+    if (product.ProducerId != user.Id) return Forbid();
+
+    var photo = product.Photos.FirstOrDefault(p => p.Id == photoId);
+
+    if (photo == null) return NotFound("Poza nu a fost găsită.");
+
+    if (product.Photos.Count == 1)
+        return BadRequest("Produsul trebuie să aibă cel puțin o poză.");
+
+    _context.ProductPhotos.Remove(photo);
+
+    if (photo.IsMain)
+    {
+        var newMainPhoto = product.Photos
+            .Where(p => p.Id != photoId)
+            .OrderBy(p => p.DisplayOrder)
+            .FirstOrDefault();
+
+        if (newMainPhoto != null)
+        {
+            newMainPhoto.IsMain = true;
+            product.PictureUrl = newMainPhoto.Url;
+        }
+    }
+
+    await _context.SaveChangesAsync();
+
+    return Ok(new { message = "Poza a fost ștearsă." });
+}
+
+[Authorize(Roles = "CosmeticsProducer,IngredientsProducer")]
+[HttpPut("move-photo/{productId}/{photoId}")]
+public async Task<ActionResult> MovePhoto(int productId, int photoId, [FromQuery] string direction)
+{
+    var email = User.FindFirstValue(ClaimTypes.Email);
+    var user = await _userManager.FindByEmailAsync(email);
+
+    if (user == null) return Unauthorized();
+
+    var product = await _context.Products
+        .Include(p => p.Photos)
+        .FirstOrDefaultAsync(p => p.Id == productId);
+
+    if (product == null) return NotFound("Produsul nu a fost găsit.");
+
+    if (product.ProducerId != user.Id) return Forbid();
+
+    var photos = product.Photos
+        .OrderBy(p => p.DisplayOrder)
+        .ThenBy(p => p.Id)
+        .ToList();
+
+    // NOU: normalizăm ordinea, ca să nu avem toate pozele cu DisplayOrder = 0
+    for (int i = 0; i < photos.Count; i++)
+    {
+        photos[i].DisplayOrder = i + 1;
+    }
+
+    var index = photos.FindIndex(p => p.Id == photoId);
+
+    if (index == -1) return NotFound("Poza nu a fost găsită.");
+
+    if (direction == "up" && index > 0)
+    {
+        var current = photos[index];
+        photos.RemoveAt(index);
+        photos.Insert(index - 1, current);
+    }
+    else if (direction == "down" && index < photos.Count - 1)
+    {
+        var current = photos[index];
+        photos.RemoveAt(index);
+        photos.Insert(index + 1, current);
+    }
+
+    // NOU: rescriem ordinea finală clar, de la 1 la n
+    for (int i = 0; i < photos.Count; i++)
+    {
+        photos[i].DisplayOrder = i + 1;
+    }
+
+    await _context.SaveChangesAsync();
+
+    return Ok(new { message = "Ordinea pozelor a fost actualizată." });
+}
     }
 }
+    

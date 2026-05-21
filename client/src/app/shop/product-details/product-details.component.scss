@@ -4,3 +4,15 @@ ngx-gallery {
     margin-bottom: 20px;
     background-color: #fff; // Un fundal alb curat
 }
+
+::ng-deep ngx-gallery {
+  .ngx-gallery-image {
+    background-size: cover !important;
+    background-position: center !important;
+  }
+
+  .ngx-gallery-thumbnail {
+    background-size: cover !important;
+    background-position: center !important;
+  }
+}

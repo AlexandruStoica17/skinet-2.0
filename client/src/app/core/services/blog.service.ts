@@ -28,4 +28,8 @@ export class BlogService {
   addComment(commentDto: any) {
     return this.http.post(this.baseUrl + 'blog/comments', commentDto);
   }
+
+  createPost(values: { title: string; content: string }) {
+  return this.http.post<Post>(this.baseUrl + 'blog', values);
+}
 }

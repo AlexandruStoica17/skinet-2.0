@@ -1,3 +1,13 @@
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2>Blog</h2>
+
+  <button
+    *ngIf="isBlogger"
+    class="btn btn-primary"
+    routerLink="/blog/create">
+    Create blog post
+  </button>
+</div>
 <div class="container mt-5">
     <h2 class="mb-4">SkiNet Blog 🏂</h2>
     <div class="row">

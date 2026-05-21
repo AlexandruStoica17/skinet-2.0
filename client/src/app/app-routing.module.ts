@@ -81,9 +81,16 @@ const routes: Routes = [
   { path: 'edit-product/:id', component: EditProductComponent, canActivate: [ProducerGuard] },
   // Adaugă asta lângă celelalte rute de producător:
   { path: 'producer-orders', component: ProducerOrdersComponent, data: { breadcrumb: 'Comenzi Vânzător' } },
+  {
+  path: 'whats-new',
+  loadChildren: () => import('./news/news.module').then(m => m.NewsModule),
+  data: { breadcrumb: "What's New" }
+},
 
   // --- RUTA WILDCARD TREBUIE SĂ FIE STRICT ULTIMA! ---
   { path: '**', redirectTo: 'not-found', pathMatch: 'full' }
+
+  
 ];
 
 @NgModule({

@@ -1,35 +1,48 @@
-.btn{
-    width: 30%;
-    height: 40px;
+/* MODIFICAT: card asemănător cu cel din What's New */
+.product-card {
+  border-radius: 6px;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-.image :hover{
-opacity: 1;
-& button {
-    transform: none;
-    opacity: 1;
-}
+.product-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.12) !important;
 }
 
-.hover-overlay{
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    top: 0;
-    left: 0;
-    background: rgba(255,255,255,0.5);
-    opacity: 0;
-    transition: all 0.5s;
+/* MODIFICAT: aceeași zonă de imagine pentru toate cardurile */
+.product-image-wrapper {
+  height: 200px;
+  overflow: hidden;
+  background: #f8f9fa;
+  cursor: pointer;
+}
 
-     & button {
-        z-index: 1000;
-        transition: all 0.5s;
-    }
-    & button:first-of-type {
-        transform: translateX(-20px);
-    }
-    & button:last-of-type {
-        transform: translateX(20px);
+.product-image {
+  width: 100%;
+  height: 200px;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
 
-    }
+/* Overlay existent, păstrat pentru Shop */
+.hover-overlay {
+  position: absolute;
+  width: 100%;
+  height: 200px;
+  top: 0;
+  left: 0;
+  background: rgba(255, 255, 255, 0.65);
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+
+.product-image-wrapper:hover .hover-overlay {
+  opacity: 1;
+}
+
+.btn {
+  min-width: 40px;
+  height: 40px;
 }

@@ -6,6 +6,9 @@ import { Brand } from '../shared/models/brand';
 import { Type } from '../shared/models/type';
 import { ShopParams } from '../shared/models/shopParams';
 
+type MultiFilterKey = 'skinTypes' | 'usages' | 'benefits' | 'formulas';
+type FilterSectionKey = MultiFilterKey | 'ratings';
+
 @Component({
   selector: 'app-shop',
   templateUrl: './shop.component.html',
@@ -13,6 +16,7 @@ import { ShopParams } from '../shared/models/shopParams';
 })
 export class ShopComponent implements OnInit {
   @ViewChild('search') searchTerm?: ElementRef;
+
   products: Product[] = [];
   brands: Brand[] = [];
   types: Type[] = [];
@@ -23,6 +27,7 @@ export class ShopComponent implements OnInit {
     { name: 'Price: Low to high', value: 'priceAsc' },
     { name: 'Price: High to low', value: 'priceDesc' },
   ];
+
   totalCount = 0;
 
   // Price range
@@ -32,18 +37,65 @@ export class ShopComponent implements OnInit {
 
   // Filter options
   skinTypeOptions = ['All Skin Types', 'Oily', 'Dry', 'Combination', 'Sensitive', 'Normal'];
-  usageOptions    = ['Face', 'Eyes', 'Lips', 'Hands', 'Body', 'Hair', 'Neck & Décolletage'];
-  benefitOptions  = ['Hydration', 'Anti-aging', 'SPF Protection', 'Brightening',
-                     'Pore Cleansing', 'Firming', 'Soothing', 'Exfoliating',
-                     'Nourishing', 'Mattifying'];
-  formulaOptions  = ['Cream', 'Serum', 'Lotion', 'Emulsion', 'Oil', 'Gel',
-                     'Foam', 'Toner', 'Mask', 'Scrub', 'Liquid', 'Balm', 'Powder'];
 
-  ratingOptions = [
-    { label: '⭐⭐⭐⭐⭐ 5 stars', value: 5 },
-    { label: '⭐⭐⭐⭐ 4+ stars', value: 4 },
-    { label: '⭐⭐⭐ 3+ stars', value: 3 },
+  usageOptions = [
+    'Face',
+    'Eyes',
+    'Lips',
+    'Hands',
+    'Body',
+    'Hair',
+    'Neck & Décolletage',
   ];
+
+  benefitOptions = [
+    'Hydration',
+    'Anti-aging',
+    'SPF Protection',
+    'Brightening',
+    'Pore Cleansing',
+    'Firming',
+    'Soothing',
+    'Exfoliating',
+    'Nourishing',
+    'Mattifying',
+  ];
+
+  formulaOptions = [
+    'Cream',
+    'Serum',
+    'Lotion',
+    'Emulsion',
+    'Oil',
+    'Gel',
+    'Foam',
+    'Toner',
+    'Mask',
+    'Scrub',
+    'Liquid',
+    'Balm',
+    'Powder',
+  ];
+
+  // MODIFICAT: am adăugat 0, 1 și 2 stele.
+  // Observație: 0 înseamnă "fără filtru minim", ca să nu rupem backend-ul existent.
+  ratingOptions = [
+    { label: '☆☆☆☆☆ 0 stars', value: 0 },
+    { label: '★☆☆☆☆ 1+ star', value: 1 },
+    { label: '★★☆☆☆ 2+ stars', value: 2 },
+    { label: '★★★☆☆ 3+ stars', value: 3 },
+    { label: '★★★★☆ 4+ stars', value: 4 },
+    { label: '★★★★★ 5 stars', value: 5 },
+  ];
+
+  // MODIFICAT: filtrele lungi sunt închise inițial
+  filterSectionsOpen: Record<FilterSectionKey, boolean> = {
+    skinTypes: false,
+    usages: false,
+    benefits: false,
+    formulas: false,
+    ratings: false,
+  };
 
   constructor(
     private shopService: ShopService,
@@ -54,16 +106,21 @@ export class ShopComponent implements OnInit {
 
   ngOnInit(): void {
     this.getBrands();
+
     this.route.queryParams.subscribe(params => {
       if (params['type']) {
         this.shopService.getTypes().subscribe(types => {
           this.types = [{ id: 0, name: 'All' }, ...types];
-          const found = types.find((t: any) =>
-            t.name.toLowerCase() === params['type'].toLowerCase());
+
+          const found = types.find(
+            (t: any) => t.name.toLowerCase() === params['type'].toLowerCase()
+          );
+
           if (found) {
             this.shopParams.typeId = found.id;
             this.shopService.setShopParams(this.shopParams);
           }
+
           this.getProducts();
         });
       } else {
@@ -79,6 +136,7 @@ export class ShopComponent implements OnInit {
         this.products = response.data;
         this.totalCount = response.count;
       },
+      error: err => console.log(err),
     });
   }
 
@@ -100,6 +158,7 @@ export class ShopComponent implements OnInit {
     const params = this.shopService.getShopParams();
     params.brandId = brandId;
     params.pageNumber = 1;
+
     this.shopService.setShopParams(params);
     this.shopParams = params;
     this.getProducts();
@@ -109,6 +168,7 @@ export class ShopComponent implements OnInit {
     const params = this.shopService.getShopParams();
     params.typeId = typeId;
     params.pageNumber = 1;
+
     this.shopService.setShopParams(params);
     this.shopParams = params;
     this.getProducts();
@@ -117,58 +177,80 @@ export class ShopComponent implements OnInit {
   onSortSelected(event: Event) {
     const params = this.shopService.getShopParams();
     params.sort = (event.target as HTMLSelectElement).value;
+
     this.shopService.setShopParams(params);
     this.shopParams = params;
     this.getProducts();
   }
 
-  // Price range
   onMinPriceChange(event: Event) {
     const val = +(event.target as HTMLInputElement).value;
-    if (val <= this.priceMax) { this.priceMin = val; this.applyPriceFilter(); }
+
+    if (val <= this.priceMax) {
+      this.priceMin = val;
+      this.applyPriceFilter();
+    }
   }
 
   onMaxPriceChange(event: Event) {
     const val = +(event.target as HTMLInputElement).value;
-    if (val >= this.priceMin) { this.priceMax = val; this.applyPriceFilter(); }
+
+    if (val >= this.priceMin) {
+      this.priceMax = val;
+      this.applyPriceFilter();
+    }
   }
 
   applyPriceFilter() {
     const params = this.shopService.getShopParams();
+
     params.minPrice = this.priceMin;
     params.maxPrice = this.priceMax >= this.PRICE_ABSOLUTE_MAX ? 0 : this.priceMax;
     params.pageNumber = 1;
+
     this.shopService.setShopParams(params);
     this.shopParams = params;
     this.getProducts();
   }
 
-  // MULTISELECT toggle helper
-  // Adds or removes value from the selected array, then reloads products
-  toggleFilter(paramKey: 'skinTypes' | 'usages' | 'benefits' | 'formulas', value: string) {
+  // MODIFICAT: deschide/închide secțiunile lungi de filtre
+  toggleFilterSection(section: FilterSectionKey) {
+    this.filterSectionsOpen[section] = !this.filterSectionsOpen[section];
+  }
+
+  toggleFilter(paramKey: MultiFilterKey, value: string) {
     const params = this.shopService.getShopParams();
     const arr = params[paramKey] as string[];
+
     const idx = arr.indexOf(value);
+
     if (idx > -1) {
-      arr.splice(idx, 1);   // deselect
+      arr.splice(idx, 1);
     } else {
-      arr.push(value);       // select
+      arr.push(value);
     }
+
     params.pageNumber = 1;
+
     this.shopService.setShopParams(params);
     this.shopParams = params;
     this.getProducts();
   }
 
-  // Check if a value is selected (used in HTML for [class.active])
-  isSelected(paramKey: 'skinTypes' | 'usages' | 'benefits' | 'formulas', value: string): boolean {
+  isSelected(paramKey: MultiFilterKey, value: string): boolean {
     return (this.shopParams[paramKey] as string[]).includes(value);
+  }
+
+  getSelectedCount(paramKey: MultiFilterKey): number {
+    return (this.shopParams[paramKey] as string[]).length;
   }
 
   onRatingSelected(minRating: number) {
     const params = this.shopService.getShopParams();
+
     params.minRating = params.minRating === minRating ? 0 : minRating;
     params.pageNumber = 1;
+
     this.shopService.setShopParams(params);
     this.shopParams = params;
     this.getProducts();
@@ -176,8 +258,10 @@ export class ShopComponent implements OnInit {
 
   onSearch() {
     const params = this.shopService.getShopParams();
+
     params.search = this.searchTerm?.nativeElement.value;
     params.pageNumber = 1;
+
     this.shopService.setShopParams(params);
     this.shopParams = params;
     this.getProducts();
@@ -185,15 +269,19 @@ export class ShopComponent implements OnInit {
 
   onReset() {
     if (this.searchTerm) this.searchTerm.nativeElement.value = '';
+
     this.priceMin = 0;
     this.priceMax = this.PRICE_ABSOLUTE_MAX;
+
     this.shopParams = new ShopParams();
     this.shopService.setShopParams(this.shopParams);
+
     this.getProducts();
   }
 
   onPageChanged(event: number) {
     const params = this.shopService.getShopParams();
+
     if (params.pageNumber !== event) {
       params.pageNumber = event;
       this.shopService.setShopParams(params);
