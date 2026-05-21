@@ -1,8 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { take } from 'rxjs';
-import { Post } from '../shared/models/post';
-import { BlogService } from '../core/services/blog.service';
 import { AccountService } from '../account/account.service';
+import { BlogService } from '../core/services/blog.service';
+import { Post } from '../shared/models/post';
 
 @Component({
   selector: 'app-blog',
@@ -11,6 +11,7 @@ import { AccountService } from '../account/account.service';
 })
 export class BlogComponent implements OnInit {
   posts: Post[] = [];
+  loading = false;
   isBlogger = false;
 
   constructor(
@@ -20,17 +21,43 @@ export class BlogComponent implements OnInit {
 
   ngOnInit(): void {
     this.getPosts();
-
-    // MODIFICAT: doar bloggerii văd butonul de creare articol
-    this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
-      this.isBlogger = !!user?.role?.includes('Blogger');
-    });
+    this.checkBloggerRole();
   }
 
   getPosts() {
+    this.loading = true;
+
     this.blogService.getPosts().subscribe({
-      next: response => this.posts = response,
-      error: error => console.log(error)
+      next: response => {
+        this.posts = response;
+        this.loading = false;
+      },
+      error: error => {
+        console.log(error);
+        this.loading = false;
+      }
     });
+  }
+
+  checkBloggerRole() {
+    this.accountService.currentUser$.pipe(take(1)).subscribe(user => {
+      const role = user?.role;
+
+      if (Array.isArray(role)) {
+        this.isBlogger = role.includes('Blogger');
+      } else {
+        this.isBlogger = role === 'Blogger';
+      }
+    });
+  }
+
+  getExcerpt(post: Post): string {
+    const source = post.summary || post.content || '';
+
+    if (source.length <= 180) {
+      return source;
+    }
+
+    return source.substring(0, 180).trim() + '...';
   }
 }

@@ -36,10 +36,17 @@ namespace API.Helpers
             CreateMap<ProductPhoto, ProductPhotoDto>()
     .ForMember(d => d.Url, o => o.MapFrom<ProductPhotoUrlResolver>());
 
-            // --- AICI ESTE CONFIGURAREA NOUĂ PENTRU BLOG ---
-            CreateMap<Post, PostToReturnDto>()
-            .ForMember(d => d.AuthorName, o => o.MapFrom(s => s.AppUser.DisplayName));
-            CreateMap<PostCreateDto, Post>();
+           // --- BLOG ---
+CreateMap<Post, PostToReturnDto>()
+    .ForMember(d => d.AuthorName, o => o.MapFrom(s => s.AppUser.DisplayName))
+    .ForMember(d => d.ImageUrl, o => o.MapFrom<PostImageUrlResolver>())
+    .ForMember(d => d.Sections, o => o.MapFrom(s => s.Sections.OrderBy(x => x.DisplayOrder)));
+
+CreateMap<PostCreateDto, Post>();
+
+// NOU: secțiuni articol blog
+CreateMap<PostSection, PostSectionToReturnDto>()
+    .ForMember(d => d.ImageUrl, o => o.MapFrom<PostSectionImageUrlResolver>());
 
             CreateMap<Comment, CommentToReturnDto>()
     .ForMember(d => d.AuthorName, o => o.MapFrom(s => s.AppUser.DisplayName));

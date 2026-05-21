@@ -1,0 +1,77 @@
+<div class="container my-posts-page mt-5 mb-5">
+  <div class="page-header">
+    <div>
+      <span class="eyebrow">Blogger dashboard</span>
+      <h1>My blog posts</h1>
+      <p>Manage, edit and review all articles you have published.</p>
+    </div>
+
+    <button
+      type="button"
+      class="btn btn-primary"
+      routerLink="/blog/create">
+      <i class="fa fa-plus me-2"></i>
+      Create new post
+    </button>
+  </div>
+
+  <div class="text-center py-5" *ngIf="loading">
+    <div class="spinner-border text-primary" role="status"></div>
+    <p class="mt-3 text-muted">Loading your posts...</p>
+  </div>
+
+  <div class="empty-state" *ngIf="!loading && posts.length === 0">
+    <i class="fa fa-pencil-square-o"></i>
+    <h3>You have not published any posts yet</h3>
+    <p>Create your first skincare article and start building your blog area.</p>
+
+    <button
+      type="button"
+      class="btn btn-primary"
+      routerLink="/blog/create">
+      Create first post
+    </button>
+  </div>
+
+  <div class="row" *ngIf="!loading && posts.length > 0">
+    <div class="col-12 mb-4" *ngFor="let post of posts">
+      <article class="post-management-card">
+        <div class="post-image" *ngIf="post.imageUrl">
+          <img [src]="post.imageUrl" [alt]="post.title">
+        </div>
+
+        <div class="post-content">
+          <div class="post-meta">
+            <span>{{ post.createdAt | date:'mediumDate' }}</span>
+            <span>{{ post.sections?.length || 0 }} sections</span>
+          </div>
+
+          <h3>{{ post.title }}</h3>
+
+          <p>{{ getExcerpt(post) }}</p>
+        </div>
+
+        <div class="post-actions">
+          <a
+            class="btn btn-outline-secondary"
+            [routerLink]="['/blog', post.id]">
+            View
+          </a>
+
+          <a
+            class="btn btn-primary"
+            [routerLink]="['/blog/edit', post.id]">
+            Edit
+          </a>
+
+          <button
+            type="button"
+            class="btn btn-outline-danger"
+            (click)="deletePost(post.id)">
+            Delete
+          </button>
+        </div>
+      </article>
+    </div>
+  </div>
+</div>

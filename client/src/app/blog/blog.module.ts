@@ -3,19 +3,26 @@ import { CommonModule } from '@angular/common';
 import { BlogRoutingModule } from './blog-routing.module';
 import { BlogComponent } from './blog.component';
 import { PostDetailsComponent } from './post-details/post-details.component';
-import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router'; // NEW: needed for [routerLink] in suggestions
+import { CreatePostComponent } from './create-post/create-post.component';
+import { MyPostsComponent } from './my-posts/my-posts.component';
+import { EditPostComponent } from './edit-post/edit-post.component';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 
 @NgModule({
   declarations: [
     BlogComponent,
-    PostDetailsComponent
+    PostDetailsComponent,
+    CreatePostComponent,
+    MyPostsComponent,
+    EditPostComponent
   ],
   imports: [
     CommonModule,
     BlogRoutingModule,
     FormsModule,
-    RouterModule,  // NEW: enables [routerLink] and currency pipe in post-details template
+    ReactiveFormsModule,
+    RouterModule
   ]
 })
 export class BlogModule { }

@@ -1,0 +1,190 @@
+<div class="container blog-create-page mt-5 mb-5">
+  <div class="blog-create-hero">
+    <div>
+      <span class="eyebrow">Blogger area</span>
+      <h1>Create a new blog post</h1>
+      <p>
+        Build an article with multiple image-and-text sections.
+      </p>
+    </div>
+
+    <button
+      type="button"
+      class="btn btn-outline-secondary"
+      routerLink="/blog">
+      Back to blog
+    </button>
+  </div>
+
+  <div class="card blog-editor-card">
+    <div class="card-body">
+      <form [formGroup]="blogForm" (ngSubmit)="onSubmit()">
+        <div class="mb-4">
+          <label class="form-label fw-bold">Post title</label>
+
+          <input
+            type="text"
+            class="form-control form-control-lg"
+            placeholder="Example: How to build a simple hydrating routine"
+            formControlName="title"
+          >
+
+          <small
+            class="text-danger"
+            *ngIf="blogForm.get('title')?.touched && blogForm.get('title')?.invalid">
+            Title is required and must have at least 5 characters.
+          </small>
+        </div>
+
+        <div class="mb-4">
+          <label class="form-label fw-bold">Cover image</label>
+
+          <input
+            type="file"
+            class="form-control"
+            accept="image/*"
+            (change)="onCoverSelected($event)"
+          >
+
+          <small class="text-muted">
+            Optional. If you do not select one, the first section image will be used as cover.
+          </small>
+        </div>
+
+        <div class="cover-preview mb-4" *ngIf="coverPreview">
+          <img [src]="coverPreview" alt="Cover preview">
+
+          <button
+            type="button"
+            class="btn btn-sm btn-danger remove-image-btn"
+            (click)="removeCover()">
+            ×
+          </button>
+        </div>
+
+        <hr>
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h4 class="mb-0">Article sections</h4>
+
+          <button
+            type="button"
+            class="btn btn-outline-primary"
+            (click)="addSection()">
+            <i class="fa fa-plus me-1"></i>
+            Add section
+          </button>
+        </div>
+
+        <div
+          class="section-editor mb-4"
+          *ngFor="let section of sections; let i = index; trackBy: trackByIndex">
+
+          <div class="section-header">
+            <h5>Section {{ i + 1 }}</h5>
+
+            <div class="d-flex gap-2">
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-secondary"
+                [disabled]="i === 0"
+                (click)="moveSection(i, 'up')">
+                ↑
+              </button>
+
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-secondary"
+                [disabled]="i === sections.length - 1"
+                (click)="moveSection(i, 'down')">
+                ↓
+              </button>
+
+              <button
+                type="button"
+                class="btn btn-sm btn-outline-danger"
+                (click)="removeSection(i)">
+                Remove
+              </button>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-bold">Section heading</label>
+
+            <input
+              type="text"
+              class="form-control"
+              placeholder="Example: Step 1: Cleanse gently"
+              [(ngModel)]="section.heading"
+              [ngModelOptions]="{ standalone: true }"
+            >
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-bold">Section text</label>
+
+            <textarea
+              class="form-control"
+              rows="5"
+              placeholder="Write this part of the article..."
+              [(ngModel)]="section.text"
+              [ngModelOptions]="{ standalone: true }">
+            </textarea>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-bold">Section image</label>
+
+            <input
+              type="file"
+              class="form-control"
+              accept="image/*"
+              (change)="onSectionImageSelected($event, i)"
+            >
+          </div>
+
+          <div class="section-image-preview mb-3" *ngIf="section.imagePreview">
+            <img [src]="section.imagePreview" alt="Section image preview">
+
+            <button
+              type="button"
+              class="btn btn-sm btn-danger remove-image-btn"
+              (click)="removeSectionImage(i)">
+              ×
+            </button>
+          </div>
+
+          <div class="mb-2">
+            <label class="form-label fw-bold">Image caption</label>
+
+            <input
+              type="text"
+              class="form-control"
+              placeholder="Optional caption under the image"
+              [(ngModel)]="section.caption"
+              [ngModelOptions]="{ standalone: true }"
+            >
+          </div>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2 mt-4">
+          <button
+            type="button"
+            class="btn btn-outline-danger"
+            routerLink="/blog">
+            Cancel
+          </button>
+
+          <button
+            type="submit"
+            class="btn btn-primary"
+            [disabled]="submitting || !isArticleValid()">
+            <i class="fa fa-paper-plane me-1"></i>
+            {{ submitting ? 'Publishing...' : 'Publish blog post' }}
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

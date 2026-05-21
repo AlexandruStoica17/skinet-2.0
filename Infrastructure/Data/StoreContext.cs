@@ -31,6 +31,8 @@ namespace Infrastructure.Data
         public DbSet<BlogPost> BlogPosts { get; set; }
         // NOU: reviews
         public DbSet<Review> Reviews { get; set; }
+
+      public DbSet<PostSection> PostSections { get; set; }
         // NOU: reviews pentru produse individuale
 
         // NOU: poze multiple pentru produse
