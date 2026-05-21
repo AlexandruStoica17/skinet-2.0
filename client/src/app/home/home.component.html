@@ -1,16 +1,160 @@
-<carousel [isAnimated]="true">
-    <slide>
-        <img src="assets/images/hero1.jpg" alt="first slide" style="display: block; width: 100%;">
-    </slide>
-    <slide>
-        <img src="assets/images/hero2.jpg" alt="first slide" style="display: block; width: 100%;">
-    </slide>
-    <slide>
-        <img src="assets/images/hero3.jpg" alt="first slide" style="display: block; width: 100%;">
-    </slide>
-</carousel>
-<section class="featured">
-    <div class="d-flex justify-content-center pt-4">
-        <h1>Welcome to the Shop!</h1>
+<div class="home-page">
+  <!-- HERO -->
+  <section class="hero-section">
+    <img
+      src="assets/CosmeticPics/homePage.jpg"
+      alt="Natural cosmetics hero image"
+      class="hero-image"
+    >
+
+    <div class="hero-overlay"></div>
+
+    <div class="hero-content">
+      <p class="hero-kicker">Discover. Glow. Dare.</p>
+
+      <h1>
+        Natural care, crafted for your skin
+      </h1>
+
+      <a
+        class="soft-pill-btn"
+        routerLink="/shop">
+        Shop
+      </a>
     </div>
-</section>
+  </section>
+
+  <!-- COSMETICS -->
+  <section class="home-section products-section">
+    <div class="section-title-row">
+      <h2>Cosmetics</h2>
+    </div>
+
+    <div class="text-center py-4" *ngIf="loadingCosmetics">
+      <div class="spinner-border text-secondary" role="status"></div>
+    </div>
+
+    <div class="cards-grid products-grid" *ngIf="!loadingCosmetics && cosmetics.length > 0">
+      <a
+        class="home-product-card"
+        *ngFor="let product of cosmetics; let i = index"
+        [class.card-featured]="i === 1"
+        [routerLink]="['/shop', product.id]">
+
+        <div class="card-image-wrapper">
+          <img
+            [src]="product.pictureUrl"
+            [alt]="product.name"
+          >
+
+          <div class="card-hover-layer">
+            <span>View product</span>
+          </div>
+        </div>
+
+        <div class="card-info">
+          <h3>{{ product.name }}</h3>
+          <p>{{ product.productBrand }}</p>
+          <span>{{ product.price | currency }}</span>
+        </div>
+      </a>
+    </div>
+
+    <div class="empty-home-section" *ngIf="!loadingCosmetics && cosmetics.length === 0">
+      No cosmetics available yet.
+    </div>
+
+    <div class="section-action">
+      <a
+        class="soft-pill-btn light"
+        [routerLink]="['/shop']"
+        [queryParams]="{ type: 'Cosmetics' }">
+        See more
+      </a>
+    </div>
+  </section>
+
+  <!-- INGREDIENTS -->
+  <section class="home-section ingredients-section">
+    <div class="ingredients-title">
+      <h2>Ingredients</h2>
+    </div>
+
+    <div class="text-center py-4" *ngIf="loadingIngredients">
+      <div class="spinner-border text-secondary" role="status"></div>
+    </div>
+
+    <div class="cards-grid ingredients-grid" *ngIf="!loadingIngredients && ingredients.length > 0">
+      <a
+        class="home-product-card"
+        *ngFor="let ingredient of ingredients; let i = index"
+        [class.card-featured]="i === 1"
+        [routerLink]="['/shop', ingredient.id]">
+
+        <div class="card-image-wrapper">
+          <img
+            [src]="ingredient.pictureUrl"
+            [alt]="ingredient.name"
+          >
+
+          <div class="card-hover-layer">
+            <span>View product</span>
+          </div>
+        </div>
+
+        <div class="card-info">
+          <h3>{{ ingredient.name }}</h3>
+          <p>{{ ingredient.productBrand }}</p>
+          <span>{{ ingredient.price | currency }}</span>
+        </div>
+      </a>
+    </div>
+
+    <div class="empty-home-section" *ngIf="!loadingIngredients && ingredients.length === 0">
+      No ingredients available yet.
+    </div>
+
+    <div class="section-action">
+      <a
+        class="soft-pill-btn light"
+        [routerLink]="['/shop']"
+        [queryParams]="{ type: 'Ingredients' }">
+        Shop Ingredients
+      </a>
+    </div>
+  </section>
+
+  <!-- BLOG CTA -->
+  <section class="blog-banner">
+    <div class="blog-text">
+      <h2>Check the blog</h2>
+
+      <p>
+        Explore skincare guides, ingredient stories and routines created by our beauty community.
+        Learn how to choose formulas, understand natural extracts and build a routine that fits your skin.
+      </p>
+
+      <a
+        class="soft-pill-btn"
+        routerLink="/blog">
+        Meet us
+      </a>
+    </div>
+
+    <div class="blog-image"></div>
+  </section>
+
+  <!-- FOOTER SIMPLE -->
+  <footer class="home-footer">
+    <div class="footer-links">
+      <a routerLink="/shop">Shop</a>
+      <a routerLink="/blog">Blog</a>
+      <a routerLink="/favorites">Favorites</a>
+    </div>
+
+    <div class="footer-brand">
+      <strong>GreenBeauty</strong>
+      <span>© All rights reserved.</span>
+    </div>
+  </footer>
+</div>

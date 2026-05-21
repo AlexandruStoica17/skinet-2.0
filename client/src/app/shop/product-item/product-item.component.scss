@@ -1,48 +1,118 @@
-/* MODIFICAT: card asemănător cu cel din What's New */
-.product-card {
-  border-radius: 6px;
-  overflow: hidden;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+.shop-product-card {
+  display: flex;
+  flex-direction: column;
+  color: #2f332d;
 }
 
-.product-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.12) !important;
-}
-
-/* MODIFICAT: aceeași zonă de imagine pentru toate cardurile */
-.product-image-wrapper {
-  height: 200px;
+.product-image-frame {
+  position: relative;
+  height: 295px;
   overflow: hidden;
-  background: #f8f9fa;
+  border-radius: 10px;
+  background: #fbfaf6;
+  box-shadow: 0 12px 30px rgba(44, 49, 39, 0.12);
   cursor: pointer;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+    transition: transform 0.28s ease, filter 0.28s ease;
+  }
+
+  &:hover img {
+    transform: scale(1.06);
+    filter: blur(3px);
+  }
+
+  &:hover .product-hover {
+    opacity: 1;
+  }
 }
 
-.product-image {
-  width: 100%;
-  height: 200px;
-  object-fit: cover;
-  object-position: center;
-  display: block;
-}
-
-/* Overlay existent, păstrat pentru Shop */
-.hover-overlay {
+.product-hover {
   position: absolute;
-  width: 100%;
-  height: 200px;
-  top: 0;
-  left: 0;
-  background: rgba(255, 255, 255, 0.65);
+  inset: 0;
+  background: rgba(47, 51, 45, 0.28);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   opacity: 0;
-  transition: all 0.3s ease;
+  transition: opacity 0.28s ease;
+
+  span {
+    background: rgba(249, 247, 240, 0.93);
+    color: #273024;
+    border-radius: 999px;
+    padding: 8px 22px;
+    font-size: 0.82rem;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  }
 }
 
-.product-image-wrapper:hover .hover-overlay {
-  opacity: 1;
+.product-info {
+  padding-top: 14px;
 }
 
-.btn {
-  min-width: 40px;
-  height: 40px;
+.product-brand {
+  margin: 0 0 4px;
+  color: #7b806f;
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+h3 {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.35rem;
+  font-weight: 500;
+  line-height: 1.15;
+  margin: 0 0 4px;
+  color: #2f332d;
+}
+
+.product-type {
+  margin: 0;
+  color: #7b806f;
+  font-size: 0.88rem;
+}
+
+.product-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.product-price {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.28rem;
+  color: #2f332d;
+}
+
+.product-actions {
+  display: flex;
+  gap: 8px;
+
+  button {
+    width: 36px;
+    height: 36px;
+    border: 1px solid rgba(47, 51, 45, 0.16);
+    border-radius: 50%;
+    background: #fbfaf6;
+    color: #5d6957;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background: #5d6957;
+      color: #f7f4eb;
+      transform: translateY(-2px);
+    }
+  }
 }
