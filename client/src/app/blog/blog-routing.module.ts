@@ -8,28 +8,16 @@ import { EditPostComponent } from './edit-post/edit-post.component';
 import { AuthGuard } from '../core/guards/auth.guard';
 
 const routes: Routes = [
-  {
-    path: '',
-    component: BlogComponent
-  },
-  {
-    path: 'create',
-    component: CreatePostComponent,
-    canActivate: [AuthGuard]
-  },
-  {
-    path: 'my-posts',
-    component: MyPostsComponent,
-    canActivate: [AuthGuard]
-  },
-  {
-    path: 'edit/:id',
-    component: EditPostComponent,
-    canActivate: [AuthGuard]
-  },
-  {
-    path: ':id',
-    component: PostDetailsComponent
+  { path: '', component: BlogComponent },
+  { path: 'create', component: CreatePostComponent, canActivate: [AuthGuard] },
+  { path: 'my-posts', component: MyPostsComponent, canActivate: [AuthGuard] },
+  { path: 'edit/:id', component: EditPostComponent, canActivate: [AuthGuard] },
+
+  // MODIFICAT: folosim alias pentru breadcrumb dinamic
+  { 
+    path: ':id', 
+    component: PostDetailsComponent,
+    data: { breadcrumb: { alias: 'postDetails' } }
   }
 ];
 

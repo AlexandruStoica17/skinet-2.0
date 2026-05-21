@@ -104,17 +104,35 @@
                             <i class="fa fa-history me-3"></i> My Orders
                         </a>
                     </li>
-                    <li class="py-1">
-                        <a routerLink="/chat" class="dropdown-item">
-                            <i class="fa fa-comments me-3"></i> Messages
-                            <span class="badge bg-danger ms-1"
-                                  *ngIf="(messageService.unreadCount$ | async) as unread">
-                                <ng-container *ngIf="unread > 0">{{unread}}</ng-container>
-                            </span>
-                        </a>
-                    </li>
+                   <li class="py-1">
 
-                    <div class="dropdown-divider"></div>
+
+
+</li>
+
+<!-- NOU: secțiune pentru blogger - duce la articolele mele -->
+<li class="py-1" *ngIf="user.role?.includes('Blogger')">
+
+<a routerLink="/blog/my-posts" class="dropdown-item">
+
+<i class="fa fa-pencil-square-o me-3"></i> My Blog Posts
+
+</a>
+
+</li>
+
+<!-- NOU: opțional, shortcut direct către creare articol -->
+<li class="py-1" *ngIf="user.role?.includes('Blogger')">
+
+<a routerLink="/blog/create" class="dropdown-item">
+
+<i class="fa fa-plus-circle me-3"></i> Create Blog Post
+
+</a>
+
+</li>
+
+<div class="dropdown-divider"></div>
 
                     <li class="py-1">
                         <a (click)="accountService.logout()" class="dropdown-item">
@@ -147,6 +165,8 @@
                                 <i class="fa fa-clipboard-list me-1"></i>My Orders (Seller)
                             </a>
                         </li>
+
+                        
                     </ng-container>
                 </ul>
             </div>
