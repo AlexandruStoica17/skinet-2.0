@@ -119,12 +119,19 @@ export class ShopComponent implements OnInit {
             (t: any) => t.name.toLowerCase() === typeParam.toLowerCase()
           );
 
-          shopParams.typeId = found ? found.id : 0;
+          const typeId = found ? found.id : 0;
+
+          if (shopParams.typeId !== typeId) {
+            shopParams.typeId = typeId;
+            shopParams.pageNumber = 1;
+          }
+        } else if (shopParams.typeId !== 0) {
+          shopParams.typeId = 0;
+          shopParams.pageNumber = 1;
         } else {
           shopParams.typeId = 0;
         }
 
-        shopParams.pageNumber = 1;
         this.shopService.setShopParams(shopParams);
         this.shopParams = shopParams;
         this.getProducts();

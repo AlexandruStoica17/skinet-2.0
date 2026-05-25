@@ -75,7 +75,9 @@ namespace Infrastructure.Data
 
                 var product = await context.Products
                     .Include(p => p.Photos)
-                    .FirstOrDefaultAsync(p => p.Name == seedProduct.Name);
+                    .FirstOrDefaultAsync(p =>
+                        p.Name == seedProduct.Name ||
+                        p.PictureUrl == seedProduct.PictureUrl);
 
                 if (product == null)
                 {

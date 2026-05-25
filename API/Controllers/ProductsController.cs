@@ -499,6 +499,12 @@ public async Task<ActionResult<Pagination<ProductToReturnDto>>> GetRecentProduct
             if (tokens.Contains("hibiscus"))
                 concepts.Add("hibiscus");
 
+            if (tokens.Contains("rose") || tokens.Contains("roses"))
+                concepts.Add("rose");
+
+            if (tokens.Contains("honey"))
+                concepts.Add("honey");
+
             if (tokens.Contains("marigold"))
                 concepts.Add("marigold");
 

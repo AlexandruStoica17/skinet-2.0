@@ -145,8 +145,8 @@
     "Formula": "Mask"
   },
   {
-    "Name": "Aloe Vera Botanical Juice",
-    "Description": "A water-based cosmetic ingredient for soothing toners, gels and lightweight hydrating formulas.",
+    "Name": "Fresh Aloe Vera",
+    "Description": "Fresh aloe vera leaves for soothing gels, cooling masks and lightweight hydrating handmade formulas.",
     "Price": 8,
     "PictureUrl": "images/products/ingredient-1A.jpg",
     "PhotoUrls": [
@@ -160,11 +160,11 @@
     "SkinType": "Sensitive, Dry, Normal",
     "Usage": "Face, Body, Hair",
     "Benefits": "Soothing, Hydration, Calming",
-    "Formula": "Liquid, Botanical"
+    "Formula": "Fresh, Botanical"
   },
   {
-    "Name": "Hibiscus Flower Powder",
-    "Description": "A finely milled botanical powder for masks, scrubs and color-rich handmade cosmetic blends.",
+    "Name": "Dried Hibiscus Flower",
+    "Description": "Dried hibiscus flowers for botanical infusions, masks, scrubs and color-rich handmade cosmetic blends.",
     "Price": 7,
     "PictureUrl": "images/products/ingredient-1H.jpg",
     "PhotoUrls": [
@@ -179,11 +179,11 @@
     "SkinType": "Normal, Combination",
     "Usage": "Face, Body, Hair",
     "Benefits": "Brightening, Exfoliating, Nourishing",
-    "Formula": "Powder, Botanical"
+    "Formula": "Dried Flower, Botanical"
   },
   {
-    "Name": "Lavender Botanical Extract",
-    "Description": "A botanical ingredient used in calming skincare formulas, soaps and relaxing body-care products.",
+    "Name": "Dried Lavender Flowers",
+    "Description": "Dried lavender flowers for calming skincare formulas, soaps, sachets and relaxing body-care products.",
     "Price": 9,
     "PictureUrl": "images/products/ingredient-1La.jpg",
     "PhotoUrls": [
@@ -198,11 +198,11 @@
     "SkinType": "Sensitive, Normal",
     "Usage": "Face, Body, Hands",
     "Benefits": "Soothing, Nourishing",
-    "Formula": "Extract, Botanical"
+    "Formula": "Dried Flower, Botanical"
   },
   {
-    "Name": "Marigold Petal Infusion",
-    "Description": "A warm botanical infusion ingredient for soothing creams, balms and gentle cleansing products.",
+    "Name": "Bio Honey",
+    "Description": "Organic honey for nourishing masks, soft balms and gentle handmade cleansing products.",
     "Price": 6,
     "PictureUrl": "images/products/ingredient-1M.jpg",
     "PhotoUrls": [
@@ -218,11 +218,11 @@
     "SkinType": "Sensitive, Dry, Normal",
     "Usage": "Face, Hands, Body",
     "Benefits": "Soothing, Nourishing, Hydration",
-    "Formula": "Infusion, Botanical"
+    "Formula": "Honey, Natural"
   },
   {
-    "Name": "Mint Leaf Distillate",
-    "Description": "A refreshing aromatic ingredient for toners, scalp products and crisp summer body-care recipes.",
+    "Name": "Fresh Mint Leaves",
+    "Description": "Fresh mint leaves for refreshing toners, scalp products and crisp summer body-care recipes.",
     "Price": 10,
     "PictureUrl": "images/products/ingredient-1MN.jpg",
     "PhotoUrls": [
@@ -236,11 +236,11 @@
     "SkinType": "Oily, Combination, Normal",
     "Usage": "Face, Hair, Body",
     "Benefits": "Refreshing, Pore Cleansing, Balancing",
-    "Formula": "Distillate, Liquid"
+    "Formula": "Fresh Leaves, Botanical"
   },
   {
-    "Name": "Shea Herbal Blend",
-    "Description": "A nourishing raw ingredient blend suitable for rich creams, balms and handmade body-care recipes.",
+    "Name": "Shea Butter",
+    "Description": "Pure shea butter suitable for rich creams, balms and handmade body-care recipes.",
     "Price": 12,
     "PictureUrl": "images/products/ingredient-1S.jpg",
     "PhotoUrls": [
@@ -259,8 +259,8 @@
     "Formula": "Butter, Balm"
   },
   {
-    "Name": "Coconut Butter Base",
-    "Description": "A soft cosmetic base ingredient for moisturizing formulas, body balms and gentle skincare preparations.",
+    "Name": "Dried Rose Buds",
+    "Description": "Dried rose buds for botanical infusions, soaps, bath blends and aromatic handmade skincare.",
     "Price": 6,
     "PictureUrl": "images/products/ingredient-1T.jpg",
     "PhotoUrls": [
@@ -272,14 +272,14 @@
     "ProductTypeId": 2,
     "ProductBrandId": 6,
     "ProducerEmail": "herbalroots@greenbeauty.com",
-    "SkinType": "Dry, Normal",
-    "Usage": "Body, Hands, Lips",
-    "Benefits": "Hydration, Nourishing",
-    "Formula": "Butter, Balm"
+    "SkinType": "Dry, Normal, Sensitive",
+    "Usage": "Face, Body, Hair",
+    "Benefits": "Soothing, Nourishing, Calming",
+    "Formula": "Dried Flower, Botanical"
   },
   {
-    "Name": "Lemon Peel Active",
-    "Description": "A citrus-derived ingredient for brightening masks, exfoliating blends and energizing handmade formulas.",
+    "Name": "Fresh Organic Lemon",
+    "Description": "Fresh organic lemon for brightening masks, exfoliating blends and energizing handmade formulas.",
     "Price": 11,
     "PictureUrl": "images/products/ingredient-1L.jpg",
     "PhotoUrls": [
@@ -292,6 +292,6 @@
     "SkinType": "Normal, Combination",
     "Usage": "Face, Body",
     "Benefits": "Brightening, Exfoliating, Refreshing",
-    "Formula": "Powder, Extract"
+    "Formula": "Fresh Fruit, Citrus"
   }
 ]
