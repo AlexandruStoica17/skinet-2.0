@@ -8,6 +8,12 @@
             </h2>
             <p class="text-muted">Discover the latest products added to our platform</p>
             <hr>
+
+            <app-paging-header
+                [totalCount]="totalCount"
+                [pageSize]="pageSize"
+                [pageNumber]="pageNumber">
+            </app-paging-header>
         </div>
     </div>
 
@@ -57,5 +63,14 @@
             <p>No products available yet.</p>
         </div>
 
+    </div>
+
+    <div class="d-flex justify-content-center mt-4" *ngIf="totalCount > pageSize && !loading">
+        <app-pager
+            [pageSize]="pageSize"
+            [totalCount]="totalCount"
+            [pageNumber]="pageNumber"
+            (pageChanged)="onPageChanged($event)">
+        </app-pager>
     </div>
 </div>

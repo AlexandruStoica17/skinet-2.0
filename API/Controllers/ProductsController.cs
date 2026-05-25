@@ -360,15 +360,20 @@ public async Task<ActionResult> EditProduct(int id, [FromForm] ProductEditDto pr
     return Ok(new { message = "Produs actualizat cu succes!" });
 }
         // NEW: Recently added products for the "What's New" page
-        // GET /api/products/recent?count=12
+        // GET /api/products/recent?pageIndex=1&pageSize=8
        
        [HttpGet("recent")]
-public async Task<ActionResult<IReadOnlyList<ProductToReturnDto>>> GetRecentProducts(
-    [FromQuery] int count = 12)
+public async Task<ActionResult<Pagination<ProductToReturnDto>>> GetRecentProducts(
+    [FromQuery] int pageIndex = 1,
+    [FromQuery] int pageSize = 8)
 {
     // MODIFICAT: produsele sunt considerate "new" doar 30 de zile.
     // Ele rămân în continuare disponibile și în Shop.
     var oneMonthAgo = DateTime.UtcNow.AddMonths(-1);
+
+    var totalItems = await _context.Products
+    .Where(p => p.CreatedAt >= oneMonthAgo)
+    .CountAsync();
 
     var recentProducts = await _context.Products
     .Include(p => p.ProductType)
@@ -377,10 +382,13 @@ public async Task<ActionResult<IReadOnlyList<ProductToReturnDto>>> GetRecentProd
     .Where(p => p.CreatedAt >= oneMonthAgo)
     .OrderByDescending(p => p.CreatedAt)
     .ThenByDescending(p => p.Id)
-    .Take(count)
+    .Skip(pageSize * (pageIndex - 1))
+    .Take(pageSize)
     .ToListAsync();
 
-    return Ok(_mapper.Map<IReadOnlyList<Product>, IReadOnlyList<ProductToReturnDto>>(recentProducts));
+    var data = _mapper.Map<IReadOnlyList<Product>, IReadOnlyList<ProductToReturnDto>>(recentProducts);
+
+    return Ok(new Pagination<ProductToReturnDto>(pageIndex, pageSize, totalItems, data));
 }
 
         // GET /api/products/suggestions?keywords=lavender,oil&excludeId=5&count=4

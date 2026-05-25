@@ -163,8 +163,12 @@ export class ShopService {
     );
   }
 
-  getRecentProducts(count: number = 12) {
-    return this.http.get<Product[]>(this.baseUrl + 'products/recent?count=' + count);
+  getRecentProducts(pageNumber: number = 1, pageSize: number = 8) {
+    const params = new HttpParams()
+      .set('pageIndex', pageNumber.toString())
+      .set('pageSize', pageSize.toString());
+
+    return this.http.get<Pagination<Product[]>>(this.baseUrl + 'products/recent', { params });
   }
 
   getSuggestions(keywords: string, excludeId: number = 0, count: number = 4) {
