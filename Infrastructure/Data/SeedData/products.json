@@ -1,10 +1,14 @@
 [
   {
-    "Id": 1,
     "Name": "Botanical Calm Soap",
     "Description": "A gentle handcrafted soap bar with botanical oils, suitable for daily cleansing and delicate routines.",
     "Price": 20,
-    "PictureUrl": "images/products/1K.jpg",
+    "PictureUrl": "images/products/cosmetic-1K.jpg",
+    "PhotoUrls": [
+      "images/products/cosmetic-1K.jpg",
+      "images/products/cosmetic-2K.jpg",
+      "images/products/cosmetic-3K.jpg"
+    ],
     "ProductTypeId": 1,
     "ProductBrandId": 1,
     "ProducerEmail": "luxeskin@greenbeauty.com",
@@ -14,39 +18,180 @@
     "Formula": "Bar, Solid"
   },
   {
-    "Id": 2,
-    "Name": "Lavender Glow Soap",
-    "Description": "A lavender-inspired cleansing bar created for relaxing evening routines and soft skin comfort.",
-    "Price": 40,
-    "PictureUrl": "images/products/1D.jpg",
-    "ProductTypeId": 1,
-    "ProductBrandId": 2,
-    "ProducerEmail": "pureglow@greenbeauty.com",
-    "SkinType": "Dry, Sensitive, Normal",
-    "Usage": "Face, Body, Hands",
-    "Benefits": "Soothing, Hydration, Nourishing",
-    "Formula": "Bar, Solid"
-  },
-  {
-    "Id": 3,
-    "Name": "Minimal Daily Skin Cream",
-    "Description": "A minimal daily cream designed for simple skincare routines, lightweight hydration and everyday comfort.",
-    "Price": 25,
-    "PictureUrl": "images/products/3C.jpg",
+    "Name": "Radiance Day Cream",
+    "Description": "A soft daily moisturizer with a fresh botanical finish for balanced hydration and a naturally bright look.",
+    "Price": 38,
+    "PictureUrl": "images/products/cosmetic-1C.jpg",
+    "PhotoUrls": [
+      "images/products/cosmetic-1C.jpg",
+      "images/products/cosmetic-2C.jpg",
+      "images/products/cosmetic-3C.jpg"
+    ],
     "ProductTypeId": 1,
     "ProductBrandId": 3,
     "ProducerEmail": "botanica@greenbeauty.com",
     "SkinType": "Normal, Combination, Dry",
-    "Usage": "Face, Neck & Décolletage",
-    "Benefits": "Hydration, Nourishing, Firming",
+    "Usage": "Face, Neck and Decolletage",
+    "Benefits": "Hydration, Brightening, Nourishing",
     "Formula": "Cream"
   },
   {
-    "Id": 4,
+    "Name": "Silk Repair Serum",
+    "Description": "A concentrated serum for tired skin, built for a smoother-looking texture and a supple evening routine.",
+    "Price": 52,
+    "PictureUrl": "images/products/cosmetic-1F.jpg",
+    "PhotoUrls": [
+      "images/products/cosmetic-1F.jpg",
+      "images/products/cosmetic-2F.jpg",
+      "images/products/cosmetic-3F.jpg"
+    ],
+    "ProductTypeId": 1,
+    "ProductBrandId": 2,
+    "ProducerEmail": "pureglow@greenbeauty.com",
+    "SkinType": "Dry, Normal, Mature",
+    "Usage": "Face, Neck and Decolletage",
+    "Benefits": "Firming, Anti-aging, Hydration",
+    "Formula": "Serum"
+  },
+  {
+    "Name": "Mineral Balance Toner",
+    "Description": "A light botanical toner made to refresh the skin after cleansing and prepare it for layered care.",
+    "Price": 27,
+    "PictureUrl": "images/products/cosmetic-1I.jpg",
+    "PhotoUrls": [
+      "images/products/cosmetic-1I.jpg",
+      "images/products/cosmetic-2I.jpg",
+      "images/products/cosmetic-3I.jpg",
+      "images/products/cosmetic-4I.jpg"
+    ],
+    "ProductTypeId": 1,
+    "ProductBrandId": 1,
+    "ProducerEmail": "luxeskin@greenbeauty.com",
+    "SkinType": "Combination, Oily, Normal",
+    "Usage": "Face",
+    "Benefits": "Pore Cleansing, Balancing, Soothing",
+    "Formula": "Toner, Liquid"
+  },
+  {
+    "Name": "Velvet Nourish Balm",
+    "Description": "A rich multipurpose balm for dry zones, lips and hands, created for comfort in colder seasons.",
+    "Price": 31,
+    "PictureUrl": "images/products/cosmetic-1Q.jpg",
+    "PhotoUrls": [
+      "images/products/cosmetic-1Q.jpg",
+      "images/products/cosmetic-2Q.jpg",
+      "images/products/cosmetic-3Q.jpg",
+      "images/products/cosmetic-4Q.jpg",
+      "images/products/cosmetic-5Q.jpg"
+    ],
+    "ProductTypeId": 1,
+    "ProductBrandId": 2,
+    "ProducerEmail": "pureglow@greenbeauty.com",
+    "SkinType": "Dry, Sensitive, Normal",
+    "Usage": "Hands, Lips, Body",
+    "Benefits": "Nourishing, Soothing, Hydration",
+    "Formula": "Balm"
+  },
+  {
+    "Name": "Cloud Milk Cleanser",
+    "Description": "A creamy cleanser for gentle morning and evening routines, suited for skin that dislikes harsh foaming.",
+    "Price": 29,
+    "PictureUrl": "images/products/cosmetic-1A.jpg",
+    "PhotoUrls": [
+      "images/products/cosmetic-1A.jpg",
+      "images/products/cosmetic-2A.jpg"
+    ],
+    "ProductTypeId": 1,
+    "ProductBrandId": 3,
+    "ProducerEmail": "botanica@greenbeauty.com",
+    "SkinType": "Dry, Sensitive, Normal",
+    "Usage": "Face",
+    "Benefits": "Cleansing, Soothing, Hydration",
+    "Formula": "Cream, Emulsion"
+  },
+  {
+    "Name": "Citrus Fresh Gel",
+    "Description": "A lightweight gel moisturizer with a clean finish for quick absorption and a fresh daytime feel.",
+    "Price": 34,
+    "PictureUrl": "images/products/cosmetic-1E.jpg",
+    "PhotoUrls": [
+      "images/products/cosmetic-1E.jpg",
+      "images/products/cosmetic-2E.jpg"
+    ],
+    "ProductTypeId": 1,
+    "ProductBrandId": 1,
+    "ProducerEmail": "luxeskin@greenbeauty.com",
+    "SkinType": "Oily, Combination, Normal",
+    "Usage": "Face",
+    "Benefits": "Hydration, Mattifying, Brightening",
+    "Formula": "Gel"
+  },
+  {
+    "Name": "Lavender Clay Mask",
+    "Description": "A rinse-off mask for weekly care, pairing a calming aromatic profile with a polished skin feel.",
+    "Price": 45,
+    "PictureUrl": "images/products/woman-with-hair-care-product_23-2151918442.jpg",
+    "PhotoUrls": [
+      "images/products/woman-with-hair-care-product_23-2151918442.jpg",
+      "images/products/woman-with-hair-care-product_23-2151918445.jpg",
+      "images/products/top-view-lovely-arrangement-plants-with-properties_23-2148799474.jpg"
+    ],
+    "ProductTypeId": 1,
+    "ProductBrandId": 2,
+    "ProducerEmail": "pureglow@greenbeauty.com",
+    "SkinType": "Normal, Combination, Oily",
+    "Usage": "Face",
+    "Benefits": "Exfoliating, Soothing, Pore Cleansing",
+    "Formula": "Mask"
+  },
+  {
+    "Name": "Aloe Vera Botanical Juice",
+    "Description": "A water-based cosmetic ingredient for soothing toners, gels and lightweight hydrating formulas.",
+    "Price": 8,
+    "PictureUrl": "images/products/ingredient-1A.jpg",
+    "PhotoUrls": [
+      "images/products/ingredient-1A.jpg",
+      "images/products/ingredient-2A.jpg",
+      "images/products/ingredient-3A.jpg"
+    ],
+    "ProductTypeId": 2,
+    "ProductBrandId": 4,
+    "ProducerEmail": "naturesource@greenbeauty.com",
+    "SkinType": "Sensitive, Dry, Normal",
+    "Usage": "Face, Body, Hair",
+    "Benefits": "Soothing, Hydration, Calming",
+    "Formula": "Liquid, Botanical"
+  },
+  {
+    "Name": "Hibiscus Flower Powder",
+    "Description": "A finely milled botanical powder for masks, scrubs and color-rich handmade cosmetic blends.",
+    "Price": 7,
+    "PictureUrl": "images/products/ingredient-1H.jpg",
+    "PhotoUrls": [
+      "images/products/ingredient-1H.jpg",
+      "images/products/ingredient-2H.jpg",
+      "images/products/ingredient-3H.jpg",
+      "images/products/ingredient-4H.jpg"
+    ],
+    "ProductTypeId": 2,
+    "ProductBrandId": 6,
+    "ProducerEmail": "herbalroots@greenbeauty.com",
+    "SkinType": "Normal, Combination",
+    "Usage": "Face, Body, Hair",
+    "Benefits": "Brightening, Exfoliating, Nourishing",
+    "Formula": "Powder, Botanical"
+  },
+  {
     "Name": "Lavender Botanical Extract",
     "Description": "A botanical ingredient used in calming skincare formulas, soaps and relaxing body-care products.",
-    "Price": 5,
-    "PictureUrl": "images/products/3La.jpg",
+    "Price": 9,
+    "PictureUrl": "images/products/ingredient-1La.jpg",
+    "PhotoUrls": [
+      "images/products/ingredient-1La.jpg",
+      "images/products/ingredient-2La.jpg",
+      "images/products/ingredient-3La.jpg",
+      "images/products/ingredient-4La.jpg"
+    ],
     "ProductTypeId": 2,
     "ProductBrandId": 4,
     "ProducerEmail": "naturesource@greenbeauty.com",
@@ -56,11 +201,55 @@
     "Formula": "Extract, Botanical"
   },
   {
-    "Id": 5,
+    "Name": "Marigold Petal Infusion",
+    "Description": "A warm botanical infusion ingredient for soothing creams, balms and gentle cleansing products.",
+    "Price": 6,
+    "PictureUrl": "images/products/ingredient-1M.jpg",
+    "PhotoUrls": [
+      "images/products/ingredient-1M.jpg",
+      "images/products/ingredient-2M.jpg",
+      "images/products/ingredient-3M.jpg",
+      "images/products/ingredient-4M.jpg",
+      "images/products/ingredient-5M.jpg"
+    ],
+    "ProductTypeId": 2,
+    "ProductBrandId": 6,
+    "ProducerEmail": "herbalroots@greenbeauty.com",
+    "SkinType": "Sensitive, Dry, Normal",
+    "Usage": "Face, Hands, Body",
+    "Benefits": "Soothing, Nourishing, Hydration",
+    "Formula": "Infusion, Botanical"
+  },
+  {
+    "Name": "Mint Leaf Distillate",
+    "Description": "A refreshing aromatic ingredient for toners, scalp products and crisp summer body-care recipes.",
+    "Price": 10,
+    "PictureUrl": "images/products/ingredient-1MN.jpg",
+    "PhotoUrls": [
+      "images/products/ingredient-1MN.jpg",
+      "images/products/ingredient-2MN.jpg",
+      "images/products/ingredient-3MN.jpg"
+    ],
+    "ProductTypeId": 2,
+    "ProductBrandId": 4,
+    "ProducerEmail": "naturesource@greenbeauty.com",
+    "SkinType": "Oily, Combination, Normal",
+    "Usage": "Face, Hair, Body",
+    "Benefits": "Refreshing, Pore Cleansing, Balancing",
+    "Formula": "Distillate, Liquid"
+  },
+  {
     "Name": "Shea Herbal Blend",
     "Description": "A nourishing raw ingredient blend suitable for rich creams, balms and handmade body-care recipes.",
-    "Price": 5,
-    "PictureUrl": "images/products/5S.jpg",
+    "Price": 12,
+    "PictureUrl": "images/products/ingredient-1S.jpg",
+    "PhotoUrls": [
+      "images/products/ingredient-1S.jpg",
+      "images/products/ingredient-2S.jpg",
+      "images/products/ingredient-3S.jpg",
+      "images/products/ingredient-4S.jpg",
+      "images/products/ingredient-5S.jpg"
+    ],
     "ProductTypeId": 2,
     "ProductBrandId": 5,
     "ProducerEmail": "rawessentials@greenbeauty.com",
@@ -70,17 +259,39 @@
     "Formula": "Butter, Balm"
   },
   {
-    "Id": 6,
-    "Name": "Coconut Butter Base",
-    "Description": "A soft cosmetic base ingredient for moisturizing formulas, body balms and gentle skincare preparations.",
-    "Price": 6,
-    "PictureUrl": "images/products/3T.jpg",
+    "Name": "Tea Tree Botanical Oil",
+    "Description": "A potent cosmetic ingredient for targeted formulas, cleansing products and oily-skin routines.",
+    "Price": 14,
+    "PictureUrl": "images/products/ingredient-1T.jpg",
+    "PhotoUrls": [
+      "images/products/ingredient-1T.jpg",
+      "images/products/ingredient-2T.jpg",
+      "images/products/ingredient-3T.jpg",
+      "images/products/ingredient-4T.jpg"
+    ],
+    "ProductTypeId": 2,
+    "ProductBrandId": 5,
+    "ProducerEmail": "rawessentials@greenbeauty.com",
+    "SkinType": "Oily, Combination",
+    "Usage": "Face, Scalp, Body",
+    "Benefits": "Pore Cleansing, Balancing, Purifying",
+    "Formula": "Oil"
+  },
+  {
+    "Name": "Lemon Peel Active",
+    "Description": "A citrus-derived ingredient for brightening masks, exfoliating blends and energizing handmade formulas.",
+    "Price": 11,
+    "PictureUrl": "images/products/ingredient-1L.jpg",
+    "PhotoUrls": [
+      "images/products/ingredient-1L.jpg",
+      "images/products/ingredient-2L.jpg"
+    ],
     "ProductTypeId": 2,
     "ProductBrandId": 6,
     "ProducerEmail": "herbalroots@greenbeauty.com",
-    "SkinType": "Dry, Normal",
-    "Usage": "Body, Hands, Lips",
-    "Benefits": "Hydration, Nourishing",
-    "Formula": "Butter, Balm"
+    "SkinType": "Normal, Combination",
+    "Usage": "Face, Body",
+    "Benefits": "Brightening, Exfoliating, Refreshing",
+    "Formula": "Powder, Extract"
   }
 ]

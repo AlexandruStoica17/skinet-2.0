@@ -4,6 +4,7 @@ using Core.Entities.Identity;
 using Core.Entities.OrderAggregate;
 using Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace Infrastructure.Data
 {
@@ -51,50 +52,101 @@ namespace Infrastructure.Data
                 await context.SaveChangesAsync();
             }
 
-            if (!context.Products.Any())
-            {
-                var productsData = File.ReadAllText("../Infrastructure/Data/SeedData/products.json");
+            var productsData = File.ReadAllText("../Infrastructure/Data/SeedData/products.json");
 
-                var seedProducts = JsonSerializer.Deserialize<List<SeedProductDto>>(
-                    productsData,
-                    new JsonSerializerOptions
-                    {
-                        PropertyNameCaseInsensitive = true
-                    }
-                );
-
-                if (seedProducts != null)
+            var seedProducts = JsonSerializer.Deserialize<List<SeedProductDto>>(
+                productsData,
+                new JsonSerializerOptions
                 {
-                    foreach (var seedProduct in seedProducts)
-                    {
-                        var producer = await userManager.FindByEmailAsync(seedProduct.ProducerEmail);
-
-                        if (producer == null)
-                        {
-                            continue;
-                        }
-
-                        var product = new Product
-                        {
-                            Name = seedProduct.Name,
-                            Description = seedProduct.Description,
-                            Price = seedProduct.Price,
-                            PictureUrl = seedProduct.PictureUrl,
-                            ProductTypeId = seedProduct.ProductTypeId,
-                            ProductBrandId = seedProduct.ProductBrandId,
-                            ProducerId = producer.Id,
-                            ProducerName = producer.DisplayName,
-                            SkinType = seedProduct.SkinType,
-                            Usage = seedProduct.Usage,
-                            Benefits = seedProduct.Benefits,
-                            Formula = seedProduct.Formula
-                        };
-
-                        context.Products.Add(product);
-                    }
-
-                    await context.SaveChangesAsync();
+                    PropertyNameCaseInsensitive = true
                 }
+            );
+
+            if (seedProducts == null) return;
+
+            foreach (var seedProduct in seedProducts)
+            {
+                var producer = await userManager.FindByEmailAsync(seedProduct.ProducerEmail);
+
+                if (producer == null)
+                {
+                    continue;
+                }
+
+                var product = await context.Products
+                    .Include(p => p.Photos)
+                    .FirstOrDefaultAsync(p => p.Name == seedProduct.Name);
+
+                if (product == null)
+                {
+                    product = new Product();
+                    context.Products.Add(product);
+                }
+
+                product.Name = seedProduct.Name;
+                product.Description = seedProduct.Description;
+                product.Price = seedProduct.Price;
+                product.PictureUrl = seedProduct.PictureUrl;
+                product.ProductTypeId = seedProduct.ProductTypeId;
+                product.ProductBrandId = seedProduct.ProductBrandId;
+                product.ProducerId = producer.Id;
+                product.ProducerName = producer.DisplayName;
+                product.SkinType = seedProduct.SkinType;
+                product.Usage = seedProduct.Usage;
+                product.Benefits = seedProduct.Benefits;
+                product.Formula = seedProduct.Formula;
+
+                EnsureProductPhotos(product, seedProduct);
+            }
+
+            if (context.ChangeTracker.HasChanges())
+            {
+                await context.SaveChangesAsync();
+            }
+        }
+
+        private static void EnsureProductPhotos(Product product, SeedProductDto seedProduct)
+        {
+            var photoUrls = (seedProduct.PhotoUrls == null || seedProduct.PhotoUrls.Count == 0)
+                ? new List<string> { seedProduct.PictureUrl }
+                : seedProduct.PhotoUrls;
+
+            photoUrls = photoUrls
+                .Where(url => !string.IsNullOrWhiteSpace(url))
+                .Distinct()
+                .ToList();
+
+            for (var i = 0; i < photoUrls.Count; i++)
+            {
+                var url = photoUrls[i];
+                var existingPhoto = product.Photos.FirstOrDefault(p => p.Url == url);
+
+                if (existingPhoto == null)
+                {
+                    product.Photos.Add(new ProductPhoto
+                    {
+                        Url = url,
+                        DisplayOrder = i + 1,
+                        IsMain = url == seedProduct.PictureUrl
+                    });
+
+                    continue;
+                }
+
+                existingPhoto.DisplayOrder = i + 1;
+                existingPhoto.IsMain = url == seedProduct.PictureUrl;
+            }
+
+            foreach (var photo in product.Photos.Where(p => p.Url != seedProduct.PictureUrl))
+            {
+                photo.IsMain = false;
+            }
+
+            var mainPhoto = product.Photos.FirstOrDefault(p => p.Url == seedProduct.PictureUrl);
+
+            if (mainPhoto != null)
+            {
+                mainPhoto.IsMain = true;
             }
         }
 
@@ -104,6 +156,7 @@ namespace Infrastructure.Data
             public string Description { get; set; }
             public decimal Price { get; set; }
             public string PictureUrl { get; set; }
+            public List<string> PhotoUrls { get; set; } = new();
 
             public int ProductTypeId { get; set; }
             public int ProductBrandId { get; set; }
