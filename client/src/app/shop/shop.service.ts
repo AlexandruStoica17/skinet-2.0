@@ -117,17 +117,7 @@ export class ShopService {
   }
 
   getProduct(id: number) {
-    // RESTAURAT/ADAPTAT: caută produsul în cache-ul paginilor deja încărcate
-    const product = [...this.productCache.values()]
-      .reduce((acc: Product | null, paginatedResult: Pagination<Product[]>) => {
-        const found = paginatedResult.data.find((x: Product) => x.id === id);
-        return found ?? acc;
-      }, null as Product | null);
-
-    if (product) {
-      return of(product);
-    }
-
+    // Fetch the full product details so the gallery includes all ProductPhotos.
     return this.http.get<Product>(this.baseUrl + 'products/' + id);
   }
 

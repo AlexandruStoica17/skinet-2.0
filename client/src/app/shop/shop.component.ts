@@ -108,25 +108,27 @@ export class ShopComponent implements OnInit {
     this.getBrands();
 
     this.route.queryParams.subscribe(params => {
-      if (params['type']) {
-        this.shopService.getTypes().subscribe(types => {
-          this.types = [{ id: 0, name: 'All' }, ...types];
+      this.shopService.getTypes().subscribe(types => {
+        this.types = [{ id: 0, name: 'All' }, ...types];
 
+        const shopParams = this.shopService.getShopParams();
+        const typeParam = params['type'];
+
+        if (typeParam) {
           const found = types.find(
-            (t: any) => t.name.toLowerCase() === params['type'].toLowerCase()
+            (t: any) => t.name.toLowerCase() === typeParam.toLowerCase()
           );
 
-          if (found) {
-            this.shopParams.typeId = found.id;
-            this.shopService.setShopParams(this.shopParams);
-          }
+          shopParams.typeId = found ? found.id : 0;
+        } else {
+          shopParams.typeId = 0;
+        }
 
-          this.getProducts();
-        });
-      } else {
-        this.getTypes();
+        shopParams.pageNumber = 1;
+        this.shopService.setShopParams(shopParams);
+        this.shopParams = shopParams;
         this.getProducts();
-      }
+      });
     });
   }
 
