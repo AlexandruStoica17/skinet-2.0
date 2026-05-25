@@ -77,6 +77,8 @@ export class ProductDetailsComponent implements OnInit {
   }
 
   loadProduct() {
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+
     const id = this.activatedRoute.snapshot.paramMap.get('id');
 
     if (!id) return;
@@ -134,9 +136,12 @@ export class ProductDetailsComponent implements OnInit {
     const uniqueUrls = new Set<string>();
 
     if (this.product?.photos && this.product.photos.length > 0) {
-      this.product.photos.forEach(photo => {
-        if (photo.url) uniqueUrls.add(photo.url);
-      });
+      this.product.photos
+        .slice()
+        .sort((a, b) => a.displayOrder - b.displayOrder)
+        .forEach(photo => {
+          if (photo.url) uniqueUrls.add(photo.url);
+        });
     }
 
     // fallback pentru produsele vechi, care au doar pictureUrl

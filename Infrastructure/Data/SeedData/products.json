@@ -259,9 +259,9 @@
     "Formula": "Butter, Balm"
   },
   {
-    "Name": "Tea Tree Botanical Oil",
-    "Description": "A potent cosmetic ingredient for targeted formulas, cleansing products and oily-skin routines.",
-    "Price": 14,
+    "Name": "Coconut Butter Base",
+    "Description": "A soft cosmetic base ingredient for moisturizing formulas, body balms and gentle skincare preparations.",
+    "Price": 6,
     "PictureUrl": "images/products/ingredient-1T.jpg",
     "PhotoUrls": [
       "images/products/ingredient-1T.jpg",
@@ -270,12 +270,12 @@
       "images/products/ingredient-4T.jpg"
     ],
     "ProductTypeId": 2,
-    "ProductBrandId": 5,
-    "ProducerEmail": "rawessentials@greenbeauty.com",
-    "SkinType": "Oily, Combination",
-    "Usage": "Face, Scalp, Body",
-    "Benefits": "Pore Cleansing, Balancing, Purifying",
-    "Formula": "Oil"
+    "ProductBrandId": 6,
+    "ProducerEmail": "herbalroots@greenbeauty.com",
+    "SkinType": "Dry, Normal",
+    "Usage": "Body, Hands, Lips",
+    "Benefits": "Hydration, Nourishing",
+    "Formula": "Butter, Balm"
   },
   {
     "Name": "Lemon Peel Active",

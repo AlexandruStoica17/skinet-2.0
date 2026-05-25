@@ -137,6 +137,15 @@ namespace Infrastructure.Data
                 existingPhoto.IsMain = url == seedProduct.PictureUrl;
             }
 
+            var stalePhotos = product.Photos
+                .Where(p => !photoUrls.Contains(p.Url))
+                .ToList();
+
+            foreach (var stalePhoto in stalePhotos)
+            {
+                product.Photos.Remove(stalePhoto);
+            }
+
             foreach (var photo in product.Photos.Where(p => p.Url != seedProduct.PictureUrl))
             {
                 photo.IsMain = false;
