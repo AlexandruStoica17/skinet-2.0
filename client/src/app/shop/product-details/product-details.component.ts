@@ -73,17 +73,27 @@ export class ProductDetailsComponent implements OnInit {
       if (user) this.currentUserEmail = user.email;
     });
 
-    this.loadProduct();
+    this.activatedRoute.paramMap.subscribe(params => {
+      const id = params.get('id');
+
+      if (id) {
+        this.loadProduct(+id);
+      }
+    });
   }
 
-  loadProduct() {
+  loadProduct(id: number) {
     window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
 
-    const id = this.activatedRoute.snapshot.paramMap.get('id');
+    this.product = undefined;
+    this.galleryImages = [];
+    this.productReviews = [];
+    this.suggestedProducts = [];
+    this.avgRating = 0;
+    this.quantity = 1;
+    this.quantityInBasket = 0;
 
-    if (!id) return;
-
-    this.shopService.getProduct(+id).subscribe({
+    this.shopService.getProduct(id).subscribe({
       next: product => {
         this.product = product;
         this.bcService.set('@productDetails', product.name);
@@ -93,7 +103,7 @@ export class ProductDetailsComponent implements OnInit {
 
         this.basketService.basketSource$.pipe(take(1)).subscribe({
           next: basket => {
-            const item = basket?.items.find(x => x.id === +id);
+            const item = basket?.items.find(x => x.id === id);
 
             if (item) {
               this.quantity = item.quantity;
@@ -102,7 +112,7 @@ export class ProductDetailsComponent implements OnInit {
           }
         });
 
-        this.reviewService.getProductReviews(+id).subscribe({
+        this.reviewService.getProductReviews(id).subscribe({
           next: (reviews: ProductReview[]) => {
             this.productReviews = reviews;
 
@@ -121,7 +131,7 @@ export class ProductDetailsComponent implements OnInit {
         const keywords = this.shopService.extractKeywords(text);
 
         if (keywords) {
-          this.shopService.getSuggestions(keywords, +id, 4).subscribe({
+          this.shopService.getSuggestions(keywords, id, 4).subscribe({
             next: suggestions => this.suggestedProducts = suggestions,
             error: err => console.log(err)
           });

@@ -383,7 +383,6 @@ public async Task<ActionResult<IReadOnlyList<ProductToReturnDto>>> GetRecentProd
     return Ok(_mapper.Map<IReadOnlyList<Product>, IReadOnlyList<ProductToReturnDto>>(recentProducts));
 }
 
-        // NEW: Related product suggestions based on keywords from name/description
         // GET /api/products/suggestions?keywords=lavender,oil&excludeId=5&count=4
         [HttpGet("suggestions")]
         public async Task<ActionResult<IReadOnlyList<ProductToReturnDto>>> GetSuggestions(
@@ -403,28 +402,145 @@ public async Task<ActionResult<IReadOnlyList<ProductToReturnDto>>> GetRecentProd
             if (!keywordList.Any())
                 return Ok(new List<ProductToReturnDto>());
 
-          var spec = new ProductsWithTypesAndBrandsSpecification(
-    new ProductSpecParams { PageSize = 1000, PageIndex = 1 },
-    applyPaging: false);
+            var spec = new ProductsWithTypesAndBrandsSpecification(
+                new ProductSpecParams { PageSize = 1000, PageIndex = 1 },
+                applyPaging: false);
             var allProducts = await _productsRepo.ListAsync(spec);
 
-            // Score each product by how many keywords match name or description
+            var currentProduct = allProducts.FirstOrDefault(p => p.Id == excludeId);
+
             var suggestions = allProducts
                 .Where(p => p.Id != excludeId)
-                .Select(p => new
+                .Select(product => new
                 {
-                    Product = p,
-                    Score = keywordList.Count(k =>
-                        (p.Name?.ToLower().Contains(k) == true) ||
-                        (p.Description?.ToLower().Contains(k) == true))
+                    Product = product,
+                    Score = currentProduct == null
+                        ? ScoreKeywordMatch(product, keywordList)
+                        : ScoreRelatedProduct(currentProduct, product, keywordList)
                 })
-                .Where(x => x.Score > 0)
+                .Where(x => x.Score >= 12)
                 .OrderByDescending(x => x.Score)
+                .ThenBy(x => x.Product.Name)
                 .Take(count)
                 .Select(x => x.Product)
                 .ToList();
 
             return Ok(_mapper.Map<IReadOnlyList<Product>, IReadOnlyList<ProductToReturnDto>>(suggestions));
+        }
+
+        private static int ScoreKeywordMatch(Product product, List<string> keywordList)
+        {
+            var haystack = string.Join(" ", product.Name, product.Description, product.Benefits, product.Formula)
+                .ToLowerInvariant();
+
+            return keywordList.Count(keyword => haystack.Contains(keyword)) * 4;
+        }
+
+        private static int ScoreRelatedProduct(Product current, Product candidate, List<string> keywordList)
+        {
+            var currentPrimaryConcepts = GetPrimaryConcepts(current);
+            var candidatePrimaryConcepts = GetPrimaryConcepts(candidate);
+            var primaryOverlap = currentPrimaryConcepts.Intersect(candidatePrimaryConcepts).Count();
+
+            var score = 0;
+            score += primaryOverlap * 30;
+            score += CountSharedCsv(current.Benefits, candidate.Benefits) * 7;
+            score += CountSharedCsv(current.Formula, candidate.Formula) * 5;
+            score += CountSharedCsv(current.Usage, candidate.Usage) * 3;
+            score += CountSharedCsv(current.SkinType, candidate.SkinType) * 2;
+            score += CountSharedTokens(current.Name, candidate.Name) * 10;
+            score += keywordList.Count(k => (candidate.Name ?? "").ToLowerInvariant().Contains(k)) * 3;
+
+            if (current.ProductBrandId == candidate.ProductBrandId) score += 2;
+            if (current.ProductTypeId == candidate.ProductTypeId) score += 1;
+
+            if (primaryOverlap == 0 && score < 30)
+            {
+                return 0;
+            }
+
+            return score;
+        }
+
+        private static HashSet<string> GetPrimaryConcepts(Product product)
+        {
+            var tokens = Tokenize(product.Name);
+            var concepts = new HashSet<string>();
+
+            AddConcepts(tokens, concepts);
+            return concepts;
+        }
+
+        private static void AddConcepts(HashSet<string> tokens, HashSet<string> concepts)
+        {
+            if (tokens.Overlaps(new[] { "citrus", "lemon", "lime", "orange", "peel" }))
+                concepts.Add("citrus");
+
+            if (tokens.Contains("aloe"))
+                concepts.Add("aloe");
+
+            if (tokens.Contains("coconut"))
+                concepts.Add("coconut");
+
+            if (tokens.Contains("shea"))
+                concepts.Add("shea");
+
+            if (tokens.Contains("lavender"))
+                concepts.Add("lavender");
+
+            if (tokens.Contains("hibiscus"))
+                concepts.Add("hibiscus");
+
+            if (tokens.Contains("marigold"))
+                concepts.Add("marigold");
+
+            if (tokens.Contains("mint"))
+                concepts.Add("mint");
+
+            if (tokens.Contains("tea") && tokens.Contains("tree"))
+                concepts.Add("tea-tree");
+
+            foreach (var token in tokens.Intersect(new[] { "serum", "cream", "cleanser", "soap", "toner", "balm", "mask", "gel", "butter", "powder", "oil" }))
+            {
+                concepts.Add(token);
+            }
+        }
+
+        private static int CountSharedCsv(string first, string second)
+        {
+            return SplitCsv(first).Intersect(SplitCsv(second)).Count();
+        }
+
+        private static HashSet<string> SplitCsv(string value)
+        {
+            return (value ?? "")
+                .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                .Select(x => x.Trim().ToLowerInvariant())
+                .Where(x => x.Length > 0)
+                .ToHashSet();
+        }
+
+        private static int CountSharedTokens(string first, string second)
+        {
+            return Tokenize(first).Intersect(Tokenize(second)).Count();
+        }
+
+        private static HashSet<string> Tokenize(string value)
+        {
+            var stopWords = new HashSet<string>
+            {
+                "the", "and", "for", "with", "this", "that", "from", "skin", "care",
+                "cosmetic", "cosmetics", "ingredient", "ingredients", "product", "base",
+                "active", "botanical", "formula", "formulas"
+            };
+
+            return new string((value ?? "")
+                    .ToLowerInvariant()
+                    .Select(ch => char.IsLetterOrDigit(ch) ? ch : ' ')
+                    .ToArray())
+                .Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                .Where(token => token.Length > 2 && !stopWords.Contains(token))
+                .ToHashSet();
         }
 
 private async Task<string> SaveProductImageAsync(IFormFile picture)
