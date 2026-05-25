@@ -1,0 +1,166 @@
+.seller-page {
+  max-width: 1180px;
+  margin: 120px auto 60px;
+  padding: 0 18px;
+}
+
+.seller-hero {
+  padding: 42px 0 32px;
+  border-bottom: 1px solid #e5e0d8;
+}
+
+.seller-label {
+  margin-bottom: 8px;
+  color: #6fbfa8;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0;
+  font-size: 0.8rem;
+}
+
+.seller-hero h1 {
+  font-size: 3rem;
+  margin-bottom: 14px;
+}
+
+.seller-intro {
+  max-width: 760px;
+  color: #6c757d;
+  font-size: 1.05rem;
+}
+
+.seller-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.seller-meta span {
+  border: 1px solid #d9e7df;
+  padding: 8px 12px;
+  border-radius: 6px;
+  background: #f7fbf9;
+}
+
+.seller-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  gap: 36px;
+  padding: 34px 0;
+}
+
+.seller-main section,
+.seller-side {
+  margin-bottom: 26px;
+}
+
+h2 {
+  font-size: 1.45rem;
+  margin-bottom: 12px;
+}
+
+.document-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #55aa91;
+  font-weight: 700;
+}
+
+.map-frame {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border: 1px solid #e5e0d8;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.map-frame iframe {
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.seller-products {
+  padding-top: 28px;
+  border-top: 1px solid #e5e0d8;
+}
+
+.products-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 22px;
+}
+
+.seller-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.seller-product {
+  border: 1px solid #ece7df;
+  border-radius: 6px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.image-wrap {
+  display: block;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+}
+
+.image-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.product-body {
+  padding: 14px;
+}
+
+.product-type {
+  margin-bottom: 4px;
+  color: #6c757d;
+  font-size: 0.85rem;
+}
+
+.product-body h3 {
+  min-height: 44px;
+  font-size: 1rem;
+  margin-bottom: 12px;
+}
+
+.product-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.product-bottom button {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid #d7e7df;
+  background: #f7fbf9;
+  color: #4c8f7c;
+}
+
+.empty-products {
+  color: #6c757d;
+}
+
+@media (max-width: 900px) {
+  .seller-layout,
+  .seller-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .seller-hero h1 {
+    font-size: 2.2rem;
+  }
+}

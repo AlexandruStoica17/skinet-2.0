@@ -1,0 +1,94 @@
+<div class="seller-page" *ngIf="seller && !loading">
+  <section class="seller-hero">
+    <div>
+      <p class="seller-label">{{ seller.sellerType === 'Ingredients' ? 'Ingredient producer' : 'Cosmetics producer' }}</p>
+      <h1>{{ seller.companyName || seller.displayName }}</h1>
+      <p class="seller-intro">
+        {{ seller.description || 'Acest vanzator pregateste pagina publica. Produsele disponibile sunt listate mai jos.' }}
+      </p>
+      <div class="seller-meta">
+        <span *ngIf="seller.isVerified"><i class="fa fa-check-circle"></i> Vanzator acreditat</span>
+        <span *ngIf="seller.location"><i class="fa fa-map-marker"></i> {{ seller.location }}</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="seller-layout">
+    <div class="seller-main">
+      <section>
+        <h2>Povestea lor</h2>
+        <p>{{ seller.story || 'Vanzatorul nu a adaugat inca povestea companiei.' }}</p>
+      </section>
+
+      <section>
+        <h2>Scurt istoric</h2>
+        <p>{{ seller.history || 'Istoricul va fi completat de vanzator.' }}</p>
+      </section>
+
+      <section *ngIf="seller.documentUrl">
+        <h2>Documente acreditare</h2>
+        <a class="document-link" [href]="getDocumentUrl(seller.documentUrl)" target="_blank" rel="noopener">
+          <i class="fa fa-file-text-o"></i>
+          Vezi documentele incarcate
+        </a>
+      </section>
+    </div>
+
+    <aside class="seller-side">
+      <h2>Locatie</h2>
+      <p *ngIf="seller.location">{{ seller.location }}</p>
+      <div class="map-frame" *ngIf="mapUrl">
+        <iframe [src]="mapUrl" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+      </div>
+      <p *ngIf="!mapUrl" class="text-muted">Harta va aparea dupa ce vanzatorul adauga linkul de Google Maps.</p>
+    </aside>
+  </section>
+
+  <section class="seller-products">
+    <div class="products-header">
+      <div>
+        <h2>Produse disponibile</h2>
+        <app-paging-header
+          [totalCount]="seller.products.count"
+          [pageNumber]="seller.products.pageIndex"
+          [pageSize]="seller.products.pageSize">
+        </app-paging-header>
+      </div>
+    </div>
+
+    <div class="seller-grid" *ngIf="seller.products.data.length > 0">
+      <article class="seller-product" *ngFor="let product of seller.products.data">
+        <a [routerLink]="['/shop', product.id]" class="image-wrap">
+          <img [src]="product.pictureUrl" [alt]="product.name">
+        </a>
+        <div class="product-body">
+          <p class="product-type">{{ product.productType }}</p>
+          <h3>{{ product.name }}</h3>
+          <div class="product-bottom">
+            <strong>{{ product.price | currency }}</strong>
+            <button type="button" (click)="addItemToBasket(product)" title="Add to basket">
+              <i class="fa fa-shopping-cart"></i>
+            </button>
+          </div>
+        </div>
+      </article>
+    </div>
+
+    <p class="empty-products" *ngIf="seller.products.data.length === 0">
+      Acest vanzator nu are produse disponibile momentan.
+    </p>
+
+    <div class="d-flex justify-content-center mt-4" *ngIf="seller.products.count > seller.products.pageSize">
+      <app-pager
+        [pageSize]="seller.products.pageSize"
+        [totalCount]="seller.products.count"
+        [pageNumber]="seller.products.pageIndex"
+        (pageChanged)="onPageChanged($event)">
+      </app-pager>
+    </div>
+  </section>
+</div>
+
+<div class="container py-5 text-center" *ngIf="loading">
+  <i class="fa fa-spinner fa-spin fa-3x text-muted"></i>
+</div>

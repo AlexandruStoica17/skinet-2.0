@@ -12,6 +12,7 @@ import { MyProductsComponent } from './producer/my-products/my-products.componen
 import { EditProductComponent } from './producer/edit-product/edit-product.component';
 import { ProducerGuard } from './core/guards/producer.guard';
 import { ProducerOrdersComponent } from './producer/producer-orders/producer-orders.component';
+import { SellerProfileComponent } from './seller-profile/seller-profile.component';
 
 
 const routes: Routes = [
@@ -64,6 +65,7 @@ const routes: Routes = [
     path: 'chat', 
     loadChildren: () => import('./chat/chat.module').then(m => m.ChatModule) 
   },
+  { path: 'seller/:email', component: SellerProfileComponent },
   { path: 'favorites', loadChildren: () => import('./favorites/favorites.module').then(m => m.FavoritesModule) },
   { path: 'blog', loadChildren: () => import('./blog/blog.module').then(m => m.BlogModule) },
 

@@ -12,8 +12,9 @@ import { User } from 'src/app/shared/models/user';
 })
 export class ProfileComponent implements OnInit {
   addressForm!: FormGroup;
-  passwordForm!: FormGroup; 
-  activeTab: 'address' | 'password' | 'verification' = 'address'; // Am adăugat 'verification'
+  passwordForm!: FormGroup;
+  sellerPageForm!: FormGroup;
+  activeTab: 'address' | 'password' | 'verification' | 'myPage' = 'address'; // Am adăugat 'verification'
   
   user$: Observable<User | null>; // Pentru a afișa tab-ul doar producătorilor
   selectedFile: File | null = null; // Fișierul selectat de utilizator
@@ -29,7 +30,9 @@ export class ProfileComponent implements OnInit {
   ngOnInit(): void {
     this.createAddressForm();
     this.createPasswordForm(); 
+    this.createSellerPageForm();
     this.getAddress();
+    this.getSellerPage();
   }
 
   // --- LOGICA PENTRU ADRESĂ ---
@@ -74,6 +77,37 @@ export class ProfileComponent implements OnInit {
       oldPassword: ['', Validators.required],
       newPassword: ['', [Validators.required, Validators.pattern(passwordRegex)]],
       confirmPassword: ['', Validators.required]
+    });
+  }
+
+  createSellerPageForm() {
+    this.sellerPageForm = this.fb.group({
+      companyName: [''],
+      description: [''],
+      story: [''],
+      history: [''],
+      location: [''],
+      mapUrl: ['']
+    });
+  }
+
+  getSellerPage() {
+    this.accountService.getMySellerProfile().subscribe({
+      next: profile => this.sellerPageForm.patchValue(profile),
+      error: error => console.log(error)
+    });
+  }
+
+  onSubmitSellerPage() {
+    this.accountService.updateMySellerProfile(this.sellerPageForm.value).subscribe({
+      next: () => {
+        this.sellerPageForm.markAsPristine();
+        this.toastr.success('Pagina ta de vanzator a fost actualizata.');
+      },
+      error: error => {
+        console.log(error);
+        this.toastr.error('Nu s-a putut actualiza pagina.');
+      }
     });
   }
 

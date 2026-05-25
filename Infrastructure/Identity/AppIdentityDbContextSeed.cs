@@ -29,6 +29,7 @@ namespace Infrastructure.Identity
             // Dacă există deja useri, nu mai seed-uim.
             // Dacă ai deja useri @skinet.com în DB și vrei să îi înlocuiești,
             // trebuie să ștergi baza de date / să golești tabelele Identity.
+            await SeedSellerProfilesAsync(userManager);
             if (userManager.Users.Any()) return;
 
             var admin = new AppUser
@@ -287,6 +288,65 @@ namespace Infrastructure.Identity
             {
                 await userManager.CreateAsync(blogger, "Blogger@123");
                 await userManager.AddToRoleAsync(blogger, "Blogger");
+            }
+
+            await SeedSellerProfilesAsync(userManager);
+        }
+
+        private static async Task SeedSellerProfilesAsync(UserManager<AppUser> userManager)
+        {
+            var profiles = new Dictionary<string, (string Description, string Story, string History, string Location, string MapUrl)>
+            {
+                ["luxeskin@greenbeauty.com"] = (
+                    "Atelier de cosmetice proaspete, cu formule curate pentru rutine simple si eficiente.",
+                    "LuxeSkin Studio lucreaza in loturi mici, cu accent pe texturi usoare, ingrediente botanice si produse testate in rutina zilnica.",
+                    "Brandul a pornit ca un mic laborator local si s-a dezvoltat prin colaborari cu furnizori naturali si clienti care cauta ingrijire blanda.",
+                    "Bucuresti, Romania",
+                    "https://www.google.com/maps?q=Bucharest,Romania&output=embed"),
+                ["pureglow@greenbeauty.com"] = (
+                    "Laborator de cosmetice artizanale axat pe hidratare, calmare si formule pentru piele sensibila.",
+                    "PureGlow Lab creeaza produse in serii controlate, cu focus pe ingrediente stabile si senzorial placut.",
+                    "Echipa a inceput cu formule de ingrijire pentru familie si a transformat practica intr-un mic brand de laborator.",
+                    "Cluj-Napoca, Romania",
+                    "https://www.google.com/maps?q=Cluj-Napoca,Romania&output=embed"),
+                ["botanica@greenbeauty.com"] = (
+                    "Studio de skincare inspirat de extracte vegetale, creme fine si ritualuri blande.",
+                    "BotanicaBeauty combina plante, uleiuri si texturi moderne pentru produse usor de integrat in rutina de zi cu zi.",
+                    "Brandul s-a construit in jurul retetelor botanice si al colaborarii cu mici producatori locali.",
+                    "Brasov, Romania",
+                    "https://www.google.com/maps?q=Brasov,Romania&output=embed"),
+                ["naturesource@greenbeauty.com"] = (
+                    "Furnizor de ingrediente botanice proaspete pentru cosmetice handmade si formule de atelier.",
+                    "NatureSource selecteaza plante, frunze si extracte din ferme mici, cu trasabilitate si loturi atent verificate.",
+                    "Ferma a pornit cu culturi aromatice si s-a extins catre ingrediente pentru cosmetica naturala.",
+                    "Sibiu, Romania",
+                    "https://www.google.com/maps?q=Sibiu,Romania&output=embed"),
+                ["rawessentials@greenbeauty.com"] = (
+                    "Furnizor de unturi, baze si materii prime pentru balsamuri, creme si produse de corp.",
+                    "RawEssentials lucreaza cu ingrediente brute, atent pastrate, pentru producatori care vor formule consistente.",
+                    "Compania a crescut dintr-un mic depozit de materii prime catre un furnizor specializat pentru cosmetice handmade.",
+                    "Timisoara, Romania",
+                    "https://www.google.com/maps?q=Timisoara,Romania&output=embed"),
+                ["herbalroots@greenbeauty.com"] = (
+                    "Ferma de plante uscate, flori botanice si ingrediente aromatice pentru retete cosmetice naturale.",
+                    "HerbalRoots cultiva si usuca plante in loturi mici, pastrand culoarea, aroma si proprietatile botanice.",
+                    "Povestea lor a inceput cu o gradina de familie si s-a transformat intr-o ferma dedicata ingredientelor curate.",
+                    "Iasi, Romania",
+                    "https://www.google.com/maps?q=Iasi,Romania&output=embed")
+            };
+
+            foreach (var profile in profiles)
+            {
+                var user = await userManager.FindByEmailAsync(profile.Key);
+                if (user == null || !string.IsNullOrWhiteSpace(user.SellerDescription)) continue;
+
+                user.SellerDescription = profile.Value.Description;
+                user.SellerStory = profile.Value.Story;
+                user.SellerHistory = profile.Value.History;
+                user.SellerLocation = profile.Value.Location;
+                user.SellerMapUrl = profile.Value.MapUrl;
+
+                await userManager.UpdateAsync(user);
             }
         }
     }

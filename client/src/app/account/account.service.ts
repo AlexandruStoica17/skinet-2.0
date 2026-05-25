@@ -4,6 +4,7 @@ import { environment } from 'src/environments/environment';
 import { Address, User } from '../shared/models/user';
 import { BehaviorSubject, map, of, ReplaySubject } from 'rxjs';
 import { Router } from '@angular/router';
+import { SellerProfile, SellerProfileUpdate } from '../shared/models/sellerProfile';
 
 @Injectable({
   providedIn: 'root',
@@ -83,6 +84,21 @@ export class AccountService {
     // Trimitem datele către noul endpoint din C#
     return this.http.post(this.baseUrl + 'account/change-password', values);
   }
+  getSellerProfile(email: string, pageNumber = 1, pageSize = 8) {
+    return this.http.get<SellerProfile>(
+      this.baseUrl + 'sellers/by-email/' + encodeURIComponent(email) +
+      `?pageIndex=${pageNumber}&pageSize=${pageSize}`
+    );
+  }
+
+  getMySellerProfile() {
+    return this.http.get<SellerProfileUpdate>(this.baseUrl + 'sellers/me');
+  }
+
+  updateMySellerProfile(values: SellerProfileUpdate) {
+    return this.http.put(this.baseUrl + 'sellers/me', values);
+  }
+
   setCurrentUser(user: User | null) {
     if (user) {
       // 1. Decodificăm token-ul

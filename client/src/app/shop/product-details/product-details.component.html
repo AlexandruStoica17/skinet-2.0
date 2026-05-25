@@ -81,7 +81,15 @@
                     <div class="badge bg-light text-dark border p-2 fs-6">
                         <i class="fa fa-store-alt text-primary me-2"></i>
                         Vândut și livrat de:
-                        <span class="fw-bold text-primary ms-1">{{ product.producerName || 'Magazinul Nostru' }}</span>
+                        <a
+                            *ngIf="product.producerEmail"
+                            class="fw-bold text-primary ms-1"
+                            [routerLink]="['/seller', product.producerEmail]">
+                            {{ product.producerName || 'Magazinul Nostru' }}
+                        </a>
+                        <span *ngIf="!product.producerEmail" class="fw-bold text-primary ms-1">
+                            {{ product.producerName || 'Magazinul Nostru' }}
+                        </span>
                     </div>
                 </div>
 

@@ -20,6 +20,8 @@ import { EditProductComponent } from './producer/edit-product/edit-product.compo
 import { ProducerOrdersComponent } from './producer/producer-orders/producer-orders.component';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router'; // NOU: necesar pentru routerLink in ProducerOrdersComponent
+import { SharedModule } from './shared/shared.module';
+import { SellerProfileComponent } from './seller-profile/seller-profile.component';
 
 @NgModule({
   declarations: [
@@ -29,6 +31,7 @@ import { RouterModule } from '@angular/router'; // NOU: necesar pentru routerLin
     MyProductsComponent,
     EditProductComponent,
     ProducerOrdersComponent,
+    SellerProfileComponent,
   ],
   imports: [
     BrowserModule,
@@ -43,6 +46,7 @@ import { RouterModule } from '@angular/router'; // NOU: necesar pentru routerLin
     FormsModule,       // NOU: necesar pentru [(ngModel)] in producer components
     CommonModule,      // FIX: decomentam — necesar pentru *ngIf, *ngFor, pipes
     RouterModule,      // FIX: necesar pentru routerLink, queryParams in ProducerOrdersComponent
+    SharedModule,
   ],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },

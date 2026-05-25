@@ -29,6 +29,12 @@
                         <i class="fa fa-id-card-o me-2"></i> Verificare Cont
                         <i *ngIf="user.isVerified" class="fa fa-check-circle text-success ms-2" title="Cont Verificat"></i>
                     </a>
+                    <a class="list-group-item list-group-item-action"
+                       *ngIf="user.role?.includes('Producer')"
+                       [class.active]="activeTab === 'myPage'"
+                       (click)="activeTab = 'myPage'">
+                        <i class="fa fa-building-o me-2"></i> My Page
+                    </a>
                 </div>
             </div>
         </div>
@@ -105,6 +111,54 @@
                         <div class="d-flex justify-content-end">
                             <button type="submit" class="btn btn-primary" [disabled]="passwordForm.invalid">
                                 Schimbă Parola
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card shadow-sm" *ngIf="activeTab === 'myPage'">
+                <div class="card-header bg-white">
+                    <h4 class="mb-0 py-2">Pagina mea de vanzator</h4>
+                </div>
+                <div class="card-body p-4" *ngIf="sellerPageForm">
+                    <form [formGroup]="sellerPageForm" (ngSubmit)="onSubmitSellerPage()">
+                        <div class="form-group mb-3">
+                            <label class="form-label">Numele firmei</label>
+                            <input type="text" class="form-control" formControlName="companyName">
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label class="form-label">Scurta descriere</label>
+                            <textarea class="form-control" rows="3" formControlName="description"></textarea>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label class="form-label">Povestea voastra</label>
+                            <textarea class="form-control" rows="4" formControlName="story"></textarea>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label class="form-label">Scurt istoric</label>
+                            <textarea class="form-control" rows="3" formControlName="history"></textarea>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label class="form-label">Locatie</label>
+                            <input type="text" class="form-control" formControlName="location" placeholder="Ex: Brasov, Romania">
+                        </div>
+
+                        <div class="form-group mb-4">
+                            <label class="form-label">Link harta Google Maps embed</label>
+                            <input type="text" class="form-control" formControlName="mapUrl" placeholder="https://www.google.com/maps/embed?...">
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a class="btn btn-outline-secondary" [routerLink]="['/seller', user.email]">
+                                Vezi pagina publica
+                            </a>
+                            <button type="submit" class="btn btn-primary" [disabled]="sellerPageForm.invalid || !sellerPageForm.dirty">
+                                Salveaza pagina
                             </button>
                         </div>
                     </form>

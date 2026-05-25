@@ -21,5 +21,10 @@ namespace Core.Entities.Identity
         
         public string CompanyName { get; set; } // Pentru facturare/vitrină
         public string DocumentUrl { get; set; } // Aici vom salva calea către PDF/Poza cu actele firmei
+        public string SellerDescription { get; set; }
+        public string SellerStory { get; set; }
+        public string SellerHistory { get; set; }
+        public string SellerLocation { get; set; }
+        public string SellerMapUrl { get; set; }
     }
 }
