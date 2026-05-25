@@ -9,7 +9,6 @@ namespace Infrastructure.Identity
             UserManager<AppUser> userManager,
             RoleManager<IdentityRole> roleManager)
         {
-            // ── Roles ────────────────────────────────────────────────────────
             var roles = new[]
             {
                 "Admin",
@@ -22,18 +21,21 @@ namespace Infrastructure.Identity
             foreach (var role in roles)
             {
                 if (!await roleManager.RoleExistsAsync(role))
+                {
                     await roleManager.CreateAsync(new IdentityRole(role));
+                }
             }
 
-            // ── Skip if users already exist ──────────────────────────────────
+            // Dacă există deja useri, nu mai seed-uim.
+            // Dacă ai deja useri @skinet.com în DB și vrei să îi înlocuiești,
+            // trebuie să ștergi baza de date / să golești tabelele Identity.
             if (userManager.Users.Any()) return;
 
-            // ── Admin ────────────────────────────────────────────────────────
             var admin = new AppUser
             {
                 DisplayName = "Admin",
-                Email = "admin@skinet.com",
-                UserName = "admin@skinet.com",
+                Email = "admin@greenbeauty.com",
+                UserName = "admin@greenbeauty.com",
                 IsVerified = true,
                 Address = new Address
                 {
@@ -45,61 +47,61 @@ namespace Infrastructure.Identity
                     Zipcode = "15795"
                 }
             };
+
             await userManager.CreateAsync(admin, "Admin@123");
             await userManager.AddToRoleAsync(admin, "Admin");
 
-            // ── Cosmetics Producers (3) ───────────────────────────────────────
             var cosmeticsProducers = new[]
             {
                 new AppUser
                 {
                     DisplayName = "LuxeSkin Studio",
-                    Email       = "luxeskin@skinet.com",
-                    UserName    = "luxeskin@skinet.com",
-                    IsVerified  = true,
+                    Email = "luxeskin@greenbeauty.com",
+                    UserName = "luxeskin@greenbeauty.com",
+                    IsVerified = true,
                     CompanyName = "LuxeSkin Studio SRL",
                     Address = new Address
                     {
                         FirstName = "LuxeSkin",
-                        LastName  = "Studio",
-                        Street    = "LuxeSkin Street",
-                        City      = "New York",
-                        State     = "NY",
-                        Zipcode   = "15648"
+                        LastName = "Studio",
+                        Street = "LuxeSkin Street",
+                        City = "New York",
+                        State = "NY",
+                        Zipcode = "15648"
                     }
                 },
                 new AppUser
                 {
                     DisplayName = "PureGlow Lab",
-                    Email       = "pureglow@skinet.com",
-                    UserName    = "pureglow@skinet.com",
-                    IsVerified  = true,
+                    Email = "pureglow@greenbeauty.com",
+                    UserName = "pureglow@greenbeauty.com",
+                    IsVerified = true,
                     CompanyName = "PureGlow Lab SRL",
                     Address = new Address
                     {
                         FirstName = "PureGlow",
-                        LastName  = "Lab",
-                        Street    = "PureGlow Street",
-                        City      = "New York",
-                        State     = "NY",
-                        Zipcode   = "30154"
+                        LastName = "Lab",
+                        Street = "PureGlow Street",
+                        City = "New York",
+                        State = "NY",
+                        Zipcode = "30154"
                     }
                 },
                 new AppUser
                 {
                     DisplayName = "BotanicaBeauty",
-                    Email       = "botanica@skinet.com",
-                    UserName    = "botanica@skinet.com",
-                    IsVerified  = true,
+                    Email = "botanica@greenbeauty.com",
+                    UserName = "botanica@greenbeauty.com",
+                    IsVerified = true,
                     CompanyName = "BotanicaBeauty SRL",
                     Address = new Address
                     {
                         FirstName = "Botanica",
-                        LastName  = "Beauty",
-                        Street    = "BotanicaBeauty Street",
-                        City      = "New York",
-                        State     = "NY",
-                        Zipcode   = "48752"
+                        LastName = "Beauty",
+                        Street = "BotanicaBeauty Street",
+                        City = "New York",
+                        State = "NY",
+                        Zipcode = "48752"
                     }
                 }
             };
@@ -110,58 +112,57 @@ namespace Infrastructure.Identity
                 await userManager.AddToRoleAsync(producer, "CosmeticsProducer");
             }
 
-            // ── Ingredients Producers (3) ─────────────────────────────────────
             var ingredientProducers = new[]
             {
                 new AppUser
                 {
                     DisplayName = "NatureSource",
-                    Email       = "naturesource@skinet.com",
-                    UserName    = "naturesource@skinet.com",
-                    IsVerified  = true,
+                    Email = "naturesource@greenbeauty.com",
+                    UserName = "naturesource@greenbeauty.com",
+                    IsVerified = true,
                     CompanyName = "NatureSource SRL",
                     Address = new Address
                     {
                         FirstName = "Nature",
-                        LastName  = "Source",
-                        Street    = "NatureSource Street",
-                        City      = "New York",
-                        State     = "NY",
-                        Zipcode   = "15601"
+                        LastName = "Source",
+                        Street = "NatureSource Street",
+                        City = "New York",
+                        State = "NY",
+                        Zipcode = "15601"
                     }
                 },
                 new AppUser
                 {
                     DisplayName = "RawEssentials",
-                    Email       = "rawessentials@skinet.com",
-                    UserName    = "rawessentials@skinet.com",
-                    IsVerified  = true,
+                    Email = "rawessentials@greenbeauty.com",
+                    UserName = "rawessentials@greenbeauty.com",
+                    IsVerified = true,
                     CompanyName = "RawEssentials SRL",
                     Address = new Address
                     {
                         FirstName = "Raw",
-                        LastName  = "Essentials",
-                        Street    = "RawEssentials Street",
-                        City      = "New York",
-                        State     = "NY",
-                        Zipcode   = "55401"
+                        LastName = "Essentials",
+                        Street = "RawEssentials Street",
+                        City = "New York",
+                        State = "NY",
+                        Zipcode = "55401"
                     }
                 },
                 new AppUser
                 {
                     DisplayName = "HerbalRoots",
-                    Email       = "herbalroots@skinet.com",
-                    UserName    = "herbalroots@skinet.com",
-                    IsVerified  = true,
+                    Email = "herbalroots@greenbeauty.com",
+                    UserName = "herbalroots@greenbeauty.com",
+                    IsVerified = true,
                     CompanyName = "HerbalRoots SRL",
                     Address = new Address
                     {
                         FirstName = "Herbal",
-                        LastName  = "Roots",
-                        Street    = "HerbalRoots Blvd",
-                        City      = "New York",
-                        State     = "NY",
-                        Zipcode   = "41001"
+                        LastName = "Roots",
+                        Street = "HerbalRoots Blvd",
+                        City = "New York",
+                        State = "NY",
+                        Zipcode = "41001"
                     }
                 }
             };
@@ -172,55 +173,54 @@ namespace Infrastructure.Identity
                 await userManager.AddToRoleAsync(producer, "IngredientsProducer");
             }
 
-            // ── Buyers (3) ───────────────────────────────────────────────────
             var buyers = new[]
             {
                 new AppUser
                 {
                     DisplayName = "Alice",
-                    Email       = "alice@skinet.com",
-                    UserName    = "alice@skinet.com",
-                    IsVerified  = true,
+                    Email = "alice@greenbeauty.com",
+                    UserName = "alice@greenbeauty.com",
+                    IsVerified = true,
                     Address = new Address
                     {
                         FirstName = "Alice",
-                        LastName  = "Johnson",
-                        Street    = "14 Rose Street",
-                          City      = "New York",
-                        State     = "NY",
-                        Zipcode   = "010001"
+                        LastName = "Johnson",
+                        Street = "14 Rose Street",
+                        City = "New York",
+                        State = "NY",
+                        Zipcode = "010001"
                     }
                 },
                 new AppUser
                 {
                     DisplayName = "Maria",
-                    Email       = "maria@skinet.com",
-                    UserName    = "maria@skinet.com",
-                    IsVerified  = true,
+                    Email = "maria@greenbeauty.com",
+                    UserName = "maria@greenbeauty.com",
+                    IsVerified = true,
                     Address = new Address
                     {
                         FirstName = "Maria",
-                        LastName  = "Popescu",
-                        Street    = "2 Tulips Street",
-                         City      = "New York",
-                        State     = "NY",
-                        Zipcode   = "400010"
+                        LastName = "Popescu",
+                        Street = "2 Tulips Street",
+                        City = "New York",
+                        State = "NY",
+                        Zipcode = "400010"
                     }
                 },
                 new AppUser
                 {
                     DisplayName = "Elena",
-                    Email       = "elena@skinet.com",
-                    UserName    = "elena@skinet.com",
-                    IsVerified  = true,
+                    Email = "elena@greenbeauty.com",
+                    UserName = "elena@greenbeauty.com",
+                    IsVerified = true,
                     Address = new Address
                     {
                         FirstName = "Elena",
-                        LastName  = "Ionescu",
-                        Street    = "New Street",
-                          City      = "New York",
-                        State     = "NY",
-                        Zipcode   = "900001"
+                        LastName = "Ionescu",
+                        Street = "New Street",
+                        City = "New York",
+                        State = "NY",
+                        Zipcode = "900001"
                     }
                 }
             };
@@ -231,55 +231,54 @@ namespace Infrastructure.Identity
                 await userManager.AddToRoleAsync(buyer, "Buyer");
             }
 
-            // ── Bloggers (3) ─────────────────────────────────────────────────
             var bloggers = new[]
             {
                 new AppUser
                 {
                     DisplayName = "SkincareDiary",
-                    Email       = "skincarediary@skinet.com",
-                    UserName    = "skincarediary@skinet.com",
-                    IsVerified  = true,
+                    Email = "skincarediary@greenbeauty.com",
+                    UserName = "skincarediary@greenbeauty.com",
+                    IsVerified = true,
                     Address = new Address
                     {
                         FirstName = "Skincare",
-                        LastName  = "Diary",
-                        Street    = "1 Beauty Blvd",
-                         City      = "New York",
-                        State     = "NY",
-                        Zipcode   = "02001"
+                        LastName = "Diary",
+                        Street = "1 Beauty Blvd",
+                        City = "New York",
+                        State = "NY",
+                        Zipcode = "02001"
                     }
                 },
                 new AppUser
                 {
                     DisplayName = "GreenBeautyBlog",
-                    Email       = "greenbeauty@skinet.com",
-                    UserName    = "greenbeauty@skinet.com",
-                    IsVerified  = true,
+                    Email = "greenbeautyblog@greenbeauty.com",
+                    UserName = "greenbeautyblog@greenbeauty.com",
+                    IsVerified = true,
                     Address = new Address
                     {
                         FirstName = "Green",
-                        LastName  = "Beauty",
-                        Street    = "9 Eco Street",
-                          City      = "New York",
-                        State     = "NY",
-                        Zipcode   = "40020"
+                        LastName = "Beauty",
+                        Street = "9 Eco Street",
+                        City = "New York",
+                        State = "NY",
+                        Zipcode = "40020"
                     }
                 },
                 new AppUser
                 {
                     DisplayName = "NaturalGlowBlog",
-                    Email       = "naturalglow@skinet.com",
-                    UserName    = "naturalglow@skinet.com",
-                    IsVerified  = true,
+                    Email = "naturalglow@greenbeauty.com",
+                    UserName = "naturalglow@greenbeauty.com",
+                    IsVerified = true,
                     Address = new Address
                     {
                         FirstName = "Natural",
-                        LastName  = "Glow",
-                        Street    = "NaturalGlow Street",
-                          City      = "New York",
-                        State     = "NY",
-                        Zipcode   = "30010"
+                        LastName = "Glow",
+                        Street = "NaturalGlow Street",
+                        City = "New York",
+                        State = "NY",
+                        Zipcode = "30010"
                     }
                 }
             };

@@ -50,9 +50,13 @@ var logger = services.GetRequiredService<ILogger<Program>>();
 
 try
 {
-    await context.Database.MigrateAsync();
-    await StoreContextSeed.SeedAsync(context);
-    await AppIdentityDbContextSeed.SeedUsersAsync(userManager, roleManager);
+   await context.Database.MigrateAsync();
+
+// MODIFICAT: întâi seed-uim userii/producătorii
+await AppIdentityDbContextSeed.SeedUsersAsync(userManager, roleManager);
+
+// MODIFICAT: apoi seed-uim produsele, pentru că ele au ProducerId / ProducerName
+await StoreContextSeed.SeedAsync(context, userManager);
 }
 catch (Exception ex)
 {
