@@ -178,7 +178,7 @@ export class ProductDetailsComponent implements OnInit {
 
   contactSeller() {
     if (this.product?.producerEmail) {
-      this.router.navigate(['/chat'], {
+      this.router.navigate(['/chat', 'conversation'], {
         queryParams: { user: this.product.producerEmail }
       });
     }

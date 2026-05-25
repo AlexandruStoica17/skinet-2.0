@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using API.Dtos;
 using API.Errors;
 using API.Extensions;
+using API.SignalR;
 using AutoMapper;
 using Core.Entities;
 using Core.Entities.Identity;
@@ -15,6 +16,7 @@ using Core.Specifications;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 
 namespace API.Controllers
 {
@@ -25,14 +27,24 @@ namespace API.Controllers
         private readonly IMapper _mapper;
         private readonly IUnitOfWork _unitOfWork;
         private readonly UserManager<AppUser> _userManager;
+        private readonly IHubContext<MessageHub> _messageHub;
+        private readonly IHubContext<NotificationHub> _notificationHub;
+        private readonly IHubContext<PresenceHub> _presenceHub;
 
         public OrdersController(IOrderService orderService, IMapper mapper,
-            IUnitOfWork unitOfWork, UserManager<AppUser> userManager)
+            IUnitOfWork unitOfWork,
+            UserManager<AppUser> userManager,
+            IHubContext<MessageHub> messageHub,
+            IHubContext<NotificationHub> notificationHub,
+            IHubContext<PresenceHub> presenceHub)
         {
             _mapper = mapper;
             _orderService = orderService;
             _unitOfWork = unitOfWork;
             _userManager = userManager;
+            _messageHub = messageHub;
+            _notificationHub = notificationHub;
+            _presenceHub = presenceHub;
         }
 
         [HttpPost]
@@ -121,7 +133,10 @@ namespace API.Controllers
                 };
 
                 _unitOfWork.Repository<Message>().Add(systemMsg);
-                await _unitOfWork.Complete();
+                if (await _unitOfWork.Complete() > 0)
+                {
+                    await NotifyOrderMessageAsync(systemMsg, producer, buyer);
+                }
             }
 
             return _mapper.Map<Order, OrderToReturnDto>(order);
@@ -167,11 +182,48 @@ namespace API.Controllers
                     };
 
                     _unitOfWork.Repository<Message>().Add(systemMsg);
-                    await _unitOfWork.Complete();
+                    if (await _unitOfWork.Complete() > 0)
+                    {
+                        await NotifyOrderMessageAsync(systemMsg, producer, buyer);
+                    }
                 }
             }
 
             return _mapper.Map<Order, OrderToReturnDto>(order);
+        }
+
+        private async Task NotifyOrderMessageAsync(Message message, AppUser sender, AppUser recipient)
+        {
+            var groupName = GetGroupName(sender.Email, recipient.Email) + $"_order_{message.OrderId}";
+
+            await _messageHub.Clients.Group(groupName).SendAsync(
+                "NewMessage",
+                _mapper.Map<MessageDto>(message));
+
+            var unreadSpec = new UnreadMessagesSpecification(recipient.Email);
+            var unreadCount = await _unitOfWork.Repository<Message>().CountAsync(unreadSpec);
+            await _notificationHub.Clients.User(recipient.Email).SendAsync("UnreadCount", unreadCount);
+
+            var recipientConnections = await PresenceTracker.GetConnectionsForUser(recipient.Email);
+            if (recipientConnections.Any())
+            {
+                await _presenceHub.Clients.Clients(recipientConnections).SendAsync(
+                    "NewMessageReceived",
+                    new
+                    {
+                        senderEmail = sender.Email,
+                        senderName = sender.DisplayName,
+                        orderId = message.OrderId,
+                        isSystemMessage = message.IsSystemMessage,
+                        content = message.Content
+                    });
+            }
+        }
+
+        private string GetGroupName(string caller, string other)
+        {
+            var stringCompare = string.CompareOrdinal(caller, other) < 0;
+            return stringCompare ? $"{caller}-{other}" : $"{other}-{caller}";
         }
     }
 }

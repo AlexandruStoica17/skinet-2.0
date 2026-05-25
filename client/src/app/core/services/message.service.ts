@@ -103,19 +103,35 @@ export class MessageService {
     this.presenceConnection.start().catch(error => console.log(error));
 
     // FIX: toast cu click direct la conversatie
-    this.presenceConnection.on('NewMessageReceived', ({ senderEmail, senderName }) => {
+    this.presenceConnection.on('NewMessageReceived', ({ senderEmail, senderName, orderId, isSystemMessage, content }) => {
       // FIX: nu afisam toast daca suntem deja in conversatia cu acel user
       const currentUrl = this.router.url;
       const isInConversation = currentUrl.includes('/chat/conversation') &&
-                               currentUrl.includes(encodeURIComponent(senderEmail));
+                               currentUrl.includes(encodeURIComponent(senderEmail)) &&
+                               (!orderId || currentUrl.includes(`orderId=${orderId}`));
 
       if (!isInConversation) {
+        if (isSystemMessage && orderId) {
+          this.toastr.info(content || `Ai un update pentru comanda #${orderId}. Click pentru a vedea.`, '', {
+            timeOut: 5000,
+            progressBar: true
+          }).onTap.pipe(take(1)).subscribe(() => {
+            this.router.navigate(['/chat', 'conversation'], {
+              queryParams: { user: senderEmail, orderId }
+            });
+          });
+          return;
+        }
+
         this.toastr.info(`${senderName} ți-a trimis un mesaj nou. Click pentru a vedea.`, '', {
           timeOut: 5000,
           progressBar: true
         }).onTap.pipe(take(1)).subscribe(() => {
+          const queryParams: any = { user: senderEmail };
+          if (orderId) queryParams.orderId = orderId;
+
           this.router.navigate(['/chat', 'conversation'], {
-            queryParams: { user: senderEmail }
+            queryParams
           });
         });
       }
