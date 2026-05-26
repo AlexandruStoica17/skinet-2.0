@@ -125,13 +125,13 @@
 
   summary::after {
     content: '+';
-    font-family: Arial, sans-serif;
+    font-family: 'Cormorant Garamond', Georgia, serif;
     font-size: 1rem;
     color: #7b806f;
   }
 
   &[open] summary::after {
-    content: '–';
+    content: '-';
   }
 }
 

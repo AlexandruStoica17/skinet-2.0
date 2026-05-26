@@ -1,10 +1,10 @@
-<header class="d-flex flex-row align-items-center justify-content-between p-3 px-4 mb-3
- bg-white border-bottom fixed-top shadow-sm">
+<header class="site-header fixed-top">
+    <div class="site-header__inner">
+        <a class="brand-logo" routerLink="/">
+            GreenBeauty
+        </a>
 
-    <img src="/assets/images/logo.png" alt="logo" class="logo"
-         style="max-height: 70px;" routerLink="/">
-
-    <nav class="my-2 text-uppercase fs-5 d-flex align-items-center gap-3">
+        <nav class="site-nav text-uppercase">
 
         <a class="p-2" routerLink="/"
            routerLinkActive="active"
@@ -39,8 +39,8 @@
 
         <!-- NEW: What's New page -->
         <a routerLink="/whats-new" routerLinkActive="active" class="nav-link">
-  WHAT'S NEW
-</a>
+            WHAT'S NEW
+        </a>
 
         <!-- Blog — existing -->
         <a class="p-2" routerLink="/blog" routerLinkActive="active">Blog</a>
@@ -51,12 +51,12 @@
            routerLink="/favorites"
            routerLinkActive="active">Favorites</a>
 
-    </nav>
+        </nav>
 
-    <div class="d-flex align-items-center">
+        <div class="site-actions">
 
         <!-- Basket icon (existing) -->
-        <a routerLink="/basket" class="position-relative me-4">
+        <a routerLink="/basket" class="header-icon-link position-relative">
             <i class="fa fa-shopping-cart fa-2x text-dark"></i>
             <div *ngIf="(basketService.basketSource$ | async) as basket" class="cart-no">
                 {{getCount(basket.items)}}
@@ -65,7 +65,7 @@
 
         <!-- Messages icon (existing) -->
         <a routerLink="/chat"
-           class="position-relative me-5"
+           class="header-icon-link position-relative"
            *ngIf="(accountService.currentUser$ | async)"
            title="Messages">
             <i class="fa fa-comments fa-2x text-dark"></i>
@@ -83,7 +83,7 @@
 
         <!-- Logged in — user dropdown -->
         <ng-container *ngIf="accountService.currentUser$ | async as user">
-            <div class="dropdown ms-3 me-5" style="cursor: pointer;" dropdown>
+            <div class="dropdown user-menu" dropdown>
                 <a dropdownToggle class="dropdown-toggle">
                     <strong>Welcome {{user.displayName}}</strong>
                 </a>
@@ -172,5 +172,6 @@
             </div>
         </ng-container>
 
+        </div>
     </div>
 </header>
