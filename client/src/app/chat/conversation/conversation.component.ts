@@ -69,10 +69,10 @@ export class ConversationComponent implements OnInit, OnDestroy {
             // ---> MODIFICAT AICI: Verificam statusul comenzii si daca afisam bara de confirmare
             this.messageService.messageThread$.subscribe(messages => {
               const alreadyDelivered = messages.some(m =>
-                m.content.includes('a confirmat primirea') || m.isReviewPrompt
+                m.content.includes('confirmed delivery') || m.isReviewPrompt
               );
               
-              const shippedMsg = messages.find(m => m.content.includes('a fost expediată'));
+              const shippedMsg = messages.find(m => m.content.includes('has been shipped'));
               const isBuyer = shippedMsg && shippedMsg.recipientUsername === this.currentUserEmail;
 
               if (alreadyDelivered) {

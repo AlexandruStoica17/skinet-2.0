@@ -19,7 +19,7 @@ export class AdminGuard implements CanActivate {
           return true;
         }
         
-        this.toastr.error('Nu ai acces la această secțiune!');
+        this.toastr.error('You do not have access to this section!');
         this.router.navigateByUrl('/');
         return false;
       })

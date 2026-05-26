@@ -63,7 +63,7 @@ export class ProfileComponent implements OnInit {
       next: address => {
         this.addressForm.patchValue(address);
         this.addressForm.markAsPristine();
-        this.toastr.success('Adresa a fost actualizată cu succes!');
+        this.toastr.success('Address updated successfully!');
       },
       error: error => console.log(error)
     });
@@ -102,11 +102,11 @@ export class ProfileComponent implements OnInit {
     this.accountService.updateMySellerProfile(this.sellerPageForm.value).subscribe({
       next: () => {
         this.sellerPageForm.markAsPristine();
-        this.toastr.success('Pagina ta de vanzator a fost actualizata.');
+        this.toastr.success('Your seller page was updated.');
       },
       error: error => {
         console.log(error);
-        this.toastr.error('Nu s-a putut actualiza pagina.');
+        this.toastr.error('Could not update the page.');
       }
     });
   }
@@ -115,18 +115,18 @@ export class ProfileComponent implements OnInit {
     const values = this.passwordForm.value;
 
     if (values.newPassword !== values.confirmPassword) {
-      this.toastr.error('Parolele noi nu coincid!');
+      this.toastr.error('The new passwords do not match!');
       return; 
     }
 
     this.accountService.changePassword(values).subscribe({
       next: (res: any) => {
-        this.toastr.success(res?.message || 'Parola a fost schimbată cu succes!');
+        this.toastr.success(res?.message || 'Password changed successfully!');
         this.passwordForm.reset(); 
       },
       error: error => {
         console.log(error);
-        this.toastr.error('Eroare. Posibil ca parola curentă să fie incorectă.');
+        this.toastr.error('Error. The current password may be incorrect.');
       }
     });
   }
@@ -144,12 +144,12 @@ export class ProfileComponent implements OnInit {
 
     this.accountService.uploadVerificationDocument(formData).subscribe({
       next: () => {
-        this.toastr.success('Document trimis! Așteaptă aprobarea administratorului.');
+        this.toastr.success('Document submitted! Wait for administrator approval.');
         this.selectedFile = null;
       },
       error: error => {
         console.log(error);
-        this.toastr.error('Eroare la încărcarea fișierului.');
+        this.toastr.error('Error uploading file.');
       }
     });
   }

@@ -84,9 +84,9 @@ namespace API.Controllers
             user.SellerMapUrl = sellerProfile.MapUrl;
 
             var result = await _userManager.UpdateAsync(user);
-            if (!result.Succeeded) return BadRequest(new ApiResponse(400, "Nu s-a putut actualiza pagina vanzatorului."));
+            if (!result.Succeeded) return BadRequest(new ApiResponse(400, "Could not update the seller page."));
 
-            return Ok(new { message = "Pagina vanzatorului a fost actualizata." });
+            return Ok(new { message = "Seller page updated." });
         }
 
         private SellerProfileDto CreateSellerProfileDto(

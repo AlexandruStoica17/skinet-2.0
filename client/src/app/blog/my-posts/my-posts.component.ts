@@ -32,22 +32,22 @@ export class MyPostsComponent implements OnInit {
       error: error => {
         console.log(error);
         this.loading = false;
-        this.toastr.error('Nu s-au putut încărca articolele tale.');
+        this.toastr.error('Could not load your posts.');
       }
     });
   }
 
   deletePost(id: number) {
-    if (!confirm('Sigur vrei să ștergi acest articol?')) return;
+    if (!confirm('Are you sure you want to delete this article?')) return;
 
     this.blogService.deletePost(id).subscribe({
       next: () => {
-        this.toastr.success('Articolul a fost șters.');
+        this.toastr.success('Article deleted.');
         this.posts = this.posts.filter(p => p.id !== id);
       },
       error: error => {
         console.log(error);
-        this.toastr.error('Nu s-a putut șterge articolul.');
+        this.toastr.error('Could not delete the article.');
       }
     });
   }

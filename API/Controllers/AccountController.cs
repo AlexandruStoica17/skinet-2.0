@@ -147,7 +147,7 @@ namespace API.Controllers
                 return ValidationProblem();
             }
 
-            return Ok(new { message = "Parola a fost actualizată cu succes!" });
+            return Ok(new { message = "Password updated successfully!" });
         }
 
         // --- NOU: ENDPOINT PENTRU UPLOAD DOCUMENTE ---
@@ -158,7 +158,7 @@ namespace API.Controllers
             // Folosim extensia ta existentă pentru a găsi userul logat
             var user = await _userManager.FindByEmailFromClaimsPrinciple(User);
             
-            if (file == null || file.Length == 0) return BadRequest("Niciun fișier selectat.");
+            if (file == null || file.Length == 0) return BadRequest("No file selected.");
 
             // Creăm un folder 'Content/Documents' în API dacă nu există
             var path = Path.Combine(Directory.GetCurrentDirectory(), "Content", "Documents");
@@ -178,22 +178,22 @@ namespace API.Controllers
             user.DocumentUrl = "Content/Documents/" + fileName;
             await _userManager.UpdateAsync(user);
 
-            return Ok(new { message = "Document încărcat cu succes!" });
+            return Ok(new { message = "Document uploaded successfully!" });
         }
 
         [HttpGet("make-me-admin")]
         public async Task<ActionResult> MakeMeAdmin(string email)
         {
             var user = await _userManager.FindByEmailAsync(email);
-            if (user == null) return NotFound("Utilizatorul nu a fost găsit.");
+            if (user == null) return NotFound("User was not found.");
 
             // Îi dăm rolul de Admin
             var result = await _userManager.AddToRoleAsync(user, "Admin");
 
             if (result.Succeeded) 
-                return Ok("Magie! Utilizatorul este acum Admin. Dă Logout și Login în Angular!");
+                return Ok("Done. The user is now an Admin. Log out and back in Angular.");
             
-            return BadRequest("A apărut o eroare sau are deja rolul.");
+            return BadRequest("An error occurred or the user already has the role.");
         }
     }
 }

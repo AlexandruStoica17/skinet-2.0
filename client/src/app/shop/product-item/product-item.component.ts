@@ -36,20 +36,20 @@ export class ProductItemComponent implements OnInit {
           if (user) {
             // Trimitem ID-ul produsului și Email-ul către C#
             this.likesService.addLike(this.product!.id, user.email).subscribe({
-              next: () => this.toastr.success('Ai adăugat ' + this.product?.name + ' la favorite!'),
+              next: () => this.toastr.success('Added ' + this.product?.name + ' to favorites!'),
               error: (error) => {
                 // Aici va pica dacă e deja adăugat (eroarea 400 setată de tine în C#)
-                if (error.error?.message === "Produsul este deja la favorite") {
-                  this.toastr.warning('Acest produs este deja în lista ta!');
+                if (error.error?.message === "Product is already in favorites") {
+                  this.toastr.warning('This product is already in your list!');
                 } else {
-                  this.toastr.error('A apărut o eroare la adăugare.');
+                  this.toastr.error('An error occurred while adding.');
                 }
                 console.log(error);
               }
             });
           } else {
             // Dacă apasă pe inimă fără să fie logat
-            this.toastr.error('Trebuie să fii logat pentru a adăuga la favorite!');
+            this.toastr.error('You need to be logged in to add favorites!');
           }
         }
       });

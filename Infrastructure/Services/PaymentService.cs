@@ -41,7 +41,7 @@ namespace Infrastructure.Services
                 // --- LOGICA NOUĂ DE MARKETPLACE ---
                 // Numărăm câți producători unici avem (folosind "Magazinul Nostru" ca fallback pentru cele fără nume)
                 var uniqueProducersCount = basket.Items
-                    .Select(x => string.IsNullOrEmpty(x.ProducerName) ? "Magazinul Nostru" : x.ProducerName)
+                    .Select(x => string.IsNullOrEmpty(x.ProducerName) ? "Our Store" : x.ProducerName)
                     .Distinct()
                     .Count();
 

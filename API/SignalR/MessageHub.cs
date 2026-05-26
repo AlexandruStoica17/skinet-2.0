@@ -82,11 +82,11 @@ namespace API.SignalR
             var email = Context.User.RetrieveEmailFromPrincipal();
 
             if (email == createMessageDto.RecipientUsername.ToLower())
-                throw new HubException("Nu îți poți trimite mesaje ție însuți.");
+                throw new HubException("You cannot send messages to yourself.");
 
             var sender = await _userManager.FindByEmailAsync(email);
             var recipient = await _userManager.FindByEmailAsync(createMessageDto.RecipientUsername);
-            if (recipient == null) throw new HubException("Utilizatorul nu a fost găsit.");
+            if (recipient == null) throw new HubException("User was not found.");
 
             var message = new Message
             {

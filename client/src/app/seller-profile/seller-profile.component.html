@@ -4,10 +4,10 @@
       <p class="seller-label">{{ seller.sellerType === 'Ingredients' ? 'Ingredient producer' : 'Cosmetics producer' }}</p>
       <h1>{{ seller.companyName || seller.displayName }}</h1>
       <p class="seller-intro">
-        {{ seller.description || 'Acest vanzator pregateste pagina publica. Produsele disponibile sunt listate mai jos.' }}
+        {{ seller.description || 'This seller is preparing their public page. Available products are listed below.' }}
       </p>
       <div class="seller-meta">
-        <span *ngIf="seller.isVerified"><i class="fa fa-check-circle"></i> Vanzator acreditat</span>
+        <span *ngIf="seller.isVerified"><i class="fa fa-check-circle"></i> Verified seller</span>
         <span *ngIf="seller.location"><i class="fa fa-map-marker"></i> {{ seller.location }}</span>
       </div>
     </div>
@@ -16,38 +16,38 @@
   <section class="seller-layout">
     <div class="seller-main">
       <section>
-        <h2>Povestea lor</h2>
-        <p>{{ seller.story || 'Vanzatorul nu a adaugat inca povestea companiei.' }}</p>
+        <h2>Their Story</h2>
+        <p>{{ seller.story || 'The seller has not added their company story yet.' }}</p>
       </section>
 
       <section>
-        <h2>Scurt istoric</h2>
-        <p>{{ seller.history || 'Istoricul va fi completat de vanzator.' }}</p>
+        <h2>Brief History</h2>
+        <p>{{ seller.history || 'The seller will complete this history soon.' }}</p>
       </section>
 
       <section *ngIf="seller.documentUrl">
-        <h2>Documente acreditare</h2>
+        <h2>Accreditation Documents</h2>
         <a class="document-link" [href]="getDocumentUrl(seller.documentUrl)" target="_blank" rel="noopener">
           <i class="fa fa-file-text-o"></i>
-          Vezi documentele incarcate
+          View uploaded documents
         </a>
       </section>
     </div>
 
     <aside class="seller-side">
-      <h2>Locatie</h2>
+      <h2>Location</h2>
       <p *ngIf="seller.location">{{ seller.location }}</p>
       <div class="map-frame" *ngIf="mapUrl">
         <iframe [src]="mapUrl" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
       </div>
-      <p *ngIf="!mapUrl" class="text-muted">Harta va aparea dupa ce vanzatorul adauga linkul de Google Maps.</p>
+      <p *ngIf="!mapUrl" class="text-muted">The map will appear after the seller adds a Google Maps link.</p>
     </aside>
   </section>
 
   <section class="seller-products">
     <div class="products-header">
       <div>
-        <h2>Produse disponibile</h2>
+        <h2>Available Products</h2>
         <app-paging-header
           [totalCount]="seller.products.count"
           [pageNumber]="seller.products.pageIndex"
@@ -75,7 +75,7 @@
     </div>
 
     <p class="empty-products" *ngIf="seller.products.data.length === 0">
-      Acest vanzator nu are produse disponibile momentan.
+      This seller does not have available products right now.
     </p>
 
     <div class="d-flex justify-content-center mt-4" *ngIf="seller.products.count > seller.products.pageSize">

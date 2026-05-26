@@ -60,7 +60,7 @@ namespace API.Controllers
             var favorites = await _unitOfWork.Repository<FavoriteProduct>().ListAsync(spec);
             
             if (favorites.Any(x => x.ProductId == favoriteDto.ProductId))
-                return BadRequest(new ApiResponse(400, "Produsul este deja la favorite"));
+                return BadRequest(new ApiResponse(400, "Product is already in favorites"));
 
             var favorite = new FavoriteProduct
             {
@@ -71,7 +71,7 @@ namespace API.Controllers
             _unitOfWork.Repository<FavoriteProduct>().Add(favorite);
             
             if (await _unitOfWork.Complete() <= 0) 
-                return BadRequest(new ApiResponse(400, "Problemă la salvarea favoritului"));
+                return BadRequest(new ApiResponse(400, "Problem saving favorite"));
 
             return Ok();
         }
@@ -96,7 +96,7 @@ namespace API.Controllers
             _unitOfWork.Repository<FavoriteProduct>().Delete(favorite);
             
             if (await _unitOfWork.Complete() <= 0) 
-                return BadRequest(new ApiResponse(400, "Problemă la ștergerea favoritului"));
+                return BadRequest(new ApiResponse(400, "Problem removing favorite"));
 
             return Ok();
         }

@@ -65,7 +65,7 @@ namespace API.Controllers
             var user = await _userManager.FindByEmailAsync(email);
 
             if (user == null)
-                return Unauthorized(new ApiResponse(401, "Trebuie să fii logat ca blogger."));
+                return Unauthorized(new ApiResponse(401, "You need to be logged in as a blogger."));
 
             var sections = new List<PostSectionCreateDto>();
 
@@ -168,7 +168,7 @@ public async Task<ActionResult<CommentToReturnDto>> AddComment(CommentCreateDto 
     var user = await _userManager.FindByEmailAsync(email);
 
     if (user == null)
-        return Unauthorized(new ApiResponse(401, "Trebuie să fii logat pentru a comenta"));
+        return Unauthorized(new ApiResponse(401, "You need to be logged in to comment."));
 
     // MODIFICAT: trimitem commentDto către AutoMapper
     var comment = _mapper.Map<CommentCreateDto, Comment>(commentDto);
@@ -232,7 +232,7 @@ public async Task<ActionResult<IReadOnlyList<PostToReturnDto>>> GetMyPosts()
     var user = await _userManager.FindByEmailAsync(email);
 
     if (user == null)
-        return Unauthorized(new ApiResponse(401, "Trebuie să fii logat ca blogger."));
+        return Unauthorized(new ApiResponse(401, "You need to be logged in as a blogger."));
 
     var posts = await _context.Posts
         .Include(p => p.AppUser)
@@ -255,7 +255,7 @@ public async Task<ActionResult<PostToReturnDto>> UpdatePost(int id, [FromForm] P
     var user = await _userManager.FindByEmailAsync(email);
 
     if (user == null)
-        return Unauthorized(new ApiResponse(401, "Trebuie să fii logat ca blogger."));
+        return Unauthorized(new ApiResponse(401, "You need to be logged in as a blogger."));
 
     var post = await _context.Posts
         .Include(p => p.AppUser)
@@ -263,7 +263,7 @@ public async Task<ActionResult<PostToReturnDto>> UpdatePost(int id, [FromForm] P
         .FirstOrDefaultAsync(p => p.Id == id);
 
     if (post == null)
-        return NotFound(new ApiResponse(404, "Articolul nu a fost găsit."));
+        return NotFound(new ApiResponse(404, "Article was not found."));
 
     if (post.AppUserId != user.Id)
         return Forbid();
@@ -392,14 +392,14 @@ public async Task<ActionResult> DeletePost(int id)
     var user = await _userManager.FindByEmailAsync(email);
 
     if (user == null)
-        return Unauthorized(new ApiResponse(401, "Trebuie să fii logat ca blogger."));
+        return Unauthorized(new ApiResponse(401, "You need to be logged in as a blogger."));
 
     var post = await _context.Posts
         .Include(p => p.Sections)
         .FirstOrDefaultAsync(p => p.Id == id);
 
     if (post == null)
-        return NotFound(new ApiResponse(404, "Articolul nu a fost găsit."));
+        return NotFound(new ApiResponse(404, "Article was not found."));
 
     if (post.AppUserId != user.Id)
         return Forbid();
@@ -408,7 +408,7 @@ public async Task<ActionResult> DeletePost(int id)
 
     await _context.SaveChangesAsync();
 
-    return Ok(new { message = "Articolul a fost șters." });
+    return Ok(new { message = "Article deleted." });
 }
     }
 }

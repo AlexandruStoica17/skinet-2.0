@@ -10,7 +10,7 @@
             
             <!-- SELECTOR ROL -->
             <div class="form-group mb-3">
-                <label for="role">Ce rol vei avea?</label>
+                <label for="role">What role will you have?</label>
                 <select class="form-select mt-2" formControlName="role">
                     <option *ngFor="let role of roles" [value]="role.value">{{role.display}}</option>
                 </select>
@@ -20,7 +20,7 @@
             <app-text-input 
                 *ngIf="registerForm.get('role')?.value?.includes('Producer')"
                 [formControl]="$any(registerForm.controls['companyName'])" 
-                [label]="'Nume Companie / Fermă'">
+                [label]="'Company / Farm Name'">
             </app-text-input>
 
             <app-text-input [formControl]="$any(registerForm.controls['password'])" [label]="'Password'" [type]="'password'"></app-text-input>

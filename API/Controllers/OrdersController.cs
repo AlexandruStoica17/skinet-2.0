@@ -105,7 +105,7 @@ namespace API.Controllers
             if (order == null) return NotFound(new ApiResponse(404));
 
             if (order.Status == OrderStatus.Shipped || order.Status == OrderStatus.Delivered)
-                return BadRequest(new ApiResponse(400, "Comanda a fost deja expediată."));
+                return BadRequest(new ApiResponse(400, "The order has already been shipped."));
 
             order.Status = OrderStatus.Shipped;
             _unitOfWork.Repository<Order>().Update(order);
@@ -129,7 +129,7 @@ namespace API.Controllers
                     Recipient = buyer,
                     OrderId = order.Id,
                     IsSystemMessage = true,
-                    Content = $"🚚 Platforma: Comanda #{order.Id} a fost expediată! Vei primi coletul în curând."
+                    Content = $"Platform: Order #{order.Id} has been shipped! You will receive the package soon."
                 };
 
                 _unitOfWork.Repository<Message>().Add(systemMsg);
@@ -152,7 +152,7 @@ namespace API.Controllers
             if (order == null) return NotFound(new ApiResponse(404));
 
             if (order.Status != OrderStatus.Shipped)
-                return BadRequest(new ApiResponse(400, "Comanda nu poate fi marcată ca primită."));
+                return BadRequest(new ApiResponse(400, "The order cannot be marked as delivered."));
 
             order.Status = OrderStatus.Delivered;
             _unitOfWork.Repository<Order>().Update(order);
@@ -178,7 +178,7 @@ namespace API.Controllers
                         OrderId = order.Id,
                         IsSystemMessage = true,
                         IsReviewPrompt = true, 
-                        Content = $"✅ Platforma: {buyer.DisplayName} a confirmat primirea comenzii #{order.Id}. Mulțumim, te rugăm să lași un review!"
+                        Content = $"Platform: {buyer.DisplayName} confirmed delivery for order #{order.Id}. Thank you, please leave a review!"
                     };
 
                     _unitOfWork.Repository<Message>().Add(systemMsg);

@@ -27,16 +27,16 @@ export class MyProductsComponent implements OnInit {
   // --- LOGICA NOUĂ PENTRU ȘTERGERE ---
   deleteProduct(id: number) {
     // Afișăm un mesaj de confirmare browserului ca să nu șteargă din greșeală
-    if (confirm('Ești sigur că vrei să ștergi definitiv acest produs?')) {
+    if (confirm('Are you sure you want to permanently delete this product?')) {
       this.shopService.deleteProduct(id).subscribe({
         next: () => {
           // Scoatem instantaneu produsul din listă (ca să nu mai dăm refresh la pagină)
           this.products = this.products.filter(p => p.id !== id);
-          this.toastr.success('Produsul a fost șters cu succes!');
+          this.toastr.success('Product deleted successfully!');
         },
         error: error => {
           console.log(error);
-          this.toastr.error('A apărut o eroare la ștergere.');
+          this.toastr.error('An error occurred while deleting.');
         }
       });
     }

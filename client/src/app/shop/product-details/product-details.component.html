@@ -80,15 +80,15 @@
                 <div class="d-flex align-items-center mb-3" *ngIf="product">
                     <div class="badge bg-light text-dark border p-2 fs-6">
                         <i class="fa fa-store-alt text-primary me-2"></i>
-                        Vândut și livrat de:
+                        Sold and delivered by:
                         <a
                             *ngIf="product.producerEmail"
                             class="fw-bold text-primary ms-1"
                             [routerLink]="['/seller', product.producerEmail]">
-                            {{ product.producerName || 'Magazinul Nostru' }}
+                            {{ product.producerName || 'Our Store' }}
                         </a>
                         <span *ngIf="!product.producerEmail" class="fw-bold text-primary ms-1">
-                            {{ product.producerName || 'Magazinul Nostru' }}
+                            {{ product.producerName || 'Our Store' }}
                         </span>
                     </div>
                 </div>
@@ -101,7 +101,7 @@
                 -->
                 <div class="mt-1 mb-3" *ngIf="product.producerEmail && product.producerEmail !== currentUserEmail">
                     <button class="btn btn-outline-primary" (click)="contactSeller()">
-                        <i class="fa fa-comments me-2"></i>Contactează vânzătorul
+                        <i class="fa fa-comments me-2"></i>Contact seller
                     </button>
                 </div>
 
@@ -111,19 +111,19 @@
                 <div class="col-12">
                     <hr>
                     <div class="d-flex align-items-center mb-3">
-                        <h4 class="mb-0 me-3">Recenzii clienți</h4>
+                        <h4 class="mb-0 me-3">Customer Reviews</h4>
                         <span *ngIf="productReviews.length > 0" class="text-warning fs-5">
                             <i *ngFor="let s of [1,2,3,4,5]" class="fa" [class.fa-star]="s <= avgRating"
                                 [class.fa-star-half-o]="s > avgRating && s - 0.5 <= avgRating"
                                 [class.fa-star-o]="s - 0.5 > avgRating"></i>
                             <span class="text-muted ms-1 fs-6">{{ avgRating }}/5 ({{ productReviews.length }}
-                                recenzii)</span>
+                                reviews)</span>
                         </span>
                     </div>
 
                     <div *ngIf="productReviews.length === 0" class="text-muted">
                         <i class="fa fa-comment-o me-2"></i>
-                        Nicio recenzie încă. Fii primul care lasă o recenzie după ce primești produsul!
+                        No reviews yet. Be the first to leave a review after you receive the product!
                     </div>
 
                     <div *ngFor="let review of productReviews" class="card mb-3 shadow-sm">

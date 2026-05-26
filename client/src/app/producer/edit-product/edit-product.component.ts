@@ -123,63 +123,63 @@ export class EditProductComponent implements OnInit {
 
   setMainPhoto(photoId: number) {
     if (photoId === 0) {
-      this.toastr.info('Salvează mai întâi produsul ca poza să fie înregistrată în galerie.');
+      this.toastr.info('Save the product first so the photo is registered in the gallery.');
       return;
     }
 
     this.shopService.setMainPhoto(this.productId, photoId).subscribe({
       next: () => {
-        this.toastr.success('Poza principală a fost actualizată.');
+        this.toastr.success('Main photo updated.');
         this.loadProduct();
       },
       error: error => {
         console.log(error);
-        this.toastr.error('Nu s-a putut seta poza principală.');
+        this.toastr.error('Could not set the main photo.');
       }
     });
   }
 
   deletePhoto(photoId: number) {
     if (photoId === 0) {
-      this.toastr.info('Această poză veche trebuie salvată întâi în galerie.');
+      this.toastr.info('This old photo must be saved to the gallery first.');
       return;
     }
 
-    if (!confirm('Sigur vrei să ștergi această poză?')) return;
+    if (!confirm('Are you sure you want to delete this photo?')) return;
 
     this.shopService.deleteProductPhoto(this.productId, photoId).subscribe({
       next: () => {
-        this.toastr.success('Poza a fost ștearsă.');
+        this.toastr.success('Photo deleted.');
         this.loadProduct();
       },
       error: error => {
         console.log(error);
-        this.toastr.error('Nu s-a putut șterge poza.');
+        this.toastr.error('Could not delete the photo.');
       }
     });
   }
 
  movePhoto(photoId: number, direction: 'up' | 'down') {
   if (photoId === 0) {
-    this.toastr.info('Această poză veche trebuie salvată întâi în galerie.');
+    this.toastr.info('This old photo must be saved to the gallery first.');
     return;
   }
 
   this.shopService.moveProductPhoto(this.productId, photoId, direction).subscribe({
     next: () => {
-      this.toastr.success('Ordinea pozelor a fost actualizată.');
+      this.toastr.success('Photo order updated.');
       this.loadProduct();
     },
     error: error => {
       console.log(error);
-      this.toastr.error('Nu s-a putut schimba ordinea pozelor.');
+      this.toastr.error('Could not change the photo order.');
     }
   });
 }
 
   onSubmit() {
     if (this.productForm.invalid) {
-      this.toastr.error('Completează toate câmpurile obligatorii.');
+      this.toastr.error('Complete all required fields.');
       return;
     }
 
@@ -197,14 +197,14 @@ export class EditProductComponent implements OnInit {
 
     this.shopService.editProduct(this.productId, formData).subscribe({
       next: () => {
-        this.toastr.success('Produsul a fost actualizat!');
+        this.toastr.success('Product updated!');
         this.selectedFiles = [];
         this.imagePreviews = [];
         this.loadProduct();
       },
       error: error => {
         console.log(error);
-        this.toastr.error('Eroare la actualizare');
+        this.toastr.error('Update error');
       }
     });
   }

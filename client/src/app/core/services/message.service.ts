@@ -112,7 +112,7 @@ export class MessageService {
 
       if (!isInConversation) {
         if (isSystemMessage && orderId) {
-          this.toastr.info(content || `Ai un update pentru comanda #${orderId}. Click pentru a vedea.`, '', {
+          this.toastr.info(content || `You have an update for order #${orderId}. Click to view.`, '', {
             timeOut: 5000,
             progressBar: true
           }).onTap.pipe(take(1)).subscribe(() => {
@@ -123,7 +123,7 @@ export class MessageService {
           return;
         }
 
-        this.toastr.info(`${senderName} ți-a trimis un mesaj nou. Click pentru a vedea.`, '', {
+        this.toastr.info(`${senderName} sent you a new message. Click to view.`, '', {
           timeOut: 5000,
           progressBar: true
         }).onTap.pipe(take(1)).subscribe(() => {

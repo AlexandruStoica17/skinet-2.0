@@ -14,9 +14,9 @@ export class RegisterComponent {
   
   // Lista de roluri pentru dropdown
   roles = [
-    { value: 'Buyer', display: 'Cumpărător' },
-    { value: 'CosmeticsProducer', display: 'Producător Cosmetice' },
-    { value: 'IngredientsProducer', display: 'Producător Ingrediente' },
+    { value: 'Buyer', display: 'Buyer' },
+    { value: 'CosmeticsProducer', display: 'Cosmetics Producer' },
+    { value: 'IngredientsProducer', display: 'Ingredients Producer' },
     { value: 'Blogger', display: 'Blogger' }
   ];
 

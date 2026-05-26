@@ -22,7 +22,7 @@ export class BasketComponent {
   // Adaugă această funcție în clasa BasketComponent
   getGroupedItems(items: any[]) {
     const grouped = items.reduce((acc, item) => {
-      const producer = item.producerName || 'Magazinul Nostru'; // Dacă nu are nume, îl punem la comun
+      const producer = item.producerName || 'Our Store'; // Dacă nu are nume, îl punem la comun
       if (!acc[producer]) {
         acc[producer] = [];
       }

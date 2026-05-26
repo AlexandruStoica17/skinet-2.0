@@ -128,7 +128,7 @@ export class BasketService {
       brand: item.productBrand,
       type: item.productType,
       // --- Adaugă "|| 'Magazinul Nostru'" pentru a preveni eroarea 400 din C# ---
-      producerName: item.producerName || 'Magazinul Nostru' 
+      producerName: item.producerName || 'Our Store'
     };
   }
 

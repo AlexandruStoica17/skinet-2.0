@@ -36,7 +36,7 @@ namespace Infrastructure.Services
                 var itemOrdered = new ProductItemOrdered(productItem.Id, productItem.Name, productItem.PictureUrl);
                 
                 var producerId = string.IsNullOrEmpty(productItem.ProducerId) ? "Admin" : productItem.ProducerId;
-                var producerName = string.IsNullOrEmpty(productItem.ProducerName) ? "Magazinul Nostru" : productItem.ProducerName;
+                var producerName = string.IsNullOrEmpty(productItem.ProducerName) ? "Our Store" : productItem.ProducerName;
 
                 var orderItem = new OrderItem(itemOrdered, productItem.Price, item.Quantity, producerId, producerName);
                 items.Add(orderItem);
@@ -85,7 +85,7 @@ namespace Infrastructure.Services
                         Recipient = buyer,
                         OrderId = order.Id,
                         IsSystemMessage = true,
-                        Content = $"🛒 Platforma: Comanda #{order.Id} a fost plasată cu succes!"
+                        Content = $"Platform: Order #{order.Id} was placed successfully!"
                     };
 
                     _unitOfWork.Repository<Message>().Add(systemMsg);

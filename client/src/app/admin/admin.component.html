@@ -1,19 +1,19 @@
 <div class="container mt-5">
     <div class="row">
         <div class="col-12">
-            <h2 class="mb-4"><i class="fa fa-users-cog me-2"></i>Panou Administrare Producători</h2>
+            <h2 class="mb-4"><i class="fa fa-users-cog me-2"></i>Producer Admin Panel</h2>
             
             <div class="card shadow-sm">
                 <div class="table-responsive">
                     <table class="table table-hover align-middle mb-0">
                         <thead class="bg-light">
                             <tr>
-                                <th>Utilizator</th>
-                                <th>Firmă</th>
-                                <th>Roluri</th>
+                                <th>User</th>
+                                <th>Company</th>
+                                <th>Roles</th>
                                 <th>Document</th>
                                 <th>Status</th>
-                                <th class="text-end">Acțiuni</th>
+                                <th class="text-end">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -30,13 +30,13 @@
                                     <!-- Aici punem linkul către actul trimis de el, dacă există -->
                                     <a *ngIf="user.documentUrl" [href]="'https://localhost:5001/' + user.documentUrl" 
                                        target="_blank" class="btn btn-sm btn-outline-secondary">
-                                        <i class="fa fa-file-pdf-o"></i> Vezi Acte
+                                        <i class="fa fa-file-pdf-o"></i> View Documents
                                     </a>
-                                    <span *ngIf="!user.documentUrl" class="text-muted small">Lipsă</span>
+                                    <span *ngIf="!user.documentUrl" class="text-muted small">Missing</span>
                                 </td>
                                 <td>
                                     <span [class]="user.isVerified ? 'badge bg-success' : 'badge bg-warning text-dark'">
-                                        {{user.isVerified ? 'Verificat' : 'În așteptare'}}
+                                        {{user.isVerified ? 'Verified' : 'Pending'}}
                                     </span>
                                 </td>
                                 <td class="text-end">
@@ -45,7 +45,7 @@
                                         *ngIf="!user.isVerified && (user.roles.includes('CosmeticsProducer') || user.roles.includes('IngredientsProducer'))"
                                         (click)="approveUser(user.id)" 
                                         class="btn btn-sm btn-success">
-                                        <i class="fa fa-check"></i> Aprobă
+                                        <i class="fa fa-check"></i> Approve
                                     </button>
                                 </td>
                             </tr>

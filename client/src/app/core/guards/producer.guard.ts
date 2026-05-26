@@ -31,7 +31,7 @@ export class ProducerGuard implements CanActivate {
         }
         
         // Dacă ajunge aici, înseamnă că e client normal sau nu e logat deloc
-        this.toastr.error('Acces interzis! Această secțiune este rezervată producătorilor.');
+        this.toastr.error('Access denied! This section is reserved for producers.');
         this.router.navigate(['/shop']); // Îl trimitem înapoi în magazin
         return false; // Îi blocăm accesul
       })

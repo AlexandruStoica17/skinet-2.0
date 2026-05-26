@@ -94,7 +94,7 @@ namespace API.Controllers
                 r.BuyerEmail == buyerEmail);
 
             if (alreadyReviewed)
-                return BadRequest(new ApiResponse(400, "Ai lăsat deja un review pentru acest produs."));
+                return BadRequest(new ApiResponse(400, "You have already reviewed this product."));
 
             var review = new ProductReview
             {

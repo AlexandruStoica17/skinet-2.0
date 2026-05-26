@@ -72,7 +72,7 @@ namespace API.Controllers
                         // NOU: OrderId si titlu pentru afisare in inbox
                         OrderId = lastMessage.OrderId,
                         OrderTitle = lastMessage.OrderId.HasValue
-                            ? $"Comanda #{lastMessage.OrderId}"
+                            ? $"Order #{lastMessage.OrderId}"
                             : null
                     };
                 })
@@ -113,7 +113,7 @@ namespace API.Controllers
                 r.OrderId == reviewDto.OrderId && r.BuyerEmail == buyerEmail);
 
             if (alreadyReviewed)
-                return BadRequest(new { message = "Ai lăsat deja un review pentru această comandă." });
+                return BadRequest(new { message = "You have already left a review for this order." });
 
             var review = new Review
             {
@@ -127,7 +127,7 @@ namespace API.Controllers
             _unitOfWork.Repository<Review>().Add(review);
             await _unitOfWork.Complete();
 
-            return Ok(new { message = "Review trimis cu succes! Mulțumim!" });
+            return Ok(new { message = "Review submitted successfully! Thank you!" });
         }
 
         // GET /api/messages/search-user?query=bob

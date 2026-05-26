@@ -31,11 +31,11 @@ export class AdminComponent implements OnInit {
         if (userIndex !== -1) {
           this.users[userIndex].isVerified = true;
         }
-        this.toastr.success('Producător aprobat cu succes!');
+        this.toastr.success('Producer approved successfully!');
       },
       error: (error: any) => {
         console.log(error);
-        this.toastr.error('Eroare la aprobarea utilizatorului.');
+        this.toastr.error('Error approving user.');
       }
     });
   }

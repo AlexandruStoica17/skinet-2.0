@@ -33,18 +33,18 @@ export class ProducerOrdersComponent implements OnInit {
  markAsShipped() {
     if (this.selectedOrder) {
       // Salvăm comanda într-o constantă locală ca să nu ne mai dea eroare TypeScript în interiorul subscribe-ului
-      const comandaCurenta = this.selectedOrder;
+      const currentOrder = this.selectedOrder;
 
-      this.checkoutService.markOrderAsShipped(comandaCurenta.id).subscribe({
+      this.checkoutService.markOrderAsShipped(currentOrder.id).subscribe({
         next: (updatedOrder) => {
-          comandaCurenta.status = updatedOrder.status;
+          currentOrder.status = updatedOrder.status;
           
-          const index = this.orders.findIndex(o => o.id === comandaCurenta.id);
+          const index = this.orders.findIndex(o => o.id === currentOrder.id);
           if (index !== -1) {
             this.orders[index].status = updatedOrder.status;
           }
           
-          alert('Succes! Comanda a fost marcată ca Expediată.');
+          alert('Success! The order was marked as shipped.');
         },
         error: error => console.log(error)
       });

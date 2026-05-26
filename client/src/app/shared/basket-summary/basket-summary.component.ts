@@ -27,7 +27,7 @@ export class BasketSummaryComponent implements OnInit {
         if (!basket) return [];
         
         const grouped = basket.items.reduce((acc, item) => {
-          const producer = item.producerName || 'Magazinul Nostru'; // Fallback
+          const producer = item.producerName || 'Our Store'; // Fallback
           if (!acc[producer]) {
             acc[producer] = []; // Creăm o "cutie" nouă pentru acest magazin
           }

@@ -259,16 +259,16 @@ public async Task<ActionResult<ProductToReturnDto>> AddProduct([FromForm] Produc
             if (user == null) return Unauthorized();
 
             var product = await _context.Products.FindAsync(id);
-            if (product == null) return NotFound("Produsul nu a fost găsit.");
+            if (product == null) return NotFound("Product was not found.");
 
             if (product.ProducerId != user.Id) return Forbid();
 
             _context.Products.Remove(product);
             var result = await _context.SaveChangesAsync() > 0;
 
-            if (!result) return BadRequest("Eroare la ștergerea produsului.");
+            if (!result) return BadRequest("Error deleting product.");
 
-            return Ok(new { message = "Produs șters cu succes!" });
+            return Ok(new { message = "Product deleted successfully!" });
         }
 
         [Authorize(Roles = "CosmeticsProducer,IngredientsProducer")]
@@ -285,7 +285,7 @@ public async Task<ActionResult> EditProduct(int id, [FromForm] ProductEditDto pr
         .Include(p => p.Photos)
         .FirstOrDefaultAsync(p => p.Id == id);
 
-    if (product == null) return NotFound("Produsul nu a fost găsit.");
+    if (product == null) return NotFound("Product was not found.");
 
     if (product.ProducerId != user.Id) return Forbid();
 
@@ -355,9 +355,9 @@ public async Task<ActionResult> EditProduct(int id, [FromForm] ProductEditDto pr
 
     var result = await _context.SaveChangesAsync() > 0;
 
-    if (!result) return BadRequest("Eroare la salvarea modificărilor.");
+    if (!result) return BadRequest("Error saving changes.");
 
-    return Ok(new { message = "Produs actualizat cu succes!" });
+    return Ok(new { message = "Product updated successfully!" });
 }
         // NEW: Recently added products for the "What's New" page
         // GET /api/products/recent?pageIndex=1&pageSize=8
@@ -595,13 +595,13 @@ public async Task<ActionResult> SetMainPhoto(int productId, int photoId)
         .Include(p => p.Photos)
         .FirstOrDefaultAsync(p => p.Id == productId);
 
-    if (product == null) return NotFound("Produsul nu a fost găsit.");
+    if (product == null) return NotFound("Product was not found.");
 
     if (product.ProducerId != user.Id) return Forbid();
 
     var photo = product.Photos.FirstOrDefault(p => p.Id == photoId);
 
-    if (photo == null) return NotFound("Poza nu a fost găsită.");
+    if (photo == null) return NotFound("Photo was not found.");
 
     foreach (var p in product.Photos)
     {
@@ -613,7 +613,7 @@ public async Task<ActionResult> SetMainPhoto(int productId, int photoId)
 
     await _context.SaveChangesAsync();
 
-    return Ok(new { message = "Poza principală a fost actualizată." });
+    return Ok(new { message = "Main photo updated." });
 }
 
 [Authorize(Roles = "CosmeticsProducer,IngredientsProducer")]
@@ -629,16 +629,16 @@ public async Task<ActionResult> DeletePhoto(int productId, int photoId)
         .Include(p => p.Photos)
         .FirstOrDefaultAsync(p => p.Id == productId);
 
-    if (product == null) return NotFound("Produsul nu a fost găsit.");
+    if (product == null) return NotFound("Product was not found.");
 
     if (product.ProducerId != user.Id) return Forbid();
 
     var photo = product.Photos.FirstOrDefault(p => p.Id == photoId);
 
-    if (photo == null) return NotFound("Poza nu a fost găsită.");
+    if (photo == null) return NotFound("Photo was not found.");
 
     if (product.Photos.Count == 1)
-        return BadRequest("Produsul trebuie să aibă cel puțin o poză.");
+        return BadRequest("The product must have at least one photo.");
 
     _context.ProductPhotos.Remove(photo);
 
@@ -658,7 +658,7 @@ public async Task<ActionResult> DeletePhoto(int productId, int photoId)
 
     await _context.SaveChangesAsync();
 
-    return Ok(new { message = "Poza a fost ștearsă." });
+    return Ok(new { message = "Photo deleted." });
 }
 
 [Authorize(Roles = "CosmeticsProducer,IngredientsProducer")]
@@ -674,7 +674,7 @@ public async Task<ActionResult> MovePhoto(int productId, int photoId, [FromQuery
         .Include(p => p.Photos)
         .FirstOrDefaultAsync(p => p.Id == productId);
 
-    if (product == null) return NotFound("Produsul nu a fost găsit.");
+    if (product == null) return NotFound("Product was not found.");
 
     if (product.ProducerId != user.Id) return Forbid();
 
@@ -691,7 +691,7 @@ public async Task<ActionResult> MovePhoto(int productId, int photoId, [FromQuery
 
     var index = photos.FindIndex(p => p.Id == photoId);
 
-    if (index == -1) return NotFound("Poza nu a fost găsită.");
+    if (index == -1) return NotFound("Photo was not found.");
 
     if (direction == "up" && index > 0)
     {
@@ -714,7 +714,7 @@ public async Task<ActionResult> MovePhoto(int productId, int photoId, [FromQuery
 
     await _context.SaveChangesAsync();
 
-    return Ok(new { message = "Ordinea pozelor a fost actualizată." });
+    return Ok(new { message = "Photo order updated." });
 }
     }
 }

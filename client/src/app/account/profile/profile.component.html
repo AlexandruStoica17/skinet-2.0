@@ -5,7 +5,7 @@
             <div class="card shadow-sm">
                 <div class="card-body text-center pt-4">
                     <i class="fa fa-user-circle-o fa-5x text-primary mb-3"></i>
-                    <h4 class="card-title">Profilul Meu</h4>
+                    <h4 class="card-title">My Profile</h4>
                     <!-- Afișăm rolul sub nume -->
                     <p class="text-muted small mb-0">{{user.role}}</p> 
                 </div>
@@ -13,12 +13,12 @@
                     <a class="list-group-item list-group-item-action" 
                        [class.active]="activeTab === 'address'"
                        (click)="activeTab = 'address'">
-                        <i class="fa fa-map-marker me-2"></i> Adresa de Livrare
+                        <i class="fa fa-map-marker me-2"></i> Shipping Address
                     </a>
                     <a class="list-group-item list-group-item-action" 
                        [class.active]="activeTab === 'password'"
                        (click)="activeTab = 'password'">
-                        <i class="fa fa-lock me-2"></i> Schimbă Parola
+                        <i class="fa fa-lock me-2"></i> Change Password
                     </a>
                     
                     <!-- BUTON NOU: Apare doar dacă utilizatorul este Producător -->
@@ -26,8 +26,8 @@
                        *ngIf="user.role?.includes('Producer')"
                        [class.active]="activeTab === 'verification'"
                        (click)="activeTab = 'verification'">
-                        <i class="fa fa-id-card-o me-2"></i> Verificare Cont
-                        <i *ngIf="user.isVerified" class="fa fa-check-circle text-success ms-2" title="Cont Verificat"></i>
+                        <i class="fa fa-id-card-o me-2"></i> Account Verification
+                        <i *ngIf="user.isVerified" class="fa fa-check-circle text-success ms-2" title="Verified Account"></i>
                     </a>
                     <a class="list-group-item list-group-item-action"
                        *ngIf="user.role?.includes('Producer')"
@@ -45,41 +45,41 @@
             <!-- FORMULAR ADRESĂ (Neatins) -->
             <div class="card shadow-sm" *ngIf="activeTab === 'address'">
                 <div class="card-header bg-white">
-                    <h4 class="mb-0 py-2">Adresa Implicită de Livrare</h4>
+                    <h4 class="mb-0 py-2">Default Shipping Address</h4>
                 </div>
                 <div class="card-body p-4" *ngIf="addressForm">
                     <form [formGroup]="addressForm" (ngSubmit)="onSubmitAddress()">
                         <div class="row mb-3">
                             <div class="col-md-6 form-group">
-                                <label class="form-label">Prenume</label>
+                                <label class="form-label">First Name</label>
                                 <input type="text" class="form-control" formControlName="firstName">
                             </div>
                             <div class="col-md-6 form-group">
-                                <label class="form-label">Nume de familie</label>
+                                <label class="form-label">Last Name</label>
                                 <input type="text" class="form-control" formControlName="lastName">
                             </div>
                         </div>
                         <div class="form-group mb-3">
-                            <label class="form-label">Stradă și Număr</label>
+                            <label class="form-label">Street and Number</label>
                             <input type="text" class="form-control" formControlName="street">
                         </div>
                         <div class="row mb-4">
                             <div class="col-md-4 form-group">
-                                <label class="form-label">Oraș</label>
+                                <label class="form-label">City</label>
                                 <input type="text" class="form-control" formControlName="city">
                             </div>
                             <div class="col-md-4 form-group">
-                                <label class="form-label">Județ / Stat</label>
+                                <label class="form-label">State / County</label>
                                 <input type="text" class="form-control" formControlName="state">
                             </div>
                             <div class="col-md-4 form-group">
-                                <label class="form-label">Cod Poștal</label>
+                                <label class="form-label">Postal Code</label>
                                 <input type="text" class="form-control" formControlName="zipCode">
                             </div>
                         </div>
                         <div class="d-flex justify-content-end">
                             <button type="submit" class="btn btn-primary" [disabled]="addressForm.invalid || !addressForm.dirty">
-                                Salvează Modificările
+                                Save Changes
                             </button>
                         </div>
                     </form>
@@ -89,28 +89,28 @@
             <!-- FORMULAR PAROLĂ (Neatins) -->
             <div class="card shadow-sm" *ngIf="activeTab === 'password'">
                 <div class="card-header bg-white">
-                    <h4 class="mb-0 py-2">Schimbă Parola</h4>
+                    <h4 class="mb-0 py-2">Change Password</h4>
                 </div>
                 <div class="card-body p-4" *ngIf="passwordForm">
                     <form [formGroup]="passwordForm" (ngSubmit)="onSubmitPassword()">
                         <div class="form-group mb-3">
-                            <label class="form-label">Parola Veche</label>
-                            <input type="password" class="form-control" formControlName="oldPassword" placeholder="Introdu parola curentă">
+                            <label class="form-label">Old Password</label>
+                            <input type="password" class="form-control" formControlName="oldPassword" placeholder="Enter current password">
                         </div>
                         <div class="form-group mb-3">
-                            <label class="form-label">Parola Nouă</label>
-                            <input type="password" class="form-control" formControlName="newPassword" placeholder="Introdu o parolă nouă">
+                            <label class="form-label">New Password</label>
+                            <input type="password" class="form-control" formControlName="newPassword" placeholder="Enter a new password">
                             <div class="form-text text-danger" *ngIf="passwordForm.get('newPassword')?.errors?.['pattern'] && passwordForm.get('newPassword')?.touched">
-                                Parola trebuie să conțină o literă mare, o literă mică, un număr, un caracter special și minim 6 caractere.
+                                Password must contain an uppercase letter, a lowercase letter, a number, a special character and at least 6 characters.
                             </div>
                         </div>
                         <div class="form-group mb-4">
-                            <label class="form-label">Confirmă Parola Nouă</label>
-                            <input type="password" class="form-control" formControlName="confirmPassword" placeholder="Confirmă parola nouă">
+                            <label class="form-label">Confirm New Password</label>
+                            <input type="password" class="form-control" formControlName="confirmPassword" placeholder="Confirm new password">
                         </div>
                         <div class="d-flex justify-content-end">
                             <button type="submit" class="btn btn-primary" [disabled]="passwordForm.invalid">
-                                Schimbă Parola
+                                Change Password
                             </button>
                         </div>
                     </form>
@@ -119,46 +119,46 @@
 
             <div class="card shadow-sm" *ngIf="activeTab === 'myPage'">
                 <div class="card-header bg-white">
-                    <h4 class="mb-0 py-2">Pagina mea de vanzator</h4>
+                    <h4 class="mb-0 py-2">My Seller Page</h4>
                 </div>
                 <div class="card-body p-4" *ngIf="sellerPageForm">
                     <form [formGroup]="sellerPageForm" (ngSubmit)="onSubmitSellerPage()">
                         <div class="form-group mb-3">
-                            <label class="form-label">Numele firmei</label>
+                            <label class="form-label">Company Name</label>
                             <input type="text" class="form-control" formControlName="companyName">
                         </div>
 
                         <div class="form-group mb-3">
-                            <label class="form-label">Scurta descriere</label>
+                            <label class="form-label">Short Description</label>
                             <textarea class="form-control" rows="3" formControlName="description"></textarea>
                         </div>
 
                         <div class="form-group mb-3">
-                            <label class="form-label">Povestea voastra</label>
+                            <label class="form-label">Your Story</label>
                             <textarea class="form-control" rows="4" formControlName="story"></textarea>
                         </div>
 
                         <div class="form-group mb-3">
-                            <label class="form-label">Scurt istoric</label>
+                            <label class="form-label">Brief History</label>
                             <textarea class="form-control" rows="3" formControlName="history"></textarea>
                         </div>
 
                         <div class="form-group mb-3">
-                            <label class="form-label">Locatie</label>
-                            <input type="text" class="form-control" formControlName="location" placeholder="Ex: Brasov, Romania">
+                            <label class="form-label">Location</label>
+                            <input type="text" class="form-control" formControlName="location" placeholder="Example: Brasov, Romania">
                         </div>
 
                         <div class="form-group mb-4">
-                            <label class="form-label">Link harta Google Maps embed</label>
+                            <label class="form-label">Google Maps Embed Link</label>
                             <input type="text" class="form-control" formControlName="mapUrl" placeholder="https://www.google.com/maps/embed?...">
                         </div>
 
                         <div class="d-flex justify-content-between align-items-center">
                             <a class="btn btn-outline-secondary" [routerLink]="['/seller', user.email]">
-                                Vezi pagina publica
+                                View Public Page
                             </a>
                             <button type="submit" class="btn btn-primary" [disabled]="sellerPageForm.invalid || !sellerPageForm.dirty">
-                                Salveaza pagina
+                                Save Page
                             </button>
                         </div>
                     </form>
@@ -168,28 +168,28 @@
             <!-- TAB NOU: VERIFICARE CONT -->
             <div class="card shadow-sm" *ngIf="activeTab === 'verification'">
                 <div class="card-header bg-white">
-                    <h4 class="mb-0 py-2">Statut Verificare Firmă</h4>
+                    <h4 class="mb-0 py-2">Company Verification Status</h4>
                 </div>
                 <div class="card-body p-4 text-center">
                     
                     <!-- Dacă e deja verificat -->
                     <div *ngIf="user.isVerified" class="py-4">
                         <i class="fa fa-check-circle fa-4x text-success mb-3"></i>
-                        <h3>Cont Aprobat</h3>
-                        <p class="text-muted">Documentele tale au fost validate. Acum poți vinde pe platformă.</p>
+                        <h3>Account Approved</h3>
+                        <p class="text-muted">Your documents have been validated. You can now sell on the platform.</p>
                     </div>
 
                     <!-- Dacă NU e verificat -->
                     <div *ngIf="!user.isVerified" class="py-2">
                         <div class="alert alert-warning mb-4 text-start">
                             <i class="fa fa-exclamation-triangle me-2"></i>
-                            <strong>Atenție:</strong> Contul tău de producător necesită validare. Te rugăm să încarci un document oficial (CUI, certificat constatator).
+                            <strong>Attention:</strong> Your producer account requires validation. Please upload an official document (company registration, tax certificate).
                         </div>
                         
                         <div class="input-group mt-4 mb-3">
                             <input type="file" (change)="onFileSelected($event)" class="form-control" accept=".pdf,image/*">
                             <button class="btn btn-primary" [disabled]="!selectedFile" (click)="onUploadDocument()">
-                                <i class="fa fa-upload me-2"></i> Trimite
+                                <i class="fa fa-upload me-2"></i> Submit
                             </button>
                         </div>
                     </div>

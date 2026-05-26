@@ -58,7 +58,7 @@ export class CreatePostComponent implements OnInit {
       }
 
       if (!this.isBlogger) {
-        this.toastr.error('Doar utilizatorii cu rol Blogger pot crea articole.');
+        this.toastr.error('Only users with the Blogger role can create articles.');
         this.router.navigateByUrl('/blog');
       }
     });
@@ -103,7 +103,7 @@ export class CreatePostComponent implements OnInit {
 
   removeSection(index: number) {
     if (this.sections.length === 1) {
-      this.toastr.info('Articolul trebuie să aibă cel puțin o secțiune.');
+      this.toastr.info('The article must have at least one section.');
       return;
     }
 
@@ -155,7 +155,7 @@ export class CreatePostComponent implements OnInit {
   onSubmit() {
     if (!this.isArticleValid()) {
       this.blogForm.markAllAsTouched();
-      this.toastr.error('Adaugă titlu și cel puțin o secțiune cu text sau imagine.');
+      this.toastr.error('Add a title and at least one section with text or an image.');
       return;
     }
 
@@ -195,7 +195,7 @@ export class CreatePostComponent implements OnInit {
 
     this.blogService.createPost(formData).subscribe({
       next: (post: any) => {
-        this.toastr.success('Articolul a fost publicat cu succes.');
+        this.toastr.success('Article published successfully.');
 
         if (post?.id) {
           this.router.navigate(['/blog', post.id]);
@@ -206,7 +206,7 @@ export class CreatePostComponent implements OnInit {
       error: error => {
         console.log(error);
         this.submitting = false;
-        this.toastr.error('Nu s-a putut publica articolul.');
+        this.toastr.error('Could not publish the article.');
       }
     });
   }

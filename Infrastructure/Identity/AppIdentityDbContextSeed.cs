@@ -298,39 +298,39 @@ namespace Infrastructure.Identity
             var profiles = new Dictionary<string, (string Description, string Story, string History, string Location, string MapUrl)>
             {
                 ["luxeskin@greenbeauty.com"] = (
-                    "Atelier de cosmetice proaspete, cu formule curate pentru rutine simple si eficiente.",
-                    "LuxeSkin Studio lucreaza in loturi mici, cu accent pe texturi usoare, ingrediente botanice si produse testate in rutina zilnica.",
-                    "Brandul a pornit ca un mic laborator local si s-a dezvoltat prin colaborari cu furnizori naturali si clienti care cauta ingrijire blanda.",
-                    "Bucuresti, Romania",
+                    "Fresh cosmetics studio with clean formulas for simple and effective routines.",
+                    "LuxeSkin Studio works in small batches, focusing on lightweight textures, botanical ingredients and products tested in daily routines.",
+                    "The brand started as a small local lab and grew through collaborations with natural suppliers and customers looking for gentle care.",
+                    "Bucharest, Romania",
                     "https://www.google.com/maps?q=Bucharest,Romania&output=embed"),
                 ["pureglow@greenbeauty.com"] = (
-                    "Laborator de cosmetice artizanale axat pe hidratare, calmare si formule pentru piele sensibila.",
-                    "PureGlow Lab creeaza produse in serii controlate, cu focus pe ingrediente stabile si senzorial placut.",
-                    "Echipa a inceput cu formule de ingrijire pentru familie si a transformat practica intr-un mic brand de laborator.",
+                    "Artisanal cosmetics lab focused on hydration, calming care and formulas for sensitive skin.",
+                    "PureGlow Lab creates products in controlled batches, with a focus on stable ingredients and pleasant textures.",
+                    "The team started with care formulas for family use and turned that practice into a small lab brand.",
                     "Cluj-Napoca, Romania",
                     "https://www.google.com/maps?q=Cluj-Napoca,Romania&output=embed"),
                 ["botanica@greenbeauty.com"] = (
-                    "Studio de skincare inspirat de extracte vegetale, creme fine si ritualuri blande.",
-                    "BotanicaBeauty combina plante, uleiuri si texturi moderne pentru produse usor de integrat in rutina de zi cu zi.",
-                    "Brandul s-a construit in jurul retetelor botanice si al colaborarii cu mici producatori locali.",
+                    "Skincare studio inspired by plant extracts, fine creams and gentle rituals.",
+                    "BotanicaBeauty combines plants, oils and modern textures into products that fit easily into daily routines.",
+                    "The brand was built around botanical recipes and collaboration with small local producers.",
                     "Brasov, Romania",
                     "https://www.google.com/maps?q=Brasov,Romania&output=embed"),
                 ["naturesource@greenbeauty.com"] = (
-                    "Furnizor de ingrediente botanice proaspete pentru cosmetice handmade si formule de atelier.",
-                    "NatureSource selecteaza plante, frunze si extracte din ferme mici, cu trasabilitate si loturi atent verificate.",
-                    "Ferma a pornit cu culturi aromatice si s-a extins catre ingrediente pentru cosmetica naturala.",
+                    "Supplier of fresh botanical ingredients for handmade cosmetics and studio formulas.",
+                    "NatureSource selects plants, leaves and extracts from small farms, with traceability and carefully checked batches.",
+                    "The farm started with aromatic crops and expanded into ingredients for natural cosmetics.",
                     "Sibiu, Romania",
                     "https://www.google.com/maps?q=Sibiu,Romania&output=embed"),
                 ["rawessentials@greenbeauty.com"] = (
-                    "Furnizor de unturi, baze si materii prime pentru balsamuri, creme si produse de corp.",
-                    "RawEssentials lucreaza cu ingrediente brute, atent pastrate, pentru producatori care vor formule consistente.",
-                    "Compania a crescut dintr-un mic depozit de materii prime catre un furnizor specializat pentru cosmetice handmade.",
+                    "Supplier of butters, bases and raw materials for balms, creams and body products.",
+                    "RawEssentials works with carefully stored raw ingredients for producers who want consistent formulas.",
+                    "The company grew from a small raw-material warehouse into a specialized supplier for handmade cosmetics.",
                     "Timisoara, Romania",
                     "https://www.google.com/maps?q=Timisoara,Romania&output=embed"),
                 ["herbalroots@greenbeauty.com"] = (
-                    "Ferma de plante uscate, flori botanice si ingrediente aromatice pentru retete cosmetice naturale.",
-                    "HerbalRoots cultiva si usuca plante in loturi mici, pastrand culoarea, aroma si proprietatile botanice.",
-                    "Povestea lor a inceput cu o gradina de familie si s-a transformat intr-o ferma dedicata ingredientelor curate.",
+                    "Farm for dried plants, botanical flowers and aromatic ingredients used in natural cosmetic recipes.",
+                    "HerbalRoots grows and dries plants in small batches, preserving color, aroma and botanical properties.",
+                    "Their story began with a family garden and became a farm dedicated to clean ingredients.",
                     "Iasi, Romania",
                     "https://www.google.com/maps?q=Iasi,Romania&output=embed")
             };

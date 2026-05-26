@@ -38,7 +38,7 @@ export class FavoritesComponent implements OnInit {
             next: () => {
               // Scoatem produsul din listă fără să dăm refresh la pagină
               this.products = this.products.filter(p => p.id !== productId);
-              this.toastr.info('Produs eliminat de la favorite');
+              this.toastr.info('Product removed from favorites');
             },
             error: error => console.log(error)
           });

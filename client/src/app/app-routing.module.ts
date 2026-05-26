@@ -82,7 +82,7 @@ const routes: Routes = [
   { path: 'my-products', component: MyProductsComponent, canActivate: [ProducerGuard] },
   { path: 'edit-product/:id', component: EditProductComponent, canActivate: [ProducerGuard] },
   // Adaugă asta lângă celelalte rute de producător:
-  { path: 'producer-orders', component: ProducerOrdersComponent, data: { breadcrumb: 'Comenzi Vânzător' } },
+  { path: 'producer-orders', component: ProducerOrdersComponent, data: { breadcrumb: 'Seller Orders' } },
   {
   path: 'whats-new',
   loadChildren: () => import('./news/news.module').then(m => m.NewsModule),

@@ -105,7 +105,7 @@ export class EditPostComponent implements OnInit {
       error: error => {
         console.log(error);
         this.loading = false;
-        this.toastr.error('Nu s-a putut încărca articolul.');
+        this.toastr.error('Could not load the article.');
       }
     });
   }
@@ -147,7 +147,7 @@ export class EditPostComponent implements OnInit {
 
   removeSection(index: number) {
     if (this.sections.length === 1) {
-      this.toastr.info('Articolul trebuie să aibă cel puțin o secțiune.');
+      this.toastr.info('The article must have at least one section.');
       return;
     }
 
@@ -203,7 +203,7 @@ export class EditPostComponent implements OnInit {
   onSubmit() {
     if (!this.isArticleValid()) {
       this.blogForm.markAllAsTouched();
-      this.toastr.error('Adaugă titlu și cel puțin o secțiune.');
+      this.toastr.error('Add a title and at least one section.');
       return;
     }
 
@@ -245,13 +245,13 @@ export class EditPostComponent implements OnInit {
 
     this.blogService.updatePost(this.postId, formData).subscribe({
       next: post => {
-        this.toastr.success('Articolul a fost actualizat.');
+        this.toastr.success('Article updated.');
         this.router.navigate(['/blog', post.id]);
       },
       error: error => {
         console.log(error);
         this.submitting = false;
-        this.toastr.error('Nu s-a putut actualiza articolul.');
+        this.toastr.error('Could not update the article.');
       }
     });
   }

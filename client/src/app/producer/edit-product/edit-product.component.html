@@ -1,30 +1,30 @@
 <div class="container mt-5">
   <div class="card shadow-sm">
     <div class="card-body">
-      <h3 class="mb-4">Editează Produs</h3>
+      <h3 class="mb-4">Edit Product</h3>
 
       <form [formGroup]="productForm" (ngSubmit)="onSubmit()">
         <div class="mb-3">
-          <label class="form-label fw-bold">Nume Produs</label>
+          <label class="form-label fw-bold">Product Name</label>
           <input type="text" class="form-control" formControlName="name">
         </div>
 
         <div class="mb-3">
-          <label class="form-label fw-bold">Descriere</label>
+          <label class="form-label fw-bold">Description</label>
           <textarea class="form-control" rows="5" formControlName="description">
           </textarea>
         </div>
 
         <div class="row">
           <div class="col-md-4 mb-3">
-            <label class="form-label fw-bold">Preț (RON)</label>
+            <label class="form-label fw-bold">Price (RON)</label>
             <input type="number" class="form-control" formControlName="price">
           </div>
 
           <div class="col-md-4 mb-3">
-            <label class="form-label fw-bold">Tip</label>
+            <label class="form-label fw-bold">Type</label>
             <select class="form-select" formControlName="productTypeId">
-              <option value="" disabled>Alege tipul</option>
+              <option value="" disabled>Choose type</option>
               <option *ngFor="let type of types" [value]="type.id">
                 {{ type.name }}
               </option>
@@ -34,7 +34,7 @@
           <div class="col-md-4 mb-3">
             <label class="form-label fw-bold">Brand</label>
             <select class="form-select" formControlName="productBrandId">
-              <option value="" disabled>Alege brandul</option>
+              <option value="" disabled>Choose brand</option>
               <option *ngFor="let brand of brands" [value]="brand.id">
                 {{ brand.name }}
               </option>
@@ -44,18 +44,18 @@
 
         <!-- NOU: upload multiplu -->
         <div class="mb-4">
-          <label class="form-label fw-bold">Adaugă Poze Noi (Opțional)</label>
+          <label class="form-label fw-bold">Add New Photos (Optional)</label>
 
           <input type="file" class="form-control" accept="image/*" multiple (change)="onFilesSelected($event)">
 
           <small class="text-muted">
-            Poți selecta mai multe poze deodată.
+            You can select multiple photos at once.
           </small>
         </div>
 
         <!-- NOU: poze noi selectate -->
         <div class="mb-4" *ngIf="imagePreviews.length > 0">
-          <p class="text-muted mb-2">Poze noi selectate:</p>
+          <p class="text-muted mb-2">New selected photos:</p>
 
           <div class="row">
             <div class="col-6 col-md-3 mb-3" *ngFor="let preview of imagePreviews; let i = index">
@@ -74,7 +74,7 @@
 
         <!-- NOU: poze actuale -->
        <div class="mb-4" *ngIf="existingPhotos.length > 0">
-  <p class="text-muted mb-2">Poze actuale:</p>
+  <p class="text-muted mb-2">Current photos:</p>
 
   <div class="row">
     <div
@@ -121,7 +121,7 @@
         </div>
 
         <span class="badge bg-success mt-2" *ngIf="photo.isMain">
-          Poza principală
+          Main photo
         </span>
       </div>
     </div>
@@ -132,12 +132,12 @@
 
         <div class="d-flex justify-content-end gap-2">
           <button type="button" class="btn btn-outline-danger" routerLink="/my-products">
-            Anulează
+            Cancel
           </button>
 
           <button type="submit" class="btn btn-primary" [disabled]="productForm.invalid">
             <i class="fa fa-save me-1"></i>
-            Salvează Modificările
+            Save Changes
           </button>
         </div>
       </form>

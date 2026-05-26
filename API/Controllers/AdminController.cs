@@ -65,13 +65,13 @@ namespace API.Controllers
         {
             // 1. Căutăm producătorul după ID
             var user = await _userManager.FindByIdAsync(id);
-            if (user == null) return NotFound("Utilizatorul nu a fost găsit.");
+            if (user == null) return NotFound("User was not found.");
 
             // 2. Îi schimbăm statusul în "Verificat"
             user.IsVerified = true;
             var result = await _userManager.UpdateAsync(user);
 
-            if (!result.Succeeded) return BadRequest("Eroare la aprobarea utilizatorului.");
+            if (!result.Succeeded) return BadRequest("Error approving user.");
 
             return Ok(new { message = "Utilizator aprobat cu succes!" });
         }

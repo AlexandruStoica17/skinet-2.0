@@ -3,7 +3,7 @@
     type="button"
     class="btn btn-outline-secondary mb-4"
     routerLink="/blog">
-    Înapoi la Blog
+    Back to Blog
   </button>
 
   <article class="blog-details-card">
@@ -17,7 +17,7 @@
       <h1>{{ post.title }}</h1>
 
       <p class="blog-meta">
-        Postat de {{ post.authorName }} pe {{ post.createdAt | date:'longDate' }}
+        Posted by {{ post.authorName }} on {{ post.createdAt | date:'longDate' }}
       </p>
 
       <!-- NOU: afișare secțiuni cu imagini multiple -->
@@ -56,41 +56,41 @@
   <hr class="my-5">
 
   <section>
-    <h4>Comentarii ({{ comments.length }})</h4>
+    <h4>Comments ({{ comments.length }})</h4>
 
     <div class="comment-card" *ngFor="let comment of comments">
       <p>{{ comment.content }}</p>
 
       <small>
-        {{ comment.authorName || 'Anonim' }} · {{ comment.createdAt | date:'short' }}
+        {{ comment.authorName || 'Anonymous' }} · {{ comment.createdAt | date:'short' }}
       </small>
     </div>
 
     <div class="empty-comments" *ngIf="comments.length === 0">
-      Fii primul care lasă o părere!
+      Be the first to share an opinion!
     </div>
 
     <div class="mt-4" *ngIf="accountService.currentUser$ | async">
-      <h6>Lasă un comentariu</h6>
+      <h6>Leave a comment</h6>
 
       <textarea
         class="form-control"
         rows="4"
         [(ngModel)]="newCommentContent"
-        placeholder="Scrie comentariul tău...">
+        placeholder="Write your comment...">
       </textarea>
 
       <button
         type="button"
         class="btn btn-primary mt-3"
         (click)="addComment()">
-        Postează Comentariul
+        Post Comment
       </button>
     </div>
 
     <div class="alert alert-info mt-4" *ngIf="!(accountService.currentUser$ | async)">
-      Trebuie să fii autentificat pentru a lăsa un comentariu.
-      <a routerLink="/account/login">Logează-te aici.</a>
+      You need to be signed in to leave a comment.
+      <a routerLink="/account/login">Log in here.</a>
     </div>
   </section>
 

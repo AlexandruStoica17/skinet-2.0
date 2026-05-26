@@ -4,7 +4,7 @@
     <div *ngIf="!selectedOrder">
         <div class="row">
             <div class="col-12">
-                <h2 class="mb-4"><i class="fa fa-boxes text-warning mr-2"></i>Comenzi de livrat</h2>
+                <h2 class="mb-4"><i class="fa fa-boxes text-warning mr-2"></i>Orders to Ship</h2>
                 
                 <div class="table-responsive">
                     <table class="table table-hover border">
@@ -13,7 +13,7 @@
                                 <th>Order #</th>
                                 <th>Date</th>
                                 <th>Client</th>
-                                <th>Total (Partea ta)</th>
+                                <th>Total (Your Share)</th>
                                 <th>Status</th>
                                 <th></th>
                             </tr>
@@ -37,7 +37,7 @@
 <a [routerLink]="['/chat', 'conversation']" 
    [queryParams]="{user: order.buyerEmail, orderId: order.id}" 
    class="btn btn-outline-info btn-sm mr-2"
-   title="Scrie cumpărătorului">
+   title="Write to buyer">
     <i class="fa fa-comments"></i>
 </a>
                                     <button (click)="viewOrder(order)" class="btn btn-outline-primary btn-sm">
@@ -48,7 +48,7 @@
                         </tbody>
                     </table>
                     <div *ngIf="orders.length === 0" class="alert alert-info">
-                        Nu ai nicio comandă deocamdată.
+                        You do not have any orders yet.
                     </div>
                 </div>
             </div>
@@ -75,8 +75,8 @@
 <a [routerLink]="['/chat', 'conversation']" 
    [queryParams]="{user: selectedOrder.buyerEmail, orderId: selectedOrder.id}" 
    class="btn btn-outline-info mr-3 shadow-sm"
-   title="Scrie cumpărătorului">
-    <i class="fa fa-comments mr-2"></i>Scrie cumpărătorului
+   title="Write to buyer">
+    <i class="fa fa-comments mr-2"></i>Write to buyer
 </a>
 
                 <button (click)="backToOrders()" class="btn btn-outline-secondary shadow-sm">
@@ -146,7 +146,7 @@
                                 </div>
                             </td>
                             <td class="text-center align-middle">
-                                <span class="badge badge-primary p-2" style="font-size: 1.1em;">{{item.quantity}} buc.</span>
+                                <span class="badge badge-primary p-2" style="font-size: 1.1em;">{{item.quantity}} pcs</span>
                             </td>
                         </tr>
                     </tbody>

@@ -3,9 +3,9 @@
     <!-- Buton de întoarcere -->
     <div class="row mb-4" *ngIf="order">
         <div class="col-12 d-flex justify-content-between align-items-center">
-            <h2>Detaliile Comenzii #{{order.id}}</h2>
+            <h2>Order #{{order.id}} Details</h2>
             <a routerLink="/orders" class="btn btn-outline-primary">
-                <i class="fa fa-arrow-left me-2"></i> Înapoi la comenzi
+                <i class="fa fa-arrow-left me-2"></i> Back to orders
             </a>
         </div>
     </div>
@@ -18,15 +18,15 @@
             <!-- Card cu Adresa de Livrare -->
             <div class="card shadow-sm mb-4">
                 <div class="card-body bg-light">
-                    <h5 class="card-title text-uppercase mb-3"><i class="fa fa-truck me-2"></i> Date Livrare</h5>
+                    <h5 class="card-title text-uppercase mb-3"><i class="fa fa-truck me-2"></i> Delivery Details</h5>
                     <div class="row">
                         <div class="col-6">
-                            <p class="mb-1"><strong>Dată Comandă:</strong> {{order.orderDate | date: 'medium'}}</p>
-                            <p class="mb-0"><strong>Metodă Livrare:</strong> {{order.deliveryMethod}}</p>
+                            <p class="mb-1"><strong>Order Date:</strong> {{order.orderDate | date: 'medium'}}</p>
+                            <p class="mb-0"><strong>Delivery Method:</strong> {{order.deliveryMethod}}</p>
                         </div>
                         <div class="col-6">
-                            <p class="mb-1"><strong>Destinatar:</strong> {{order.shipToAddress.firstName}} {{order.shipToAddress.lastName}}</p>
-                            <p class="mb-0"><strong>Adresă:</strong> {{order.shipToAddress.street}}, {{order.shipToAddress.city}}, {{order.shipToAddress.state}},
+                            <p class="mb-1"><strong>Recipient:</strong> {{order.shipToAddress.firstName}} {{order.shipToAddress.lastName}}</p>
+                            <p class="mb-0"><strong>Address:</strong> {{order.shipToAddress.street}}, {{order.shipToAddress.city}}, {{order.shipToAddress.state}},
 {{order.shipToAddress.zipCode || order.shipToAddress.zipcode}}</p>
                         </div>
                     </div>
