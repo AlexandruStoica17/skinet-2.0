@@ -338,7 +338,7 @@ namespace Infrastructure.Identity
             foreach (var profile in profiles)
             {
                 var user = await userManager.FindByEmailAsync(profile.Key);
-                if (user == null || !string.IsNullOrWhiteSpace(user.SellerDescription)) continue;
+                if (user == null) continue;
 
                 user.SellerDescription = profile.Value.Description;
                 user.SellerStory = profile.Value.Story;
