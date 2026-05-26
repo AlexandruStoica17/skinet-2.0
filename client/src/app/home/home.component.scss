@@ -1,4 +1,6 @@
 .home-page {
+  --home-content-width: min(1120px, calc(100% - 48px));
+
   background: #f4f2ed;
   color: #2f332d;
   padding-bottom: 40px;
@@ -8,7 +10,7 @@
 /* HERO */
 .hero-section {
   position: relative;
-  width: min(1040px, calc(100% - 48px));
+  width: var(--home-content-width);
   height: 420px;
   margin: 44px auto 70px;
   overflow: hidden;
@@ -94,7 +96,7 @@
 
 /* SECTIONS */
 .home-section {
-  width: min(1040px, calc(100% - 48px));
+  width: var(--home-content-width);
   margin: 0 auto 82px;
 }
 
@@ -250,7 +252,7 @@
 
 /* BLOG BANNER */
 .blog-banner {
-  width: min(1040px, calc(100% - 48px));
+  width: var(--home-content-width);
   min-height: 300px;
   margin: 0 auto 66px;
   display: grid;
@@ -288,7 +290,7 @@
 
 /* FOOTER */
 .home-footer {
-  width: min(1040px, calc(100% - 48px));
+  width: var(--home-content-width);
   margin: 0 auto;
   padding: 28px 0 8px;
   display: grid;
