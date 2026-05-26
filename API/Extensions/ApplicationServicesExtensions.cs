@@ -1,4 +1,5 @@
 using API.Errors;
+using API.Services;
 using Core.Interfaces;
 using Infrastructure.Data;
 using Infrastructure.Services;
@@ -36,6 +37,8 @@ namespace API.Extensions
             services.AddScoped<IPaymentService, PaymentService>();
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+            services.Configure<ChatbotOptions>(config.GetSection("OpenAI"));
+            services.AddHttpClient<IChatbotService, OpenAiChatbotService>();
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             services.Configure<ApiBehaviorOptions>(options =>
             {

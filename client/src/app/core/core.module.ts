@@ -10,6 +10,8 @@ import { SectionHeaderComponent } from './section-header/section-header.componen
 import { BreadcrumbModule } from 'xng-breadcrumb';
 import { NgxSpinnerModule } from 'ngx-spinner';
 import { SharedModule } from '../shared/shared.module';
+import { FormsModule } from '@angular/forms';
+import { ChatbotComponent } from './chatbot/chatbot.component';
 
 
 
@@ -19,11 +21,13 @@ import { SharedModule } from '../shared/shared.module';
     TestErrorComponent,
     NotFoundComponent,
     ServerErrorComponent,
-    SectionHeaderComponent
+    SectionHeaderComponent,
+    ChatbotComponent
   ],
   imports: [
     CommonModule,
     AppRoutingModule,
+    FormsModule,
     ToastrModule.forRoot({
       positionClass: 'toast-bottom-right',
       preventDuplicates: true
@@ -37,6 +41,7 @@ import { SharedModule } from '../shared/shared.module';
   exports: [
     NavBarComponent,
     SectionHeaderComponent,
+    ChatbotComponent,
     NgxSpinnerModule
   ],
  

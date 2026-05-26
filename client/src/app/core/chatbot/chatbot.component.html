@@ -1,0 +1,66 @@
+<div class="chatbot-shell" [class.chatbot-shell--open]="isOpen">
+  <section class="chatbot-panel" *ngIf="isOpen">
+    <header class="chatbot-header">
+      <div>
+        <span>GreenBeauty Assistant</span>
+        <small>Marketplace support</small>
+      </div>
+
+      <button type="button" class="icon-button" (click)="toggleChat()" aria-label="Close chatbot">
+        <i class="fa fa-times"></i>
+      </button>
+    </header>
+
+    <div class="chatbot-messages">
+      <div
+        class="chatbot-message"
+        *ngFor="let message of messages; trackBy: trackByIndex"
+        [class.chatbot-message--user]="message.role === 'user'">
+        <p>{{message.content}}</p>
+
+        <div class="chatbot-sources" *ngIf="message.sources?.length">
+          <span>Sources</span>
+          <small *ngFor="let source of message.sources">{{source}}</small>
+        </div>
+      </div>
+
+      <div class="chatbot-message chatbot-message--loading" *ngIf="isLoading">
+        <span></span>
+        <span></span>
+        <span></span>
+      </div>
+    </div>
+
+    <div class="quick-prompts" *ngIf="messages.length <= 1">
+      <button
+        type="button"
+        *ngFor="let prompt of quickPrompts"
+        (click)="askQuickPrompt(prompt)">
+        {{prompt}}
+      </button>
+    </div>
+
+    <form class="chatbot-input" (ngSubmit)="sendMessage()">
+      <input
+        type="text"
+        name="chatbotMessage"
+        [(ngModel)]="draft"
+        [disabled]="isLoading"
+        maxlength="1200"
+        placeholder="Ask about products, orders or sellers...">
+
+      <button type="submit" [disabled]="isLoading || !draft.trim()" aria-label="Send message">
+        <i class="fa fa-paper-plane"></i>
+      </button>
+    </form>
+  </section>
+
+  <button
+    type="button"
+    class="chatbot-launcher"
+    (click)="toggleChat()"
+    [attr.aria-expanded]="isOpen"
+    aria-label="Open GreenBeauty assistant">
+    <i class="fa fa-comments"></i>
+  </button>
+</div>
