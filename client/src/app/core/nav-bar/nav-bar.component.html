@@ -1,177 +1,134 @@
 <header class="site-header fixed-top">
     <div class="site-header__inner">
-        <a class="brand-logo" routerLink="/">
-            GreenBeauty
-        </a>
+        <nav class="site-nav">
+            <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Home</a>
 
-        <nav class="site-nav text-uppercase">
-
-        <a class="p-2" routerLink="/"
-           routerLinkActive="active"
-           [routerLinkActiveOptions]="{exact: true}">Home</a>
-
-        <!-- NEW: Categories dropdown (like Breslo) -->
-        <div class="dropdown" dropdown>
-            <a class="p-2 dropdown-toggle" dropdownToggle style="cursor: pointer;">
-                Categories
-            </a>
-            <ul *dropdownMenu class="dropdown-menu shadow border-0">
-                <li>
-                    <a class="dropdown-item" routerLink="/shop"
-                       [queryParams]="{type: 'Cosmetics'}">
-                        <i class="fa fa-leaf text-success me-2"></i>Cosmetics
-                    </a>
-                </li>
-                <li>
-                    <a class="dropdown-item" routerLink="/shop"
-                       [queryParams]="{type: 'Ingredients'}">
-                        <i class="fa fa-flask text-primary me-2"></i>Ingredients
-                    </a>
-                </li>
-                <li><hr class="dropdown-divider"></li>
-                <li>
-                    <a class="dropdown-item" routerLink="/shop">
-                        <i class="fa fa-th me-2"></i>All Products
-                    </a>
-                </li>
-            </ul>
-        </div>
-
-        <!-- NEW: What's New page -->
-        <a routerLink="/whats-new" routerLinkActive="active" class="nav-link">
-            WHAT'S NEW
-        </a>
-
-        <!-- Blog — existing -->
-        <a class="p-2" routerLink="/blog" routerLinkActive="active">Blog</a>
-
-        <!-- Favorites — visible only when logged in -->
-        <a class="p-2"
-           *ngIf="(accountService.currentUser$ | async)"
-           routerLink="/favorites"
-           routerLinkActive="active">Favorites</a>
-
-        </nav>
-
-        <div class="site-actions">
-
-        <!-- Basket icon (existing) -->
-        <a routerLink="/basket" class="header-icon-link position-relative">
-            <i class="fa fa-shopping-cart fa-2x text-dark"></i>
-            <div *ngIf="(basketService.basketSource$ | async) as basket" class="cart-no">
-                {{getCount(basket.items)}}
-            </div>
-        </a>
-
-        <!-- Messages icon (existing) -->
-        <a routerLink="/chat"
-           class="header-icon-link position-relative"
-           *ngIf="(accountService.currentUser$ | async)"
-           title="Messages">
-            <i class="fa fa-comments fa-2x text-dark"></i>
-            <div class="msg-badge"
-                 *ngIf="(messageService.unreadCount$ | async) as unread">
-                <span *ngIf="unread > 0">{{unread > 99 ? '99+' : unread}}</span>
-            </div>
-        </a>
-
-        <!-- Not logged in -->
-        <ng-container *ngIf="(accountService.currentUser$ | async) === null">
-            <a routerLink="/account/login" class="btn btn-outline-secondary me-2">Login</a>
-            <a routerLink="/account/register" class="btn btn-outline-secondary me-3">Sign up</a>
-        </ng-container>
-
-        <!-- Logged in — user dropdown -->
-        <ng-container *ngIf="accountService.currentUser$ | async as user">
-            <div class="dropdown user-menu" dropdown>
-                <a dropdownToggle class="dropdown-toggle">
-                    <strong>Welcome {{user.displayName}}</strong>
+            <div class="dropdown" dropdown>
+                <a class="dropdown-toggle" dropdownToggle style="cursor: pointer;">
+                    Categories
                 </a>
-
-                <ul *dropdownMenu class="dropdown-menu dropdown-menu-right">
-                    <li class="py-1">
-                        <a routerLink="/basket" class="dropdown-item">
-                            <i class="fa fa-shopping-cart me-3"></i> Basket
+                <ul *dropdownMenu class="dropdown-menu shadow border-0">
+                    <li>
+                        <a class="dropdown-item" routerLink="/shop" [queryParams]="{type: 'Cosmetics'}">
+                            <i class="fa fa-leaf text-success me-2"></i>Cosmetics
                         </a>
                     </li>
-                    <li class="py-1">
-                        <a routerLink="/account/profile" class="dropdown-item">
-                            <i class="fa fa-user-circle-o me-3"></i> My Profile
+                    <li>
+                        <a class="dropdown-item" routerLink="/shop" [queryParams]="{type: 'Ingredients'}">
+                            <i class="fa fa-flask text-primary me-2"></i>Ingredients
                         </a>
                     </li>
-                    <li class="py-1">
-                        <a routerLink="/orders" class="dropdown-item">
-                            <i class="fa fa-history me-3"></i> My Orders
+                    <li><hr class="dropdown-divider"></li>
+                    <li>
+                        <a class="dropdown-item" routerLink="/shop">
+                            <i class="fa fa-th me-2"></i>All Products
                         </a>
                     </li>
-                   <li class="py-1">
-
-
-
-</li>
-
-<!-- NOU: secțiune pentru blogger - duce la articolele mele -->
-<li class="py-1" *ngIf="user.role?.includes('Blogger')">
-
-<a routerLink="/blog/my-posts" class="dropdown-item">
-
-<i class="fa fa-pencil-square-o me-3"></i> My Blog Posts
-
-</a>
-
-</li>
-
-<!-- NOU: opțional, shortcut direct către creare articol -->
-<li class="py-1" *ngIf="user.role?.includes('Blogger')">
-
-<a routerLink="/blog/create" class="dropdown-item">
-
-<i class="fa fa-plus-circle me-3"></i> Create Blog Post
-
-</a>
-
-</li>
-
-<div class="dropdown-divider"></div>
-
-                    <li class="py-1">
-                        <a (click)="accountService.logout()" class="dropdown-item">
-                            <i class="fa fa-sign-out me-3"></i> Log out
-                        </a>
-                    </li>
-
-                    <!-- Role-based links -->
-                    <ng-container *ngIf="(accountService.currentUser$ | async) as user">
-                        <li class="nav-item" *ngIf="user.role?.includes('Admin')">
-                            <a class="nav-link text-danger fw-bold" routerLink="/admin">
-                                <i class="fa fa-cogs"></i> Admin Panel
-                            </a>
-                        </li>
-                        <li class="nav-item"
-                            *ngIf="(user.role?.includes('CosmeticsProducer') || user.role?.includes('IngredientsProducer')) && user.isVerified">
-                            <a class="nav-link text-success fw-bold" routerLink="/add-product">
-                                <i class="fa fa-plus-circle"></i> Add Product
-                            </a>
-                        </li>
-                        <li class="nav-item"
-                            *ngIf="(user.role?.includes('CosmeticsProducer') || user.role?.includes('IngredientsProducer')) && user.isVerified">
-                            <a class="nav-link text-info fw-bold" routerLink="/my-products">
-                                <i class="fa fa-box"></i> My Products
-                            </a>
-                        </li>
-                        <li class="nav-item"
-                            *ngIf="(user.role?.includes('CosmeticsProducer') || user.role?.includes('IngredientsProducer')) && user.isVerified">
-                            <a class="nav-link" routerLink="/producer-orders">
-                                <i class="fa fa-clipboard-list me-1"></i>My Orders (Seller)
-                            </a>
-                        </li>
-
-                        
-                    </ng-container>
                 </ul>
             </div>
-        </ng-container>
 
+            <a routerLink="/whats-new" routerLinkActive="active">What's New</a>
+            <a routerLink="/blog" routerLinkActive="active">Blog</a>
+            <a *ngIf="(accountService.currentUser$ | async)" routerLink="/favorites" routerLinkActive="active">
+                Favorites
+            </a>
+        </nav>
+
+        <a class="brand-logo" routerLink="/">GreenBeauty</a>
+
+        <div class="site-actions">
+            <a routerLink="/basket" class="header-icon-link position-relative" title="Basket">
+                <i class="fa fa-shopping-cart text-dark"></i>
+                <div *ngIf="(basketService.basketSource$ | async) as basket" class="cart-no">
+                    {{getCount(basket.items)}}
+                </div>
+            </a>
+
+            <a
+                routerLink="/chat"
+                class="header-icon-link position-relative"
+                *ngIf="(accountService.currentUser$ | async)"
+                title="Messages">
+                <i class="fa fa-comments text-dark"></i>
+                <div class="msg-badge" *ngIf="(messageService.unreadCount$ | async) as unread">
+                    <span *ngIf="unread > 0">{{unread > 99 ? '99+' : unread}}</span>
+                </div>
+            </a>
+
+            <ng-container *ngIf="(accountService.currentUser$ | async) === null">
+                <a routerLink="/account/login" class="auth-link">Login</a>
+                <a routerLink="/account/register" class="auth-link">Sign up</a>
+            </ng-container>
+
+            <ng-container *ngIf="accountService.currentUser$ | async as user">
+                <div class="dropdown user-menu" dropdown>
+                    <a dropdownToggle class="dropdown-toggle">
+                        Welcome {{user.displayName}}
+                    </a>
+
+                    <ul *dropdownMenu class="dropdown-menu dropdown-menu-right">
+                        <li class="py-1">
+                            <a routerLink="/basket" class="dropdown-item">
+                                <i class="fa fa-shopping-cart me-3"></i> Basket
+                            </a>
+                        </li>
+                        <li class="py-1">
+                            <a routerLink="/account/profile" class="dropdown-item">
+                                <i class="fa fa-user-circle-o me-3"></i> My Profile
+                            </a>
+                        </li>
+                        <li class="py-1">
+                            <a routerLink="/orders" class="dropdown-item">
+                                <i class="fa fa-history me-3"></i> My Orders
+                            </a>
+                        </li>
+                        <li class="py-1" *ngIf="user.role?.includes('Blogger')">
+                            <a routerLink="/blog/my-posts" class="dropdown-item">
+                                <i class="fa fa-pencil-square-o me-3"></i> My Blog Posts
+                            </a>
+                        </li>
+                        <li class="py-1" *ngIf="user.role?.includes('Blogger')">
+                            <a routerLink="/blog/create" class="dropdown-item">
+                                <i class="fa fa-plus-circle me-3"></i> Create Blog Post
+                            </a>
+                        </li>
+                        <li><div class="dropdown-divider"></div></li>
+                        <li class="py-1">
+                            <a (click)="accountService.logout()" class="dropdown-item">
+                                <i class="fa fa-sign-out me-3"></i> Log out
+                            </a>
+                        </li>
+                        <ng-container *ngIf="(accountService.currentUser$ | async) as currentUser">
+                            <li class="nav-item" *ngIf="currentUser.role?.includes('Admin')">
+                                <a class="nav-link text-danger fw-bold" routerLink="/admin">
+                                    <i class="fa fa-cogs"></i> Admin Panel
+                                </a>
+                            </li>
+                            <li
+                                class="nav-item"
+                                *ngIf="(currentUser.role?.includes('CosmeticsProducer') || currentUser.role?.includes('IngredientsProducer')) && currentUser.isVerified">
+                                <a class="nav-link text-success fw-bold" routerLink="/add-product">
+                                    <i class="fa fa-plus-circle"></i> Add Product
+                                </a>
+                            </li>
+                            <li
+                                class="nav-item"
+                                *ngIf="(currentUser.role?.includes('CosmeticsProducer') || currentUser.role?.includes('IngredientsProducer')) && currentUser.isVerified">
+                                <a class="nav-link text-info fw-bold" routerLink="/my-products">
+                                    <i class="fa fa-box"></i> My Products
+                                </a>
+                            </li>
+                            <li
+                                class="nav-item"
+                                *ngIf="(currentUser.role?.includes('CosmeticsProducer') || currentUser.role?.includes('IngredientsProducer')) && currentUser.isVerified">
+                                <a class="nav-link" routerLink="/producer-orders">
+                                    <i class="fa fa-clipboard-list me-1"></i>My Orders (Seller)
+                                </a>
+                            </li>
+                        </ng-container>
+                    </ul>
+                </div>
+            </ng-container>
         </div>
     </div>
 </header>

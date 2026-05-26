@@ -10,5 +10,18 @@ import { Breadcrumb } from 'xng-breadcrumb/lib/types/breadcrumb';
 export class SectionHeaderComponent {
 
   constructor(public bcService: BreadcrumbService) {}
+
+  getCurrentLabel(breadcrumbs: Breadcrumb[]): string {
+    return breadcrumbs.length > 0 ? String(breadcrumbs[breadcrumbs.length - 1].label) : '';
+  }
+
+  getDisplayLabel(breadcrumbs: Breadcrumb[]): string {
+    const label = this.getCurrentLabel(breadcrumbs);
+    return label.toLowerCase() === 'shop' ? 'Products' : label;
+  }
+
+  isProductsHeader(breadcrumbs: Breadcrumb[]): boolean {
+    return this.getCurrentLabel(breadcrumbs).toLowerCase() === 'shop';
+  }
   
 }
