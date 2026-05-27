@@ -43,6 +43,15 @@ ngx-gallery {
   color: #5d6957;
 }
 
+.related-product-button {
+  min-width: 0;
+  padding: 5px 10px;
+  font-size: 0.92rem;
+  line-height: 1.1;
+  white-space: nowrap;
+  box-shadow: none;
+}
+
 ::ng-deep ngx-gallery {
   .ngx-gallery-image {
     background-size: cover !important;
