@@ -2,9 +2,23 @@
 
 html,
 body {
+  min-height: 100%;
+  margin: 0;
   font-family: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
   font-weight: 500;
   color: #2f332d;
+}
+
+app-root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+app-footer {
+  display: block;
+  margin-top: auto;
+  padding-top: 72px;
 }
 
 button,
