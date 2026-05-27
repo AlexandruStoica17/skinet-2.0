@@ -3,6 +3,11 @@ import { finalize } from 'rxjs';
 import { ChatbotService } from '../services/chatbot.service';
 import { ChatbotMessage } from 'src/app/shared/models/chatbot';
 
+interface ChatbotMessageSegment {
+  text: string;
+  routerLink?: string;
+}
+
 @Component({
   selector: 'app-chatbot',
   templateUrl: './chatbot.component.html',
@@ -75,5 +80,32 @@ export class ChatbotComponent {
 
   trackByIndex(index: number): number {
     return index;
+  }
+
+  getMessageSegments(content: string): ChatbotMessageSegment[] {
+    const segments: ChatbotMessageSegment[] = [];
+    const productLinkPattern = /\[([^\]]+)\]\((\/shop\/\d+)\)|(\/shop\/\d+)/g;
+    let lastIndex = 0;
+    let match: RegExpExecArray | null;
+
+    while ((match = productLinkPattern.exec(content)) !== null) {
+      if (match.index > lastIndex) {
+        segments.push({ text: content.slice(lastIndex, match.index) });
+      }
+
+      const label = match[1] || match[3];
+      const route = match[2] || match[3];
+      segments.push({
+        text: label,
+        routerLink: route
+      });
+      lastIndex = productLinkPattern.lastIndex;
+    }
+
+    if (lastIndex < content.length) {
+      segments.push({ text: content.slice(lastIndex) });
+    }
+
+    return segments.length > 0 ? segments : [{ text: content }];
   }
 }

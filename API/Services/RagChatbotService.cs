@@ -48,10 +48,16 @@ namespace API.Services
             CancellationToken cancellationToken)
         {
             var userMessage = request.Message?.Trim();
-            var chunks = GetRelevantChunks(userMessage)
+            var searchQuery = BuildSearchQuery(userMessage, request.History);
+            var chunks = GetRelevantChunks(searchQuery)
                 .Take(Math.Max(1, _options.MaxKnowledgeChunks))
                 .ToList();
-            var products = await GetRelevantProductsAsync(userMessage, cancellationToken);
+            var products = await GetRelevantProductsAsync(searchQuery, cancellationToken);
+
+            if (IsProductLinkRequest(userMessage) && products.Count > 0)
+            {
+                return BuildProductLinkResponse(userMessage, chunks, products);
+            }
 
             if (UseOllamaProvider())
             {
@@ -222,6 +228,9 @@ namespace API.Services
                 You are GreenBeauty Assistant, a professional support chatbot for a natural beauty marketplace.
                 Answer in the same language as the user.
                 Use only the provided knowledge base excerpts and platform context.
+                If relevant product catalog matches are available, answer with those concrete products instead of generic marketplace text.
+                When a product route is available, format it as a Markdown link like [Product Name](/shop/16).
+                If the user asks for a direct product link, answer with the direct Markdown link and no extra explanation.
                 If the knowledge base does not contain enough information, say that clearly and suggest checking the relevant page or contacting support.
                 Do not provide medical diagnosis, treatment plans, or allergy guarantees. For health-sensitive questions, recommend a patch test and a qualified dermatologist.
                 Do not request or reveal passwords, payment data, private order data, or personal information.
@@ -262,6 +271,8 @@ namespace API.Services
                 builder.AppendLine(
                     $"- {product.Name} | {product.ProductType} | {product.Brand} | {product.ProducerName} | ${product.Price:0.00} | /shop/{product.Id}");
                 builder.AppendLine(
+                    $"  Markdown link: [{product.Name}](/shop/{product.Id})");
+                builder.AppendLine(
                     $"  Details: {product.Description} Skin: {product.SkinType}. Usage: {product.Usage}. Benefits: {product.Benefits}. Formula: {product.Formula}.");
             }
 
@@ -280,6 +291,18 @@ namespace API.Services
             builder.AppendLine(userMessage);
 
             return builder.ToString();
+        }
+
+        private static string BuildSearchQuery(
+            string userMessage,
+            IReadOnlyList<ChatbotHistoryMessageDto> history)
+        {
+            var recentContext = history
+                .Where(message => !string.IsNullOrWhiteSpace(message.Content))
+                .TakeLast(4)
+                .Select(message => message.Content);
+
+            return string.Join(" ", new[] { userMessage }.Concat(recentContext));
         }
 
         private ChatbotResponseDto BuildLocalFallback(
@@ -386,10 +409,64 @@ namespace API.Services
             builder.Append(products.Count == 1 ? "this relevant product" : "these relevant products");
             builder.Append(" in the current GreenBeauty catalog: ");
             builder.Append(string.Join("; ", products.Select(product =>
-                $"{product.Name} ({product.ProductType}) by {product.ProducerName}, ${product.Price:0.00}, open /shop/{product.Id}")));
+                $"[{product.Name}](/shop/{product.Id}) ({product.ProductType}) by {product.ProducerName}, ${product.Price:0.00}")));
             builder.Append(".");
 
             return builder.ToString();
+        }
+
+        private static ChatbotResponseDto BuildProductLinkResponse(
+            string query,
+            IReadOnlyList<KnowledgeChunk> chunks,
+            IReadOnlyList<ProductSearchResult> products)
+        {
+            var isRomanian = LooksRomanian(query);
+            var answer = products.Count == 1
+                ? isRomanian
+                    ? $"Iata linkul direct: [{products[0].Name}](/shop/{products[0].Id})."
+                    : $"Here is the direct product link: [{products[0].Name}](/shop/{products[0].Id})."
+                : isRomanian
+                    ? "Iata linkurile directe: " + string.Join(", ", products.Select(product => $"[{product.Name}](/shop/{product.Id})")) + "."
+                    : "Here are the direct product links: " + string.Join(", ", products.Select(product => $"[{product.Name}](/shop/{product.Id})")) + ".";
+
+            return new ChatbotResponseDto
+            {
+                Answer = answer,
+                Sources = BuildSources(chunks, products),
+                Mode = "catalog-link",
+                IsAiConfigured = true
+            };
+        }
+
+        private static bool IsProductLinkRequest(string query)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+            {
+                return false;
+            }
+
+            var normalized = query.ToLowerInvariant();
+            return normalized.Contains("link") ||
+                   normalized.Contains("url") ||
+                   normalized.Contains("direct") ||
+                   normalized.Contains("pagina") ||
+                   normalized.Contains("page");
+        }
+
+        private static bool LooksRomanian(string query)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+            {
+                return false;
+            }
+
+            var normalized = query.ToLowerInvariant();
+            return normalized.Contains(" da ") ||
+                   normalized.StartsWith("da ") ||
+                   normalized.Contains("produs") ||
+                   normalized.Contains("pagina") ||
+                   normalized.Contains("spre") ||
+                   normalized.Contains("imi");
         }
 
         private static IReadOnlyList<string> BuildSources(

@@ -16,12 +16,14 @@
         class="chatbot-message"
         *ngFor="let message of messages; trackBy: trackByIndex"
         [class.chatbot-message--user]="message.role === 'user'">
-        <p>{{message.content}}</p>
-
-        <div class="chatbot-sources" *ngIf="message.sources?.length">
-          <span>Sources</span>
-          <small *ngFor="let source of message.sources">{{source}}</small>
-        </div>
+        <p>
+          <ng-container *ngFor="let segment of getMessageSegments(message.content)">
+            <a *ngIf="segment.routerLink; else textSegment" [routerLink]="segment.routerLink">
+              {{segment.text}}
+            </a>
+            <ng-template #textSegment>{{segment.text}}</ng-template>
+          </ng-container>
+        </p>
       </div>
 
       <div class="chatbot-message chatbot-message--loading" *ngIf="isLoading">

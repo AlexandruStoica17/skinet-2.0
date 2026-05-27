@@ -29,7 +29,7 @@
 
   span {
     display: block;
-    font-size: 20px;
+    font-size: 22px;
     font-weight: 600;
     line-height: 1.1;
   }
@@ -37,7 +37,7 @@
   small {
     display: block;
     margin-top: 3px;
-    font-size: 13px;
+    font-size: 15px;
     color: rgba(247, 244, 235, 0.78);
   }
 }
@@ -78,8 +78,14 @@
 
   p {
     margin: 0;
-    font-size: 16px;
+    font-size: 18px;
     line-height: 1.45;
+
+    a {
+      color: #5d6957;
+      font-weight: 600;
+      text-decoration: underline;
+    }
   }
 }
 
@@ -87,6 +93,10 @@
   margin-left: auto;
   background: #5d6957;
   color: #f7f4eb;
+
+  a {
+    color: #fff;
+  }
 }
 
 .chatbot-message--loading {
@@ -111,23 +121,6 @@
   }
 }
 
-.chatbot-sources {
-  margin-top: 10px;
-  display: grid;
-  gap: 4px;
-  color: #7b806f;
-
-  span {
-    font-size: 12px;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-  }
-
-  small {
-    font-size: 12px;
-  }
-}
-
 .quick-prompts {
   display: grid;
   gap: 8px;
@@ -141,7 +134,7 @@
     background: #fbfaf6;
     color: #2f332d;
     text-align: left;
-    font-size: 15px;
+    font-size: 17px;
   }
 }
 
@@ -160,7 +153,7 @@
     padding: 10px 14px;
     background: #fff;
     color: #2f332d;
-    font-size: 16px;
+    font-size: 18px;
 
     &:focus {
       outline: none;
