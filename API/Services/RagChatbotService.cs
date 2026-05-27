@@ -10,7 +10,7 @@ using Microsoft.Extensions.Options;
 
 namespace API.Services
 {
-    public class OpenAiChatbotService : IChatbotService
+    public class RagChatbotService : IChatbotService
     {
         private static readonly Regex TokenRegex = new("[a-zA-Z0-9]+", RegexOptions.Compiled);
         private static readonly HashSet<string> StopWords = new(StringComparer.OrdinalIgnoreCase)
@@ -24,15 +24,15 @@ namespace API.Services
         private readonly HttpClient _httpClient;
         private readonly ChatbotOptions _options;
         private readonly IWebHostEnvironment _environment;
-        private readonly ILogger<OpenAiChatbotService> _logger;
+        private readonly ILogger<RagChatbotService> _logger;
         private readonly StoreContext _context;
         private IReadOnlyList<KnowledgeChunk> _knowledgeCache;
 
-        public OpenAiChatbotService(
+        public RagChatbotService(
             HttpClient httpClient,
             IOptions<ChatbotOptions> options,
             IWebHostEnvironment environment,
-            ILogger<OpenAiChatbotService> logger,
+            ILogger<RagChatbotService> logger,
             StoreContext context)
         {
             _httpClient = httpClient;
@@ -53,16 +53,119 @@ namespace API.Services
                 .ToList();
             var products = await GetRelevantProductsAsync(userMessage, cancellationToken);
 
+            if (UseOllamaProvider())
+            {
+                return await AskOllamaAsync(
+                    userMessage,
+                    request.History,
+                    chunks,
+                    products,
+                    userEmail,
+                    cancellationToken);
+            }
+
             if (string.IsNullOrWhiteSpace(_options.ApiKey))
             {
                 return BuildLocalFallback(chunks, products);
             }
 
+            return await AskOpenAiAsync(
+                userMessage,
+                request.History,
+                chunks,
+                products,
+                userEmail,
+                cancellationToken);
+        }
+
+        private async Task<ChatbotResponseDto> AskOllamaAsync(
+            string userMessage,
+            IReadOnlyList<ChatbotHistoryMessageDto> history,
+            IReadOnlyList<KnowledgeChunk> chunks,
+            IReadOnlyList<ProductSearchResult> products,
+            string userEmail,
+            CancellationToken cancellationToken)
+        {
+            var modelOptions = new Dictionary<string, object>
+            {
+                ["temperature"] = _options.Temperature
+            };
+
+            if (_options.MaxOutputTokens > 0)
+            {
+                modelOptions["num_predict"] = _options.MaxOutputTokens;
+            }
+
+            var payload = new Dictionary<string, object>
+            {
+                ["model"] = string.IsNullOrWhiteSpace(_options.Model) ? "gemma3:4b" : _options.Model,
+                ["stream"] = false,
+                ["messages"] = new[]
+                {
+                    new
+                    {
+                        role = "system",
+                        content = BuildInstructions()
+                    },
+                    new
+                    {
+                        role = "user",
+                        content = BuildInput(userMessage, history, chunks, products, userEmail)
+                    }
+                },
+                ["options"] = modelOptions
+            };
+
+            try
+            {
+                using var response = await _httpClient.PostAsJsonAsync(
+                    _options.OllamaEndpoint,
+                    payload,
+                    cancellationToken);
+                var responseBody = await response.Content.ReadAsStringAsync(cancellationToken);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    _logger.LogWarning(
+                        "Ollama chatbot request failed with status {StatusCode}: {Body}",
+                        response.StatusCode,
+                        responseBody);
+
+                    return BuildLocalFallback(chunks, products);
+                }
+
+                return new ChatbotResponseDto
+                {
+                    Answer = ExtractOllamaAnswer(responseBody),
+                    Sources = BuildSources(chunks, products),
+                    Mode = "ollama-rag",
+                    IsAiConfigured = true
+                };
+            }
+            catch (OperationCanceledException)
+            {
+                throw;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Ollama chatbot request failed. Falling back to local retrieval.");
+                return BuildLocalFallback(chunks, products);
+            }
+        }
+
+        private async Task<ChatbotResponseDto> AskOpenAiAsync(
+            string userMessage,
+            IReadOnlyList<ChatbotHistoryMessageDto> history,
+            IReadOnlyList<KnowledgeChunk> chunks,
+            IReadOnlyList<ProductSearchResult> products,
+            string userEmail,
+            CancellationToken cancellationToken)
+        {
             var payload = new Dictionary<string, object>
             {
                 ["model"] = string.IsNullOrWhiteSpace(_options.Model) ? "gpt-5-mini" : _options.Model,
                 ["instructions"] = BuildInstructions(),
-                ["input"] = BuildInput(userMessage, request.History, chunks, products, userEmail)
+                ["input"] = BuildInput(userMessage, history, chunks, products, userEmail)
             };
 
             if (_options.MaxOutputTokens > 0)
@@ -106,6 +209,11 @@ namespace API.Services
                 _logger.LogError(ex, "OpenAI chatbot request failed.");
                 return BuildLocalFallback(chunks, products);
             }
+        }
+
+        private bool UseOllamaProvider()
+        {
+            return !string.Equals(_options.Provider, "OpenAI", StringComparison.OrdinalIgnoreCase);
         }
 
         private static string BuildInstructions()
@@ -443,6 +551,27 @@ namespace API.Services
                         }
                     }
                 }
+            }
+
+            return "I could not generate a reliable answer right now. Please try again or contact support.";
+        }
+
+        private static string ExtractOllamaAnswer(string responseBody)
+        {
+            using var json = JsonDocument.Parse(responseBody);
+            var root = json.RootElement;
+
+            if (root.TryGetProperty("message", out var message) &&
+                message.TryGetProperty("content", out var content) &&
+                content.ValueKind == JsonValueKind.String)
+            {
+                return content.GetString();
+            }
+
+            if (root.TryGetProperty("response", out var response) &&
+                response.ValueKind == JsonValueKind.String)
+            {
+                return response.GetString();
             }
 
             return "I could not generate a reliable answer right now. Please try again or contact support.";
