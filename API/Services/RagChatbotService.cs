@@ -12,13 +12,37 @@ namespace API.Services
 {
     public class RagChatbotService : IChatbotService
     {
-        private static readonly Regex TokenRegex = new("[a-zA-Z0-9]+", RegexOptions.Compiled);
+        private static readonly Regex TokenRegex = new(@"[\p{L}\p{N}]+", RegexOptions.Compiled);
         private static readonly HashSet<string> StopWords = new(StringComparer.OrdinalIgnoreCase)
         {
             "the", "and", "for", "with", "that", "this", "from", "you", "your", "are", "can",
             "how", "what", "when", "where", "why", "who", "a", "an", "to", "of", "in", "on",
             "is", "it", "as", "or", "be", "my", "i", "me", "sa", "si", "de", "la", "cu",
-            "pe", "un", "o", "ce", "cum", "este", "sunt", "pentru"
+            "pe", "un", "o", "ce", "cum", "este", "sunt", "pentru", "vindeti", "vindeți",
+            "aveti", "aveți", "vand", "vând", "sell", "sold", "stock", "have", "product",
+            "products", "produs", "produse"
+        };
+
+        private static readonly Dictionary<string, string[]> ProductSynonyms = new(StringComparer.OrdinalIgnoreCase)
+        {
+            ["miere"] = new[] { "honey", "bio honey" },
+            ["honey"] = new[] { "miere", "bio honey" },
+            ["lamaie"] = new[] { "lemon", "citrus" },
+            ["lămâie"] = new[] { "lemon", "citrus" },
+            ["lemon"] = new[] { "lamaie", "citrus" },
+            ["lavanda"] = new[] { "lavender" },
+            ["lavandă"] = new[] { "lavender" },
+            ["aloe"] = new[] { "aloe vera" },
+            ["menta"] = new[] { "mint" },
+            ["mentă"] = new[] { "mint" },
+            ["trandafir"] = new[] { "rose" },
+            ["trandafiri"] = new[] { "rose" },
+            ["cocos"] = new[] { "coconut" },
+            ["nuca"] = new[] { "coconut" },
+            ["nucă"] = new[] { "coconut" },
+            ["shea"] = new[] { "shea butter" },
+            ["unt"] = new[] { "butter" },
+            ["hibiscus"] = new[] { "hibiscus flower" }
         };
 
         private readonly HttpClient _httpClient;
@@ -57,6 +81,11 @@ namespace API.Services
             if (IsProductLinkRequest(userMessage) && products.Count > 0)
             {
                 return BuildProductLinkResponse(userMessage, chunks, products);
+            }
+
+            if ((IsCatalogQuestion(userMessage) || IsLanguageRequest(userMessage)) && products.Count > 0)
+            {
+                return BuildProductAvailabilityResponse(userMessage, chunks, products);
             }
 
             if (UseOllamaProvider())
@@ -302,7 +331,7 @@ namespace API.Services
                 .TakeLast(4)
                 .Select(message => message.Content);
 
-            return string.Join(" ", new[] { userMessage }.Concat(recentContext));
+            return ExpandProductSynonyms(string.Join(" ", new[] { userMessage }.Concat(recentContext)));
         }
 
         private ChatbotResponseDto BuildLocalFallback(
@@ -415,6 +444,45 @@ namespace API.Services
             return builder.ToString();
         }
 
+        private static ChatbotResponseDto BuildProductAvailabilityResponse(
+            string query,
+            IReadOnlyList<KnowledgeChunk> chunks,
+            IReadOnlyList<ProductSearchResult> products)
+        {
+            var isRomanian = LooksRomanian(query) || IsLanguageRequest(query);
+            var answer = isRomanian
+                ? BuildRomanianProductAnswer(products)
+                : BuildEnglishProductAnswer(products);
+
+            return new ChatbotResponseDto
+            {
+                Answer = answer,
+                Sources = BuildSources(chunks, products),
+                Mode = "catalog-answer",
+                IsAiConfigured = true
+            };
+        }
+
+        private static string BuildEnglishProductAnswer(IReadOnlyList<ProductSearchResult> products)
+        {
+            var prefix = products.Count == 1
+                ? "Yes, we sell this relevant product: "
+                : "Yes, we sell these relevant products: ";
+
+            return prefix + string.Join("; ", products.Select(product =>
+                $"[{product.Name}](/shop/{product.Id}) by {product.ProducerName}, ${product.Price:0.00}")) + ".";
+        }
+
+        private static string BuildRomanianProductAnswer(IReadOnlyList<ProductSearchResult> products)
+        {
+            var prefix = products.Count == 1
+                ? "Da, vindem acest produs: "
+                : "Da, vindem aceste produse: ";
+
+            return prefix + string.Join("; ", products.Select(product =>
+                $"[{product.Name}](/shop/{product.Id}) de la {product.ProducerName}, ${product.Price:0.00}")) + ".";
+        }
+
         private static ChatbotResponseDto BuildProductLinkResponse(
             string query,
             IReadOnlyList<KnowledgeChunk> chunks,
@@ -450,7 +518,45 @@ namespace API.Services
                    normalized.Contains("url") ||
                    normalized.Contains("direct") ||
                    normalized.Contains("pagina") ||
+                   normalized.Contains("pagină") ||
                    normalized.Contains("page");
+        }
+
+        private static bool IsCatalogQuestion(string query)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+            {
+                return false;
+            }
+
+            var normalized = query.ToLowerInvariant();
+            return normalized.Contains("sell") ||
+                   normalized.Contains("carry") ||
+                   normalized.Contains("stock") ||
+                   normalized.Contains("have") ||
+                   normalized.Contains("vindeti") ||
+                   normalized.Contains("vindeți") ||
+                   normalized.Contains("vindem") ||
+                   normalized.Contains("aveti") ||
+                   normalized.Contains("aveți") ||
+                   normalized.Contains("exista") ||
+                   normalized.Contains("există") ||
+                   normalized.Contains("gasesti") ||
+                   normalized.Contains("găsești");
+        }
+
+        private static bool IsLanguageRequest(string query)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+            {
+                return false;
+            }
+
+            var normalized = query.ToLowerInvariant();
+            return normalized.Contains("romana") ||
+                   normalized.Contains("română") ||
+                   normalized.Contains("limba romana") ||
+                   normalized.Contains("romanian");
         }
 
         private static bool LooksRomanian(string query)
@@ -465,8 +571,29 @@ namespace API.Services
                    normalized.StartsWith("da ") ||
                    normalized.Contains("produs") ||
                    normalized.Contains("pagina") ||
+                   normalized.Contains("pagină") ||
                    normalized.Contains("spre") ||
-                   normalized.Contains("imi");
+                   normalized.Contains("imi") ||
+                   normalized.Contains("vindeti") ||
+                   normalized.Contains("vindeți") ||
+                   normalized.Contains("aveti") ||
+                   normalized.Contains("aveți") ||
+                   normalized.Contains("miere");
+        }
+
+        private static string ExpandProductSynonyms(string query)
+        {
+            var terms = new List<string> { query ?? string.Empty };
+
+            foreach (var token in Tokenize(query))
+            {
+                if (ProductSynonyms.TryGetValue(token, out var synonyms))
+                {
+                    terms.AddRange(synonyms);
+                }
+            }
+
+            return string.Join(" ", terms);
         }
 
         private static IReadOnlyList<string> BuildSources(
