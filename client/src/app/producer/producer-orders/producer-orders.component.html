@@ -1,10 +1,10 @@
-<div class="container mt-5">
+<div class="container producer-orders-page gb-page-offset">
     
     <!-- SECȚIUNEA 1: TABELUL CU COMENZI -->
     <div *ngIf="!selectedOrder">
         <div class="row">
             <div class="col-12">
-                <h2 class="mb-4"><i class="fa fa-boxes text-warning mr-2"></i>Orders to Ship</h2>
+                <h2 class="mb-4">Orders to Ship</h2>
                 
                 <div class="table-responsive">
                     <table class="table table-hover border">
@@ -36,11 +36,11 @@
                                     <!-- DUPĂ (corect — duce direct la conversația comenzii) -->
 <a [routerLink]="['/chat', 'conversation']" 
    [queryParams]="{user: order.buyerEmail, orderId: order.id}" 
-   class="btn btn-outline-info btn-sm mr-2"
+   class="gb-soft-btn btn-sm mr-2"
    title="Write to buyer">
     <i class="fa fa-comments"></i>
 </a>
-                                    <button (click)="viewOrder(order)" class="btn btn-outline-primary btn-sm">
+                                    <button (click)="viewOrder(order)" class="gb-soft-btn btn-sm">
                                         View Order
                                     </button>
                                 </td>
@@ -66,20 +66,20 @@
                 <!-- Buton Mark as Shipped -->
                 <button *ngIf="selectedOrder.status !== 'Shipped'" 
                         (click)="markAsShipped()" 
-                        class="btn btn-success mr-3 shadow-sm">
-                    <i class="fa fa-paper-plane mr-2"></i>Mark as Shipped
+                        class="gb-soft-btn mr-3 shadow-sm">
+                    Mark as Shipped
                 </button>
 
                 <!-- BUTON NOU: Scrie cumpărătorului din pagina de detalii comandă -->
                <!-- DUPĂ -->
 <a [routerLink]="['/chat', 'conversation']" 
    [queryParams]="{user: selectedOrder.buyerEmail, orderId: selectedOrder.id}" 
-   class="btn btn-outline-info mr-3 shadow-sm"
+   class="gb-soft-btn mr-3 shadow-sm"
    title="Write to buyer">
     <i class="fa fa-comments mr-2"></i>Write to buyer
 </a>
 
-                <button (click)="backToOrders()" class="btn btn-outline-secondary shadow-sm">
+                <button (click)="backToOrders()" class="gb-soft-btn shadow-sm">
                     <i class="fa fa-arrow-left mr-2"></i>Back to Orders
                 </button>
             </div>

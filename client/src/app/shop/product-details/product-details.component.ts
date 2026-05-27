@@ -52,7 +52,7 @@ export class ProductDetailsComponent implements OnInit {
     this.galleryOptions = [
   {
     width: '100%',
-    height: '500px',
+    height: '560px',
     imagePercent: 80,
     thumbnailsColumns: 4,
     imageAnimation: NgxGalleryAnimation.Fade,

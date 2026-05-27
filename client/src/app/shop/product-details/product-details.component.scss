@@ -5,6 +5,44 @@ ngx-gallery {
     background-color: #fff; // Un fundal alb curat
 }
 
+.product-details-page {
+  padding-top: 18px;
+  font-size: 1.08rem;
+
+  h2 {
+    font-size: 2.55rem;
+  }
+
+  h4 {
+    font-size: 1.85rem;
+  }
+
+  p {
+    font-size: 1.12rem;
+    line-height: 1.55;
+  }
+}
+
+.quantity-action {
+  cursor: pointer;
+  color: #6c765f;
+  font-size: 2em;
+  transition: color 0.2s ease, transform 0.2s ease;
+
+  &:hover {
+    color: #5d6957;
+    transform: translateY(-1px);
+  }
+}
+
+.seller-link {
+  color: #6c765f;
+}
+
+.seller-link:hover {
+  color: #5d6957;
+}
+
 ::ng-deep ngx-gallery {
   .ngx-gallery-image {
     background-size: cover !important;

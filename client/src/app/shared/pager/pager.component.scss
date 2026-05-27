@@ -1,0 +1,34 @@
+::ng-deep pagination {
+  .pagination {
+    gap: 6px;
+    margin-bottom: 0;
+  }
+
+  .page-link {
+    min-width: 38px;
+    border-radius: 999px !important;
+    border-color: rgba(108, 118, 95, 0.28);
+    color: #6c765f;
+    background: #fdfcf8;
+    text-align: center;
+    box-shadow: none;
+  }
+
+  .page-link:hover,
+  .page-link:focus {
+    border-color: #6c765f;
+    color: #fff;
+    background: #5d6957;
+  }
+
+  .page-item.active .page-link {
+    border-color: #5d6957;
+    background: #5d6957;
+    color: #fff;
+  }
+
+  .page-item.disabled .page-link {
+    color: rgba(47, 51, 45, 0.36);
+    background: #f4f2ed;
+  }
+}

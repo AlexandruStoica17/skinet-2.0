@@ -9,7 +9,7 @@
 .chatbot-panel {
   width: min(390px, calc(100vw - 32px));
   height: min(620px, calc(100vh - 120px));
-  margin-bottom: 18px;
+  margin-bottom: 0;
   display: grid;
   grid-template-rows: auto 1fr auto auto;
   overflow: hidden;
@@ -211,6 +211,6 @@
   }
 
   .chatbot-panel {
-    height: min(600px, calc(100vh - 96px));
+    height: min(600px, calc(100vh - 40px));
   }
 }

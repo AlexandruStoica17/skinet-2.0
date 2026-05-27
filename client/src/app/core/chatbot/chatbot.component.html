@@ -58,6 +58,7 @@
   </section>
 
   <button
+    *ngIf="!isOpen"
     type="button"
     class="chatbot-launcher"
     (click)="toggleChat()"

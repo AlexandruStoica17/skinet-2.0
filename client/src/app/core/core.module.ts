@@ -12,6 +12,7 @@ import { NgxSpinnerModule } from 'ngx-spinner';
 import { SharedModule } from '../shared/shared.module';
 import { FormsModule } from '@angular/forms';
 import { ChatbotComponent } from './chatbot/chatbot.component';
+import { FooterComponent } from './footer/footer.component';
 
 
 
@@ -22,7 +23,8 @@ import { ChatbotComponent } from './chatbot/chatbot.component';
     NotFoundComponent,
     ServerErrorComponent,
     SectionHeaderComponent,
-    ChatbotComponent
+    ChatbotComponent,
+    FooterComponent
   ],
   imports: [
     CommonModule,
@@ -42,6 +44,7 @@ import { ChatbotComponent } from './chatbot/chatbot.component';
     NavBarComponent,
     SectionHeaderComponent,
     ChatbotComponent,
+    FooterComponent,
     NgxSpinnerModule
   ],
  

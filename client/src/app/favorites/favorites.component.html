@@ -1,5 +1,5 @@
-<div class="container mt-5 mb-5" style="min-height: 500px;">
-    <h2 class="mb-4">My Favorite Products <i class="fa fa-heart text-danger"></i></h2>
+<div class="container favorites-page gb-page-offset mb-5" style="min-height: 500px;">
+    <h2 class="mb-4">My Favorite Products</h2>
     
     <div class="row" *ngIf="products.length > 0">
         <div class="col-md-3 mb-4" *ngFor="let product of products">
@@ -8,8 +8,7 @@
                 
                 <!-- BUTONUL DE ȘTERGERE -->
                 <button (click)="removeFavorite(product.id)" 
-                        class="btn btn-sm btn-outline-danger position-absolute" 
-                        style="top: 10px; right: 10px; z-index: 10;"
+                        class="favorite-remove-button position-absolute"
                         title="Remove from favorites">
                     <i class="fa fa-trash"></i>
                 </button>
@@ -19,7 +18,7 @@
                     <h6 class="text-uppercase">{{product.name}}</h6>
                     <span class="mb-2">{{product.price | currency}}</span>
                     
-                    <button routerLink="/shop/{{product.id}}" class="btn btn-outline-primary w-100 mt-auto">
+                    <button routerLink="/shop/{{product.id}}" class="gb-soft-btn w-100 mt-auto">
                         View Product
                     </button>
                 </div>
@@ -29,10 +28,9 @@
 
     <div class="row" *ngIf="products.length === 0">
         <div class="col-12 text-center mt-5">
-            <i class="fa fa-heart-o fa-5x text-muted mb-3"></i>
             <h4>You do not have any favorite products yet.</h4>
             <p class="text-muted">Explore the shop and save the products you love!</p>
-            <button routerLink="/shop" class="btn btn-primary mt-3">Back to Shop</button>
+            <button routerLink="/shop" class="gb-soft-btn mt-3">Back to Shop</button>
         </div>
     </div>
 </div>

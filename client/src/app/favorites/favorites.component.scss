@@ -1,0 +1,35 @@
+.favorites-page {
+  h2 {
+    font-size: 2.3rem;
+    color: #2f332d;
+  }
+
+  .card {
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .card img {
+    width: 100%;
+    height: 210px;
+    object-fit: cover;
+    background: #f4f2ed !important;
+  }
+}
+
+.favorite-remove-button {
+  top: 10px;
+  right: 10px;
+  z-index: 10;
+  width: 36px;
+  height: 36px;
+  border: 1px solid rgba(108, 118, 95, 0.32);
+  border-radius: 50%;
+  background: rgba(253, 252, 248, 0.92);
+  color: #6c765f;
+
+  &:hover {
+    background: #5d6957;
+    color: #fff;
+  }
+}

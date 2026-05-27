@@ -1,3 +1,21 @@
+.chat-page {
+    h4 {
+        font-size: 2rem;
+    }
+
+    .btn-primary {
+        background: #5d6957;
+        border-color: #5d6957;
+    }
+
+    .input-group-text,
+    .rounded-circle {
+        background: #5d6957 !important;
+        border-color: #5d6957;
+        color: #fff !important;
+    }
+}
+
 .chat-body {
     height: 500px;
     overflow-y: scroll; // Adaugă scroll dacă sunt multe mesaje

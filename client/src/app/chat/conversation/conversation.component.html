@@ -1,4 +1,4 @@
-<div class="container mt-4 mb-5">
+<div class="container conversation-page gb-page-offset mb-5">
     <div class="row">
         <div class="col-md-8 offset-md-2">
             <div class="card shadow-sm">
@@ -7,7 +7,6 @@
                     <button class="btn btn-sm btn-light text-primary me-3" (click)="goBack()">
                         <i class="fa fa-arrow-left"></i>
                     </button>
-                    <i class="fa fa-comments me-2"></i>
                     <strong>{{ recipientEmail }}</strong>
                     <span class="badge bg-white text-primary ms-2" *ngIf="orderId">
                         Order #{{ orderId }}
@@ -35,11 +34,11 @@
                                             && !reviewSubmitted" class="mt-2">
                                     <button class="btn btn-warning btn-sm"
                                         (click)="openReviewForm(msg.orderId!)">
-                                        <i class="fa fa-star me-1"></i> Leave a review
+                                        Leave a review
                                     </button>
                                 </div>
                                 <span class="badge bg-success mt-2" *ngIf="msg.isReviewPrompt && reviewSubmitted">
-                                    <i class="fa fa-check me-1"></i> Review sent!
+                                    Review sent!
                                 </span>
                             </div>
 
@@ -71,13 +70,12 @@
 
                 <div class="card-body border-top bg-light" *ngIf="showReviewForm">
                     <h5 class="mb-4">
-                        <i class="fa fa-star text-warning me-2"></i>
                         Review for order #{{ reviewOrderId }}
                     </h5>
 
                     <div class="card mb-3 border-warning">
                         <div class="card-header bg-warning bg-opacity-10 fw-bold">
-                            <i class="fa fa-store me-2"></i> Seller review
+                            Seller review
                         </div>
                         <div class="card-body">
                             <div class="mb-2">
@@ -127,7 +125,6 @@
 
                     <div class="d-flex gap-2">
                         <button class="btn btn-warning" (click)="submitAllReviews()" [disabled]="reviewSubmitting">
-                            <i class="fa fa-paper-plane me-1"></i>
                             {{ reviewSubmitting ? 'Sending...' : 'Submit all reviews' }}
                         </button>
                         <button class="btn btn-outline-secondary" (click)="showReviewForm = false">Cancel</button>
@@ -140,7 +137,7 @@
                         Package shipped. Click the button below only after you physically receive the package:
                     </span>
                     <button class="btn btn-success shadow-sm" (click)="markDelivered(orderId!)">
-                        <i class="fa fa-check-circle me-1"></i> Confirm order delivery
+                        Confirm order delivery
                     </button>
                 </div>
 
@@ -150,7 +147,7 @@
                             <input type="text" name="messageContent" class="form-control"
                                 placeholder="Write a message..." [(ngModel)]="messageContent" required>
                             <button class="btn btn-primary" type="submit" [disabled]="!messageForm.valid">
-                                <i class="fa fa-paper-plane me-1"></i> Send
+                                Send
                             </button>
                         </div>
                     </form>

@@ -1,6 +1,6 @@
-<div class="container">
+<div class="container basket-page gb-page-offset">
     <div *ngIf="(basketService.basketSource$ | async) === null">
-        <p>No items in basket</p>
+        <p class="basket-empty-message">No items in basket</p>
     </div>
 
     <ng-container *ngIf="(basketService.basketSource$ | async) as basket">
@@ -17,7 +17,7 @@
              <div class="row">
                     <div class="col-6 offset-6">
                         <app-order-totals></app-order-totals>
-                        <a routerLink="/checkout" class="btn btn-outline-primary py-2 btn-block">
+                        <a routerLink="/checkout" class="gb-soft-btn py-2 btn-block">
                             Proceed to checkout
                         </a>
                     </div>

@@ -1,20 +1,20 @@
-<div class="container mt-4 mb-5">
+<div class="container chat-page gb-page-offset mb-5">
     <div class="row">
         <div class="col-md-8 offset-md-2">
 
             <!-- Header cu titlu + buton mesaj nou -->
             <div class="d-flex justify-content-between align-items-center mb-3">
-                <h4><i class="fa fa-comments me-2 text-primary"></i>Messages</h4>
+                <h4>Messages</h4>
                 <!-- NOU: buton Mesaj Nou -->
                 <button class="btn btn-primary btn-sm" (click)="showNewConversation = !showNewConversation">
-                    <i class="fa fa-plus me-1"></i> New message
+                    New message
                 </button>
             </div>
 
             <!-- NOU: Panel "Mesaj nou" - cauta user dupa email/nume -->
             <div class="card shadow-sm mb-3" *ngIf="showNewConversation">
                 <div class="card-body">
-                    <h6 class="mb-2"><i class="fa fa-search me-1"></i> Search user</h6>
+                    <h6 class="mb-2">Search user</h6>
                     <div class="input-group">
                         <input type="text"
                                class="form-control"
@@ -50,7 +50,7 @@
 
             <!-- NOU: Search bar inbox -->
             <div class="input-group mb-3">
-                <span class="input-group-text"><i class="fa fa-search"></i></span>
+                <span class="input-group-text">Search</span>
                 <input type="text"
                        class="form-control"
                        placeholder="Search conversations..."
@@ -66,7 +66,6 @@
             <!-- Inbox gol -->
             <div *ngIf="!loading && conversations.length === 0" class="card shadow-sm">
                 <div class="card-body text-center py-5 text-muted">
-                    <i class="fa fa-comment-o fa-3x mb-3 d-block"></i>
                     <p>You do not have any conversations yet.</p>
                     <p class="small">Contact a seller from a product page.</p>
                 </div>
@@ -89,7 +88,7 @@
                             <div class="fw-bold">{{ conv.partnerName }}</div>
                              <!-- NOU: afisam titlul comenzii daca exista -->
     <div class="text-primary small" *ngIf="conv.orderTitle">
-        <i class="fa fa-shopping-bag me-1"></i>{{ conv.orderTitle }}
+        {{ conv.orderTitle }}
     </div>
                             <div class="text-muted small text-truncate" style="max-width: 280px;">
                                 {{ conv.lastMessage }}

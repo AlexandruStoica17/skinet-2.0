@@ -1,8 +1,8 @@
-<div class="container">
+<div class="container product-details-page">
     <div class="row" *ngIf="product">
 
         <!-- Partea Stângă (Galeria) -->
-        <div class="col-6">
+        <div class="col-lg-7 col-12">
            <ngx-gallery
   *ngIf="galleryImages.length > 0"
   [options]="galleryOptions"
@@ -11,7 +11,7 @@
         </div>
 
         <!-- Partea Dreaptă -->
-        <div class="col-6 mt-5">
+        <div class="col-lg-5 col-12 mt-5">
             <h2>{{product.name}}</h2>
             <p style="font-size: 2em;">{{product.price | currency}}</p>
 
@@ -20,12 +20,10 @@
             </h5>
 
             <div class="d-flex justify-content-start align-center">
-                <i (click)="decrementQuantity()" class="fa fa-minus-circle text-warning me-2"
-                    style="cursor: pointer; font-size: 2em;"></i>
+                <i (click)="decrementQuantity()" class="quantity-action fa fa-minus-circle me-2"></i>
                 <span class="font-weight-bold" style="font-size: 1.5em;">{{quantity}}</span>
-                <i (click)="incrementQuantity()" class="fa fa-plus-circle text-warning ms-2"
-                    style="cursor: pointer; font-size: 2em;"></i>
-                <button class="btn btn-outline-secondary ms-4" (click)="updateBasket()"
+                <i (click)="incrementQuantity()" class="quantity-action fa fa-plus-circle ms-2"></i>
+                <button class="gb-soft-btn ms-4" (click)="updateBasket()"
                     [disabled]="quantity === quantityInBasket">{{buttonText}}</button>
             </div>
 
@@ -83,11 +81,11 @@
                         Sold and delivered by:
                         <a
                             *ngIf="product.producerEmail"
-                            class="fw-bold text-primary ms-1"
+                            class="seller-link fw-bold ms-1"
                             [routerLink]="['/seller', product.producerEmail]">
                             {{ product.producerName || 'Our Store' }}
                         </a>
-                        <span *ngIf="!product.producerEmail" class="fw-bold text-primary ms-1">
+                        <span *ngIf="!product.producerEmail" class="seller-link fw-bold ms-1">
                             {{ product.producerName || 'Our Store' }}
                         </span>
                     </div>
@@ -100,7 +98,7 @@
                     - userul logat NU este chiar vânzătorul (nu-și scrie sie însuși)
                 -->
                 <div class="mt-1 mb-3" *ngIf="product.producerEmail && product.producerEmail !== currentUserEmail">
-                    <button class="btn btn-outline-primary" (click)="contactSeller()">
+                    <button class="gb-soft-btn" (click)="contactSeller()">
                         <i class="fa fa-comments me-2"></i>Contact seller
                     </button>
                 </div>
@@ -164,7 +162,7 @@
                     </div>
                     <div class="card-footer bg-white border-0 pb-2">
                         <a [routerLink]="['/shop', s.id]"
-                           class="btn btn-sm btn-outline-primary w-100">
+                           class="gb-soft-btn w-100">
                             View Product
                         </a>
                     </div>

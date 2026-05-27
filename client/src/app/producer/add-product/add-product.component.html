@@ -1,10 +1,10 @@
-<div class="container mt-5 mb-5">
+<div class="container add-product-page gb-page-offset mb-5">
   <div class="row justify-content-center">
     <div class="col-md-9">
       <div class="card shadow-sm border-0">
         <div class="card-header bg-white border-bottom">
           <h3 class="mb-0 py-2">
-            <i class="fa fa-plus-circle text-success me-2"></i>Add New Product
+            Add New Product
           </h3>
         </div>
 
@@ -58,7 +58,7 @@
               <div class="col-md-4 form-group" *ngIf="!isAdmin">
                 <label class="form-label fw-bold">Brand</label>
                 <div class="form-control bg-light text-muted" style="cursor: default;">
-                  <i class="fa fa-info-circle me-1"></i> Your name (auto-assigned)
+                  Your name (auto-assigned)
                 </div>
               </div>
             </div>
@@ -76,7 +76,7 @@
               <!-- Skin Type -->
               <div class="col-md-6 mb-4">
                 <label class="form-label fw-bold">
-                  <i class="fa fa-user me-1 text-primary"></i>Skin Type
+                  Skin Type
                   <small class="text-muted fw-normal">(select multiple)</small>
                 </label>
                 <div class="filter-multiselect-box p-2 border rounded">
@@ -93,7 +93,7 @@
               <!-- Usage Area -->
               <div class="col-md-6 mb-4">
                 <label class="form-label fw-bold">
-                  <i class="fa fa-map-marker me-1 text-success"></i>Usage Area
+                  Usage Area
                   <small class="text-muted fw-normal">(select multiple)</small>
                 </label>
                 <div class="filter-multiselect-box p-2 border rounded">
@@ -110,7 +110,7 @@
               <!-- Benefits -->
               <div class="col-md-6 mb-4">
                 <label class="form-label fw-bold">
-                  <i class="fa fa-star me-1 text-warning"></i>Benefits
+                  Benefits
                   <small class="text-muted fw-normal">(select multiple)</small>
                 </label>
                 <div class="filter-multiselect-box p-2 border rounded">
@@ -127,7 +127,7 @@
               <!-- Formula -->
               <div class="col-md-6 mb-4">
                 <label class="form-label fw-bold">
-                  <i class="fa fa-flask me-1 text-info"></i>Formula / Texture
+                  Formula / Texture
                   <small class="text-muted fw-normal">(select multiple)</small>
                 </label>
                 <div class="filter-multiselect-box p-2 border rounded">
@@ -167,11 +167,11 @@
             <hr class="my-4">
 
             <div class="d-flex justify-content-end gap-2">
-              <button type="button" class="btn btn-outline-secondary"
+              <button type="button" class="gb-soft-btn"
                       routerLink="/shop">Cancel</button>
-              <button type="submit" class="btn btn-success"
+              <button type="submit" class="gb-soft-btn"
                       [disabled]="productForm.invalid || !selectedFile">
-                <i class="fa fa-save me-2"></i>Publish Product
+                Publish Product
               </button>
             </div>
 

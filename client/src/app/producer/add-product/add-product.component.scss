@@ -1,3 +1,10 @@
+.add-product-page {
+    h3 {
+        font-size: 2.2rem;
+        color: #2f332d;
+    }
+}
+
 .filter-multiselect-box {
     max-height: 180px;
     overflow-y: auto;
@@ -8,11 +15,11 @@
         border-radius: 4px;
         cursor: pointer;
 
-        &:hover { background: rgba(13, 110, 253, 0.06); }
+        &:hover { background: rgba(108, 118, 95, 0.08); }
 
         .form-check-input:checked {
-            background-color: #e95620;
-            border-color: #e95620;
+            background-color: #6c765f;
+            border-color: #6c765f;
         }
 
         .form-check-label { cursor: pointer; }
