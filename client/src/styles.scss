@@ -15,10 +15,14 @@ app-root {
   flex-direction: column;
 }
 
+.app-main {
+  flex: 1 0 auto;
+  width: 100%;
+}
+
 app-footer {
+  flex-shrink: 0;
   display: block;
-  margin-top: auto;
-  padding-top: 72px;
 }
 
 button,
