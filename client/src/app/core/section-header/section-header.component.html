@@ -3,11 +3,8 @@
         *ngIf="breadcrumbs.length > 0 && breadcrumbs[breadcrumbs.length-1].label !== 'Home'"
         class="mb-4 section-header-band"
         [class.products-hero]="isProductsHeader(breadcrumbs)">
-        <div *ngIf="isProductsHeader(breadcrumbs); else standardHeader" class="products-hero__image">
-            <h1>{{getDisplayLabel(breadcrumbs) | titlecase}}</h1>
-        </div>
-
-        <ng-template #standardHeader>
+                <ng-template #standardHeader>
+                    <ng-container *ngTemplateOutlet="standardHeader"></ng-container>
             <div class="container section-header-band__content">
             <div class="row d-flex align-items-center">
                 <div class="col-9">
