@@ -16,6 +16,7 @@ export class MessageService {
   hubUrl = environment.hubUrl;
 
   private hubConnection?: HubConnection;
+  private hubConnectionStartPromise?: Promise<void>;
   private notificationConnection?: HubConnection;
   private presenceConnection?: HubConnection;
 
@@ -149,15 +150,18 @@ export class MessageService {
 
   createHubConnection(token: string, otherUsername: string, orderId?: number) {
     // FIX: adaugam orderId in URL
-    let url = this.hubUrl + 'message?user=' + otherUsername;
-    if (orderId) url += '&orderId=' + orderId;
+    let url = this.hubUrl + 'message?user=' + encodeURIComponent(otherUsername);
+    if (orderId) url += '&orderId=' + encodeURIComponent(orderId.toString());
 
     this.hubConnection = new HubConnectionBuilder()
       .withUrl(url, { accessTokenFactory: () => token })
       .withAutomaticReconnect()
       .build();
 
-    this.hubConnection.start().catch(error => console.log(error));
+    this.hubConnectionStartPromise = this.hubConnection.start().catch(error => {
+      console.log(error);
+      throw error;
+    });
 
     this.hubConnection.on('ReceiveMessageThread', messages => {
       this.messageThreadSource.next(messages);
@@ -178,15 +182,46 @@ export class MessageService {
     if (this.hubConnection) {
       this.hubConnection.stop();
       this.hubConnection = undefined;
+      this.hubConnectionStartPromise = undefined;
       this.messageThreadSource.next([]);
     }
   }
 
-  async sendMessage(username: string, content: string, orderId?: number) {
-    return this.hubConnection?.invoke('SendMessage', {
-      recipientUsername: username,
-      content,
-      orderId: orderId ?? null
-    }).catch(error => console.log(error));
+  async sendMessage(username: string, content: string, orderId?: number): Promise<boolean> {
+    const trimmedContent = content.trim();
+    if (!trimmedContent) return false;
+
+    if (!this.hubConnection) {
+      this.toastr.error('Messaging connection is not ready. Please reopen the conversation.');
+      return false;
+    }
+
+    try {
+      await this.hubConnectionStartPromise;
+      await this.hubConnection.invoke('SendMessage', {
+        recipientUsername: username,
+        content: trimmedContent,
+        orderId: orderId ?? null
+      });
+      return true;
+    } catch (error: any) {
+      console.log(error);
+      this.toastr.error(this.getSendMessageError(error));
+      return false;
+    }
+  }
+
+  private getSendMessageError(error: any): string {
+    const message = typeof error === 'string' ? error : error?.message ?? '';
+
+    if (message.includes('You cannot send messages to yourself')) {
+      return 'You cannot send messages to your own account.';
+    }
+
+    if (message.includes('User was not found')) {
+      return 'The selected user could not be found.';
+    }
+
+    return 'Message could not be sent. Please try again.';
   }
 }

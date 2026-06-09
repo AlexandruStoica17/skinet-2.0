@@ -116,7 +116,9 @@ namespace API.Controllers
             var producer = await _userManager.FindByEmailAsync(producerEmail);
             var buyer = await _userManager.FindByEmailAsync(order.BuyerEmail);
 
-            if (producer != null && buyer != null)
+            if (producer != null &&
+                buyer != null &&
+                !string.Equals(producer.Email, buyer.Email, StringComparison.OrdinalIgnoreCase))
             {
                 // ---> MODIFICAT AICI: Am înlocuit cu un singur mesaj de sistem pentru Expediere
                 var systemMsg = new Message
@@ -164,7 +166,8 @@ namespace API.Controllers
             if (buyer != null && firstItem != null)
             {
                 var producer = await _userManager.FindByIdAsync(firstItem.ProducerId);
-                if (producer != null)
+                if (producer != null &&
+                    !string.Equals(producer.Email, buyer.Email, StringComparison.OrdinalIgnoreCase))
                 {
                     // ---> MODIFICAT AICI: Am înlocuit cu un singur mesaj de sistem + Review prompt
                     var systemMsg = new Message

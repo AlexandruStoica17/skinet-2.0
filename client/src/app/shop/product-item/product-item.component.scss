@@ -114,5 +114,15 @@ h3 {
       color: #f7f4eb;
       transform: translateY(-2px);
     }
+
+    &.is-favorite,
+    &:disabled {
+      background: #5d6957;
+      border-color: #5d6957;
+      color: #f7f4eb;
+      cursor: default;
+      opacity: 1;
+      transform: none;
+    }
   }
 }

@@ -112,13 +112,14 @@ a {
 }
 
 .gb-soft-btn {
-  border: 1px solid var(--gb-olive);
+  border: none;
   border-radius: 999px;
   padding: 8px 32px;
-  background: #fdfcf8;
-  color: var(--gb-olive);
+  background: #f9f7f0;
+  color: #273024;
+  font-size: 0.85rem;
   min-width: 120px;
-  box-shadow: 0 8px 22px rgba(54, 59, 49, 0.12);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -128,9 +129,19 @@ a {
   &:hover,
   &:focus {
     transform: translateY(-2px);
-    background: var(--gb-olive-dark);
-    border-color: var(--gb-olive-dark);
-    color: #fff;
+    background: #fff;
+    color: #273024;
     text-decoration: none;
+  }
+}
+
+.gb-soft-btn--solid {
+  background: var(--gb-olive-dark);
+  color: #fff;
+
+  &:hover,
+  &:focus {
+    background: var(--gb-olive);
+    color: #fff;
   }
 }

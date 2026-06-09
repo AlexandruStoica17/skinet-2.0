@@ -78,6 +78,26 @@ namespace API.Services
                 .ToList();
             var products = await GetRelevantProductsAsync(searchQuery, cancellationToken);
 
+            if (IsOrderTrackingQuestion(userMessage))
+            {
+                return BuildOrderTrackingResponse(userMessage, chunks);
+            }
+
+            if (IsSellerContactQuestion(userMessage))
+            {
+                return BuildSellerContactResponse(userMessage, chunks);
+            }
+
+            if (IsRecommendationQuestion(userMessage))
+            {
+                return BuildRecommendationResponse(userMessage, chunks);
+            }
+
+            if (IsFavoritesQuestion(userMessage))
+            {
+                return BuildFavoritesResponse(userMessage, chunks);
+            }
+
             if (IsProductLinkRequest(userMessage) && products.Count > 0)
             {
                 return BuildProductLinkResponse(userMessage, chunks, products);
@@ -171,7 +191,7 @@ namespace API.Services
 
                 return new ChatbotResponseDto
                 {
-                    Answer = ExtractOllamaAnswer(responseBody),
+                    Answer = NormalizeNavigationAnswer(ExtractOllamaAnswer(responseBody), userMessage),
                     Sources = BuildSources(chunks, products),
                     Mode = "ollama-rag",
                     IsAiConfigured = true
@@ -229,7 +249,7 @@ namespace API.Services
 
                 return new ChatbotResponseDto
                 {
-                    Answer = ExtractAnswer(responseBody),
+                    Answer = NormalizeNavigationAnswer(ExtractAnswer(responseBody), userMessage),
                     Sources = BuildSources(chunks, products),
                     Mode = "openai-rag",
                     IsAiConfigured = true
@@ -259,6 +279,11 @@ namespace API.Services
                 Use only the provided knowledge base excerpts and platform context.
                 If relevant product catalog matches are available, answer with those concrete products instead of generic marketplace text.
                 When a product route is available, format it as a Markdown link like [Product Name](/shop/16).
+                Use only real GreenBeauty routes. Favorites is /favorites. Orders is /orders. Cart is /basket. Checkout is /checkout. Messages is /chat. Never invent routes like /my-orders, /account/orders, /account/orders, /order-history, /help or external help-center URLs.
+                If the user asks how to track orders, answer with [My Orders](/orders).
+                If the user asks how to contact a seller, say they can use Contact seller on product pages or open [Messages](/chat).
+                If the user asks where favorites or saved products are, answer with [Favorites](/favorites).
+                If the user asks how recommendations work, explain that suggestions compare product name, category, benefits, usage area, formula and skin type.
                 If the user asks for a direct product link, answer with the direct Markdown link and no extra explanation.
                 If the knowledge base does not contain enough information, say that clearly and suggest checking the relevant page or contacting support.
                 Do not provide medical diagnosis, treatment plans, or allergy guarantees. For health-sensitive questions, recommend a patch test and a qualified dermatologist.
@@ -504,6 +529,199 @@ namespace API.Services
                 Mode = "catalog-link",
                 IsAiConfigured = true
             };
+        }
+
+        private static ChatbotResponseDto BuildFavoritesResponse(
+            string query,
+            IReadOnlyList<KnowledgeChunk> chunks)
+        {
+            return new ChatbotResponseDto
+            {
+                Answer = BuildFavoritesAnswerText(query),
+                Sources = BuildSources(chunks, Array.Empty<ProductSearchResult>()),
+                Mode = "navigation-answer",
+                IsAiConfigured = true
+            };
+        }
+
+        private static ChatbotResponseDto BuildOrderTrackingResponse(
+            string query,
+            IReadOnlyList<KnowledgeChunk> chunks)
+        {
+            return new ChatbotResponseDto
+            {
+                Answer = BuildOrderTrackingAnswerText(query),
+                Sources = BuildSources(chunks, Array.Empty<ProductSearchResult>()),
+                Mode = "navigation-answer",
+                IsAiConfigured = true
+            };
+        }
+
+        private static ChatbotResponseDto BuildSellerContactResponse(
+            string query,
+            IReadOnlyList<KnowledgeChunk> chunks)
+        {
+            return new ChatbotResponseDto
+            {
+                Answer = BuildSellerContactAnswerText(query),
+                Sources = BuildSources(chunks, Array.Empty<ProductSearchResult>()),
+                Mode = "navigation-answer",
+                IsAiConfigured = true
+            };
+        }
+
+        private static ChatbotResponseDto BuildRecommendationResponse(
+            string query,
+            IReadOnlyList<KnowledgeChunk> chunks)
+        {
+            return new ChatbotResponseDto
+            {
+                Answer = BuildRecommendationAnswerText(query),
+                Sources = BuildSources(chunks, Array.Empty<ProductSearchResult>()),
+                Mode = "platform-answer",
+                IsAiConfigured = true
+            };
+        }
+
+        private static bool IsFavoritesQuestion(string query)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+            {
+                return false;
+            }
+
+            var normalized = query.ToLowerInvariant();
+            return normalized.Contains("favorite") ||
+                   normalized.Contains("favourite") ||
+                   normalized.Contains("wishlist") ||
+                   normalized.Contains("saved product") ||
+                   normalized.Contains("saved products") ||
+                   normalized.Contains("preferate") ||
+                   normalized.Contains("preferat") ||
+                   normalized.Contains("salvate") ||
+                   normalized.Contains("salvat");
+        }
+
+        private static bool IsOrderTrackingQuestion(string query)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+            {
+                return false;
+            }
+
+            var normalized = query.ToLowerInvariant();
+            return (normalized.Contains("track") && normalized.Contains("order")) ||
+                   normalized.Contains("order status") ||
+                   normalized.Contains("delivery information") ||
+                   normalized.Contains("my orders") ||
+                   normalized.Contains("comanda mea") ||
+                   normalized.Contains("comenzile mele") ||
+                   normalized.Contains("urmaresc comanda") ||
+                   normalized.Contains("urmăresc comanda") ||
+                   normalized.Contains("status comanda") ||
+                   normalized.Contains("status comandă");
+        }
+
+        private static bool IsSellerContactQuestion(string query)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+            {
+                return false;
+            }
+
+            var normalized = query.ToLowerInvariant();
+            return (normalized.Contains("contact") && normalized.Contains("seller")) ||
+                   normalized.Contains("message seller") ||
+                   normalized.Contains("write to seller") ||
+                   normalized.Contains("contactez vanzator") ||
+                   normalized.Contains("contactez vânzător") ||
+                   normalized.Contains("mesaj vanzator") ||
+                   normalized.Contains("mesaj vânzător");
+        }
+
+        private static bool IsRecommendationQuestion(string query)
+        {
+            if (string.IsNullOrWhiteSpace(query))
+            {
+                return false;
+            }
+
+            var normalized = query.ToLowerInvariant();
+            return normalized.Contains("recommendation") ||
+                   normalized.Contains("recommendations") ||
+                   normalized.Contains("suggestion") ||
+                   normalized.Contains("suggestions") ||
+                   normalized.Contains("you might also like") ||
+                   normalized.Contains("recomandari") ||
+                   normalized.Contains("recomandări") ||
+                   normalized.Contains("sugestii");
+        }
+
+        private static string BuildFavoritesAnswerText(string query)
+        {
+            return LooksRomanian(query)
+                ? "Poti vedea produsele favorite in pagina [Favorites](/favorites), disponibila si in meniul din header."
+                : "You can view your favorite products on the [Favorites](/favorites) page, which is also available in the header navigation.";
+        }
+
+        private static string BuildOrderTrackingAnswerText(string query)
+        {
+            return LooksRomanian(query)
+                ? "Poti urmari comenzile si statusul livrarii in pagina [My Orders](/orders)."
+                : "You can track your orders and delivery status from the [My Orders](/orders) page.";
+        }
+
+        private static string BuildSellerContactAnswerText(string query)
+        {
+            return LooksRomanian(query)
+                ? "Poti contacta vanzatorul din pagina produsului, folosind butonul Contact seller. Conversatiile tale sunt disponibile si in [Messages](/chat). Pentru probleme legate de o comanda, intra in [My Orders](/orders)."
+                : "You can contact a seller from a product page using the Contact seller button. Your conversations are also available in [Messages](/chat). For an order-specific issue, open [My Orders](/orders).";
+        }
+
+        private static string BuildRecommendationAnswerText(string query)
+        {
+            return LooksRomanian(query)
+                ? "Recomandarile de produse compara produsul curent cu restul catalogului dupa nume, categorie, beneficii, zona de utilizare, formula si tip de piele. Produsele cu cel mai bun scor de relevanta apar in sectiunea You might also like."
+                : "Product recommendations compare the current product with the catalog by product name, category, benefits, usage area, formula and skin type. The highest-scoring matches are shown in the You might also like section.";
+        }
+
+        private static string NormalizeNavigationAnswer(string answer, string userMessage)
+        {
+            if (IsOrderTrackingQuestion(userMessage))
+            {
+                return BuildOrderTrackingAnswerText(userMessage);
+            }
+
+            if (IsSellerContactQuestion(userMessage))
+            {
+                return BuildSellerContactAnswerText(userMessage);
+            }
+
+            if (IsRecommendationQuestion(userMessage))
+            {
+                return BuildRecommendationAnswerText(userMessage);
+            }
+
+            if (IsFavoritesQuestion(userMessage))
+            {
+                return BuildFavoritesAnswerText(userMessage);
+            }
+
+            if (string.IsNullOrWhiteSpace(answer))
+            {
+                return answer;
+            }
+
+            return answer
+                .Replace("[Order History](/account/orders)", "[My Orders](/orders)", StringComparison.OrdinalIgnoreCase)
+                .Replace("[Order History](/my-orders)", "[My Orders](/orders)", StringComparison.OrdinalIgnoreCase)
+                .Replace("(/account/orders)", "(/orders)", StringComparison.OrdinalIgnoreCase)
+                .Replace("(/my-orders)", "(/orders)", StringComparison.OrdinalIgnoreCase)
+                .Replace("(/order-history)", "(/orders)", StringComparison.OrdinalIgnoreCase)
+                .Replace("/account/orders", "/orders", StringComparison.OrdinalIgnoreCase)
+                .Replace("/my-orders", "/orders", StringComparison.OrdinalIgnoreCase)
+                .Replace("/order-history", "/orders", StringComparison.OrdinalIgnoreCase)
+                .Replace("[Help Center](https://www.greenbeauty.com/help)", "support", StringComparison.OrdinalIgnoreCase);
         }
 
         private static bool IsProductLinkRequest(string query)

@@ -1,11 +1,31 @@
-button.nav-link{
-    background: #e9ecef;
-    border-radius: 0;
-    border: none;
-    color: #333;
+.checkout-stepper {
+    padding: 0;
+}
 
-    &:disabled:not(.active){
-        color: #333;
-        background: #e9ecef;
+.checkout-stepper__nav {
+    gap: 0;
+    margin-bottom: 34px;
+}
+
+button.checkout-stepper__button {
+    min-height: 64px;
+    background: #f4f2ed;
+    border-radius: 0;
+    border: 1px solid rgba(47, 51, 45, 0.08);
+    color: #2f332d;
+    font-size: 1.05rem;
+    letter-spacing: 0;
+
+    &.active,
+    &.active:disabled {
+        background: #5d6957;
+        border-color: #5d6957;
+        color: #fff;
+    }
+
+    &:disabled:not(.active) {
+        color: #2f332d;
+        background: #f4f2ed;
+        opacity: 1;
     }
 }

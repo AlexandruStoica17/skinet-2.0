@@ -18,6 +18,7 @@ export class ConversationComponent implements OnInit, OnDestroy {
   currentUserEmail = '';
   currentUserToken = '';
   orderId?: number;
+  isSelfConversation = false;
 
   deliveredMarked = false;
   showDeliveryButton = false; // Folosit pentru bara de actiune
@@ -59,8 +60,16 @@ export class ConversationComponent implements OnInit, OnDestroy {
               return;
             }
 
-            this.recipientEmail = params['user'];
+            this.recipientEmail = params['user'].trim();
             if (params['orderId']) this.orderId = +params['orderId'];
+
+            this.isSelfConversation =
+              this.recipientEmail.toLowerCase() === this.currentUserEmail.toLowerCase();
+
+            if (this.isSelfConversation) {
+              this.messageService.stopHubConnection();
+              return;
+            }
 
             this.messageService.createHubConnection(
               this.currentUserToken, this.recipientEmail, this.orderId
@@ -103,10 +112,10 @@ export class ConversationComponent implements OnInit, OnDestroy {
     });
   }
 
-  sendMessage() {
+  async sendMessage() {
     if (this.messageContent.trim().length === 0) return;
-    this.messageService.sendMessage(this.recipientEmail, this.messageContent, this.orderId)
-      .then(() => { this.messageContent = ''; });
+    const sent = await this.messageService.sendMessage(this.recipientEmail, this.messageContent, this.orderId);
+    if (sent) this.messageContent = '';
   }
 
   // ---> MODIFICAT AICI: Adaugat refresh instant la SignalR

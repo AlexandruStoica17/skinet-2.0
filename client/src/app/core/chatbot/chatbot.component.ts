@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { Router } from '@angular/router';
 import { finalize } from 'rxjs';
 import { ChatbotService } from '../services/chatbot.service';
 import { ChatbotMessage } from 'src/app/shared/models/chatbot';
@@ -32,7 +33,10 @@ export class ChatbotComponent {
     }
   ];
 
-  constructor(private chatbotService: ChatbotService) {}
+  constructor(
+    private chatbotService: ChatbotService,
+    private router: Router
+  ) {}
 
   toggleChat(): void {
     this.isOpen = !this.isOpen;
@@ -82,24 +86,39 @@ export class ChatbotComponent {
     return index;
   }
 
+  navigateTo(route: string, event: MouseEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (!route) {
+      return;
+    }
+
+    this.router.navigateByUrl(route);
+  }
+
   getMessageSegments(content: string): ChatbotMessageSegment[] {
     const segments: ChatbotMessageSegment[] = [];
-    const productLinkPattern = /\[([^\]]+)\]\((\/shop\/\d+)\)|(\/shop\/\d+)/g;
+    const internalRoutePattern = '\\/(?:shop\\/\\d+|orders(?:\\/\\d+)?|my-orders|account\\/orders|order-history|favorites|basket|checkout|chat(?:\\/conversation)?|whats-new|blog(?:\\/\\d+)?)';
+    const internalLinkPattern = new RegExp(
+      `\\[([^\\]]+)\\](\\((${internalRoutePattern})\\))|(${internalRoutePattern})|\\b(My Orders)\\b`,
+      'gi'
+    );
     let lastIndex = 0;
     let match: RegExpExecArray | null;
 
-    while ((match = productLinkPattern.exec(content)) !== null) {
+    while ((match = internalLinkPattern.exec(content)) !== null) {
       if (match.index > lastIndex) {
         segments.push({ text: content.slice(lastIndex, match.index) });
       }
 
-      const label = match[1] || match[3];
-      const route = match[2] || match[3];
+      const label = match[1] || match[4] || match[5];
+      const route = this.normalizeInternalRoute(match[3] || match[4] || '/orders');
       segments.push({
         text: label,
         routerLink: route
       });
-      lastIndex = productLinkPattern.lastIndex;
+      lastIndex = internalLinkPattern.lastIndex;
     }
 
     if (lastIndex < content.length) {
@@ -107,5 +126,19 @@ export class ChatbotComponent {
     }
 
     return segments.length > 0 ? segments : [{ text: content }];
+  }
+
+  private normalizeInternalRoute(route: string): string {
+    const normalizedRoute = route.toLowerCase();
+
+    if (
+      normalizedRoute === '/my-orders' ||
+      normalizedRoute === '/account/orders' ||
+      normalizedRoute === '/order-history'
+    ) {
+      return '/orders';
+    }
+
+    return route;
   }
 }

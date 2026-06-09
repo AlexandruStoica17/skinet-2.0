@@ -98,7 +98,7 @@
 
                     <div class="text-end flex-shrink-0 ms-3">
                         <div class="text-muted small mb-1">
-                            {{ conv.lastMessageSent | date:'d MMM, HH:mm' }}
+                            {{ conv.lastMessageSent | date:'dd MMM yyyy, HH:mm' }}
                         </div>
                         <span class="badge bg-danger rounded-pill" *ngIf="conv.unreadCount > 0">
                             {{ conv.unreadCount }}

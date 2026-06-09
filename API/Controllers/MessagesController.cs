@@ -1,3 +1,4 @@
+using System;
 using API.Dtos;
 using API.Extensions;
 using Core.Entities;
@@ -37,9 +38,10 @@ namespace API.Controllers
             // NOU: grupam dupa OrderId (fiecare comanda = conversatie separata)
             // Mesajele fara OrderId (chat general) sunt grupate dupa partener ca inainte
             var conversations = allMessages
+                .Where(m => !string.Equals(m.SenderUsername, m.RecipientUsername, StringComparison.OrdinalIgnoreCase))
                 .GroupBy(m =>
                 {
-                    var partnerEmail = m.SenderUsername == currentEmail
+                    var partnerEmail = string.Equals(m.SenderUsername, currentEmail, StringComparison.OrdinalIgnoreCase)
                         ? m.RecipientUsername
                         : m.SenderUsername;
                     // Cheia grupului: orderId (daca exista) sau email partener (chat general)
@@ -51,23 +53,26 @@ namespace API.Controllers
                 {
                     var lastMessage = group.First(); // spec are OrderByDescending deja
 
-                    var partnerEmail = lastMessage.SenderUsername == currentEmail
+                    var sentByCurrentUser = string.Equals(lastMessage.SenderUsername, currentEmail, StringComparison.OrdinalIgnoreCase);
+
+                    var partnerEmail = sentByCurrentUser
                         ? lastMessage.RecipientUsername
                         : lastMessage.SenderUsername;
 
-                    var partnerUser = lastMessage.SenderUsername == currentEmail
+                    var partnerUser = sentByCurrentUser
                         ? lastMessage.Recipient
                         : lastMessage.Sender;
 
                     var unreadCount = group.Count(m =>
-                        m.RecipientUsername == currentEmail && m.DateRead == null);
+                        string.Equals(m.RecipientUsername, currentEmail, StringComparison.OrdinalIgnoreCase) &&
+                        m.DateRead == null);
 
                     return new ConversationDto
                     {
                         PartnerEmail = partnerEmail,
                         PartnerName = partnerUser?.DisplayName ?? partnerEmail,
                         LastMessage = lastMessage.Content,
-                        LastMessageSent = lastMessage.MessageSent,
+                        LastMessageSent = DateTime.SpecifyKind(lastMessage.MessageSent, DateTimeKind.Utc),
                         UnreadCount = unreadCount,
                         // NOU: OrderId si titlu pentru afisare in inbox
                         OrderId = lastMessage.OrderId,

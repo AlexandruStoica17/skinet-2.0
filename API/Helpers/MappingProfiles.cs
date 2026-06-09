@@ -1,3 +1,4 @@
+using System;
 using System.Data;
 using API.Dtos;
 using AutoMapper;
@@ -52,7 +53,13 @@ CreateMap<PostSection, PostSectionToReturnDto>()
     .ForMember(d => d.AuthorName, o => o.MapFrom(s => s.AppUser.DisplayName));
 
             CreateMap<CommentCreateDto, Comment>();
-            CreateMap<Message, MessageDto>();
+            CreateMap<Message, MessageDto>()
+                .ForMember(d => d.MessageSent,
+                    o => o.MapFrom(s => DateTime.SpecifyKind(s.MessageSent, DateTimeKind.Utc)))
+                .ForMember(d => d.DateRead,
+                    o => o.MapFrom(s => s.DateRead.HasValue
+                        ? DateTime.SpecifyKind(s.DateRead.Value, DateTimeKind.Utc)
+                        : (DateTime?)null));
         }
     }
 }

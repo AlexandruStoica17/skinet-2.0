@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -73,6 +74,7 @@ namespace Infrastructure.Services
                 {
                     var producer = await _userManager.FindByIdAsync(producerId);
                     if (producer == null) continue;
+                    if (string.Equals(producer.Email, buyer.Email, StringComparison.OrdinalIgnoreCase)) continue;
 
                     // ---> MODIFICAT AICI: Am înlocuit cele 2 mesaje duplicate cu un singur mesaj de sistem
                     var systemMsg = new Message

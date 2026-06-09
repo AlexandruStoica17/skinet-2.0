@@ -60,7 +60,7 @@ namespace API.Controllers
             var favorites = await _unitOfWork.Repository<FavoriteProduct>().ListAsync(spec);
             
             if (favorites.Any(x => x.ProductId == favoriteDto.ProductId))
-                return BadRequest(new ApiResponse(400, "Product is already in favorites"));
+                return Ok(new { alreadyExists = true, message = "Product is already in favorites" });
 
             var favorite = new FavoriteProduct
             {
@@ -73,7 +73,7 @@ namespace API.Controllers
             if (await _unitOfWork.Complete() <= 0) 
                 return BadRequest(new ApiResponse(400, "Problem saving favorite"));
 
-            return Ok();
+            return Ok(new { alreadyExists = false, message = "Product added to favorites" });
         }
 
         // 3. Șterge de la favorite (Unlike)

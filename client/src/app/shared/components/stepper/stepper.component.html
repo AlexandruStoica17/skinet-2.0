@@ -1,8 +1,8 @@
-<div class="container">
-    <ul class="nav nav-pills nav-justified">
+<div class="container checkout-stepper">
+    <ul class="nav nav-pills nav-justified checkout-stepper__nav">
         <li class="nav-item" *ngFor="let step of steps; let i = index">
             <div class="d-grid">
-                <button (click)="onClick(i)" [disabled]="true" [class.active]=" selectedIndex === i"  class="nav-link py-3 text-uppercase fw-bold">
+                <button (click)="onClick(i)" [disabled]="true" [class.active]=" selectedIndex === i"  class="nav-link checkout-stepper__button text-uppercase fw-bold">
                     {{step.label}}
                 </button></div>
             

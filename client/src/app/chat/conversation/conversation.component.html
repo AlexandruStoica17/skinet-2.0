@@ -14,6 +14,9 @@
                 </div>
 
                 <div class="card-body chat-body bg-light">
+                    <div *ngIf="isSelfConversation" class="alert alert-warning text-center mb-4">
+                        This conversation points to your own account, so messages cannot be sent here.
+                    </div>
                     
                     <div *ngIf="(messageService.messageThread$ | async)?.length === 0"
                         class="text-center text-muted mt-5">
@@ -26,7 +29,7 @@
                             <div *ngIf="msg.isSystemMessage" class="system-message-wrapper d-flex flex-column align-items-center">
                                 <div class="system-message-pill shadow-sm">
                                     <span class="content">{{ msg.content }}</span>
-                                    <span class="time">{{ msg.messageSent | date: 'dd MMM, HH:mm' }}</span>
+                                    <span class="time">{{ msg.messageSent | date: 'dd MMM yyyy, HH:mm' }}</span>
                                 </div>
 
                                 <div *ngIf="msg.isReviewPrompt
@@ -57,7 +60,7 @@
                                     <small [class.text-light]="msg.senderUsername === currentUserEmail"
                                         [class.text-muted]="msg.senderUsername !== currentUserEmail"
                                         style="font-size: 0.75em; display: block; margin-top: 4px;">
-                                        {{ msg.messageSent | date:'d MMM, HH:mm' }}
+                                        {{ msg.messageSent | date:'dd MMM yyyy, HH:mm' }}
                                         <i class="fa ms-1" *ngIf="msg.senderUsername === currentUserEmail"
                                             [class.fa-check]="!msg.dateRead" [class.fa-check-circle]="msg.dateRead"></i>
                                     </small>
@@ -145,8 +148,10 @@
                     <form #messageForm="ngForm" (ngSubmit)="sendMessage()" autocomplete="off">
                         <div class="input-group">
                             <input type="text" name="messageContent" class="form-control"
-                                placeholder="Write a message..." [(ngModel)]="messageContent" required>
-                            <button class="btn btn-primary" type="submit" [disabled]="!messageForm.valid">
+                                placeholder="Write a message..." [(ngModel)]="messageContent" required
+                                [disabled]="isSelfConversation">
+                            <button class="btn btn-primary" type="submit"
+                                [disabled]="!messageForm.valid || isSelfConversation">
                                 Send
                             </button>
                         </div>

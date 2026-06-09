@@ -1,3 +1,4 @@
+using System;
 using API.Dtos;
 using API.Extensions;
 using AutoMapper;
@@ -40,6 +41,13 @@ namespace API.SignalR
             var otherUser = httpContext.Request.Query["user"].ToString();
             var currentEmail = Context.User.RetrieveEmailFromPrincipal();
 
+            if (string.IsNullOrWhiteSpace(otherUser) ||
+                string.Equals(currentEmail, otherUser, StringComparison.OrdinalIgnoreCase))
+            {
+                await Clients.Caller.SendAsync("ReceiveMessageThread", Array.Empty<MessageDto>());
+                return;
+            }
+
             // Citim orderId din URL
             int? orderId = null;
             var orderIdStr = httpContext.Request.Query["orderId"].ToString();
@@ -62,7 +70,9 @@ namespace API.SignalR
 
             // Marcam ca citite
             var unread = messages
-                .Where(m => m.RecipientUsername == currentEmail && m.DateRead == null)
+                .Where(m =>
+                    string.Equals(m.RecipientUsername, currentEmail, StringComparison.OrdinalIgnoreCase) &&
+                    m.DateRead == null)
                 .ToList();
 
             if (unread.Any())
@@ -80,12 +90,16 @@ namespace API.SignalR
         public async Task SendMessage(CreateMessageDto createMessageDto)
         {
             var email = Context.User.RetrieveEmailFromPrincipal();
+            var recipientUsername = createMessageDto.RecipientUsername?.Trim();
 
-            if (email == createMessageDto.RecipientUsername.ToLower())
+            if (string.IsNullOrWhiteSpace(recipientUsername))
+                throw new HubException("Recipient is required.");
+
+            if (string.Equals(email, recipientUsername, StringComparison.OrdinalIgnoreCase))
                 throw new HubException("You cannot send messages to yourself.");
 
             var sender = await _userManager.FindByEmailAsync(email);
-            var recipient = await _userManager.FindByEmailAsync(createMessageDto.RecipientUsername);
+            var recipient = await _userManager.FindByEmailAsync(recipientUsername);
             if (recipient == null) throw new HubException("User was not found.");
 
             var message = new Message
@@ -119,7 +133,14 @@ namespace API.SignalR
                 {
                     await _presenceHub.Clients.Clients(recipientConnections).SendAsync(
                         "NewMessageReceived",
-                        new { senderEmail = sender.Email, senderName = sender.DisplayName }
+                        new
+                        {
+                            senderEmail = sender.Email,
+                            senderName = sender.DisplayName,
+                            orderId = message.OrderId,
+                            isSystemMessage = message.IsSystemMessage,
+                            content = message.Content
+                        }
                     );
                 }
             }

@@ -18,7 +18,10 @@
         [class.chatbot-message--user]="message.role === 'user'">
         <p>
           <ng-container *ngFor="let segment of getMessageSegments(message.content)">
-            <a *ngIf="segment.routerLink; else textSegment" [routerLink]="segment.routerLink">
+            <a
+              *ngIf="segment.routerLink; else textSegment"
+              [attr.href]="segment.routerLink"
+              (click)="navigateTo(segment.routerLink, $event)">
               {{segment.text}}
             </a>
             <ng-template #textSegment>{{segment.text}}</ng-template>

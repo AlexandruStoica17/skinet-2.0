@@ -41,7 +41,9 @@
 
         <button
           type="button"
-          title="Add to favorites"
+          [title]="isFavorite ? 'Already in favorites' : 'Add to favorites'"
+          [class.is-favorite]="isFavorite"
+          [disabled]="isFavorite"
           (click)="addLike()">
           <i class="fa fa-heart"></i>
         </button>
