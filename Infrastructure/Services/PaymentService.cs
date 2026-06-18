@@ -14,6 +14,7 @@ namespace Infrastructure.Services
 {
     public class PaymentService : IPaymentService
     {
+        private const string PaymentCurrency = "ron";
         private readonly IBasketRepository _basketRepository;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IConfiguration _config;
@@ -62,29 +63,50 @@ namespace Infrastructure.Services
             var service = new PaymentIntentService();
 
             PaymentIntent intent;
+            var amount = CalculateStripeAmount(basket, shippingPrice);
 
             if (string.IsNullOrEmpty(basket.PaymentIntentId))
             {
-                var options = new PaymentIntentCreateOptions
-                {
-                    Amount = (long)basket.Items.Sum(i => i.Quantity * (i.Price * 100)) + (long)shippingPrice * 100,
-                    Currency = "usd",
-                    PaymentMethodTypes = new List<string> { "card" }
-                };
-                intent = await service.CreateAsync(options);
+                intent = await service.CreateAsync(CreatePaymentIntentOptions(amount));
                 basket.PaymentIntentId = intent.Id;
                 basket.ClientSecret = intent.ClientSecret;
             }
             else
             {
-                var options = new PaymentIntentUpdateOptions
+                var existingIntent = await service.GetAsync(basket.PaymentIntentId);
+
+                if (!string.Equals(existingIntent.Currency, PaymentCurrency, StringComparison.OrdinalIgnoreCase))
                 {
-                    Amount = (long)basket.Items.Sum(i => i.Quantity * (i.Price * 100)) + (long)shippingPrice * 100
-                };
-                await service.UpdateAsync(basket.PaymentIntentId, options);
+                    intent = await service.CreateAsync(CreatePaymentIntentOptions(amount));
+                    basket.PaymentIntentId = intent.Id;
+                    basket.ClientSecret = intent.ClientSecret;
+                }
+                else
+                {
+                    var options = new PaymentIntentUpdateOptions
+                    {
+                        Amount = amount
+                    };
+                    await service.UpdateAsync(basket.PaymentIntentId, options);
+                }
             }
             await _basketRepository.UpdateBasketAsync(basket);
             return basket;
+        }
+
+        private static PaymentIntentCreateOptions CreatePaymentIntentOptions(long amount)
+        {
+            return new PaymentIntentCreateOptions
+            {
+                Amount = amount,
+                Currency = PaymentCurrency,
+                PaymentMethodTypes = new List<string> { "card" }
+            };
+        }
+
+        private static long CalculateStripeAmount(CustomerBasket basket, decimal shippingPrice)
+        {
+            return (long)decimal.Round((basket.Items.Sum(i => i.Quantity * i.Price) + shippingPrice) * 100, 0, MidpointRounding.AwayFromZero);
         }
 
         public async Task<Core.Entities.OrderAggregate.Order> UpdateOrderPaymentFailed(string paymentIntentId)

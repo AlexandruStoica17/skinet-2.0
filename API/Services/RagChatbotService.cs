@@ -323,7 +323,7 @@ namespace API.Services
             foreach (var product in products)
             {
                 builder.AppendLine(
-                    $"- {product.Name} | {product.ProductType} | {product.Brand} | {product.ProducerName} | ${product.Price:0.00} | /shop/{product.Id}");
+                    $"- {product.Name} | {product.ProductType} | {product.Brand} | {product.ProducerName} | {FormatPrice(product.Price)} | /shop/{product.Id}");
                 builder.AppendLine(
                     $"  Markdown link: [{product.Name}](/shop/{product.Id})");
                 builder.AppendLine(
@@ -463,7 +463,7 @@ namespace API.Services
             builder.Append(products.Count == 1 ? "this relevant product" : "these relevant products");
             builder.Append(" in the current GreenBeauty catalog: ");
             builder.Append(string.Join("; ", products.Select(product =>
-                $"[{product.Name}](/shop/{product.Id}) ({product.ProductType}) by {product.ProducerName}, ${product.Price:0.00}")));
+                $"[{product.Name}](/shop/{product.Id}) ({product.ProductType}) by {product.ProducerName}, {FormatPrice(product.Price)}")));
             builder.Append(".");
 
             return builder.ToString();
@@ -495,7 +495,7 @@ namespace API.Services
                 : "Yes, we sell these relevant products: ";
 
             return prefix + string.Join("; ", products.Select(product =>
-                $"[{product.Name}](/shop/{product.Id}) by {product.ProducerName}, ${product.Price:0.00}")) + ".";
+                $"[{product.Name}](/shop/{product.Id}) by {product.ProducerName}, {FormatPrice(product.Price)}")) + ".";
         }
 
         private static string BuildRomanianProductAnswer(IReadOnlyList<ProductSearchResult> products)
@@ -505,7 +505,12 @@ namespace API.Services
                 : "Da, vindem aceste produse: ";
 
             return prefix + string.Join("; ", products.Select(product =>
-                $"[{product.Name}](/shop/{product.Id}) de la {product.ProducerName}, ${product.Price:0.00}")) + ".";
+                $"[{product.Name}](/shop/{product.Id}) de la {product.ProducerName}, {FormatPrice(product.Price)}")) + ".";
+        }
+
+        private static string FormatPrice(decimal price)
+        {
+            return $"{price:0.00} RON";
         }
 
         private static ChatbotResponseDto BuildProductLinkResponse(

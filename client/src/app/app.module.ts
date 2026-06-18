@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import { DEFAULT_CURRENCY_CODE, LOCALE_ID, NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 
@@ -18,10 +18,13 @@ import { ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { MyProductsComponent } from './producer/my-products/my-products.component';
 import { EditProductComponent } from './producer/edit-product/edit-product.component';
 import { ProducerOrdersComponent } from './producer/producer-orders/producer-orders.component';
-import { CommonModule } from '@angular/common';
+import { CommonModule, registerLocaleData } from '@angular/common';
+import localeRo from '@angular/common/locales/ro';
 import { RouterModule } from '@angular/router'; // NOU: necesar pentru routerLink in ProducerOrdersComponent
 import { SharedModule } from './shared/shared.module';
 import { SellerProfileComponent } from './seller-profile/seller-profile.component';
+
+registerLocaleData(localeRo);
 
 @NgModule({
   declarations: [
@@ -49,6 +52,8 @@ import { SellerProfileComponent } from './seller-profile/seller-profile.componen
     SharedModule,
   ],
   providers: [
+    { provide: LOCALE_ID, useValue: 'ro-RO' },
+    { provide: DEFAULT_CURRENCY_CODE, useValue: 'RON' },
     { provide: HTTP_INTERCEPTORS, useClass: ErrorInterceptor, multi: true },
     { provide: HTTP_INTERCEPTORS, useClass: LoadingInterceptor, multi: true },
     { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
