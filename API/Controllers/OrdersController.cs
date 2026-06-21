@@ -120,7 +120,6 @@ namespace API.Controllers
                 buyer != null &&
                 !string.Equals(producer.Email, buyer.Email, StringComparison.OrdinalIgnoreCase))
             {
-                // ---> MODIFICAT AICI: Am înlocuit cu un singur mesaj de sistem pentru Expediere
                 var systemMsg = new Message
                 {
                     SenderId = producer.Id,
@@ -153,23 +152,33 @@ namespace API.Controllers
 
             if (order == null) return NotFound(new ApiResponse(404));
 
-            if (order.Status != OrderStatus.Shipped)
+            if (order.Status != OrderStatus.Shipped && order.Status != OrderStatus.Delivered)
                 return BadRequest(new ApiResponse(400, "The order cannot be marked as delivered."));
 
-            order.Status = OrderStatus.Delivered;
-            _unitOfWork.Repository<Order>().Update(order);
-            await _unitOfWork.Complete();
-
             var buyer = await _userManager.FindByEmailAsync(buyerEmail);
-            var firstItem = order.OrderItems.FirstOrDefault();
+            var messagesToNotify = new List<(Message Message, AppUser Producer)>();
 
-            if (buyer != null && firstItem != null)
+            if (buyer != null)
             {
-                var producer = await _userManager.FindByIdAsync(firstItem.ProducerId);
-                if (producer != null &&
-                    !string.Equals(producer.Email, buyer.Email, StringComparison.OrdinalIgnoreCase))
+                var producerIds = order.OrderItems
+                    .Where(item => !string.IsNullOrWhiteSpace(item.ProducerId))
+                    .Select(item => item.ProducerId)
+                    .Distinct()
+                    .ToList();
+
+                foreach (var producerId in producerIds)
                 {
-                    // ---> MODIFICAT AICI: Am înlocuit cu un singur mesaj de sistem + Review prompt
+                    var producer = await _userManager.FindByIdAsync(producerId);
+                    if (producer == null ||
+                        string.Equals(producer.Email, buyer.Email, StringComparison.OrdinalIgnoreCase))
+                    {
+                        continue;
+                    }
+
+                    var promptSpec = new DeliveryReviewPromptMessageSpecification(order.Id, producer.Email, buyer.Email);
+                    var existingPromptCount = await _unitOfWork.Repository<Message>().CountAsync(promptSpec);
+                    if (existingPromptCount > 0) continue;
+
                     var systemMsg = new Message
                     {
                         SenderId = producer.Id,
@@ -180,16 +189,32 @@ namespace API.Controllers
                         Recipient = buyer,
                         OrderId = order.Id,
                         IsSystemMessage = true,
-                        IsReviewPrompt = true, 
+                        IsReviewPrompt = true,
                         Content = $"Platform: {buyer.DisplayName} confirmed delivery for order #{order.Id}. Thank you, please leave a review!"
                     };
 
                     _unitOfWork.Repository<Message>().Add(systemMsg);
-                    if (await _unitOfWork.Complete() > 0)
-                    {
-                        await NotifyOrderMessageAsync(systemMsg, producer, buyer);
-                    }
+                    messagesToNotify.Add((systemMsg, producer));
                 }
+            }
+
+            var shouldUpdateStatus = order.Status == OrderStatus.Shipped;
+            if (shouldUpdateStatus)
+            {
+                order.Status = OrderStatus.Delivered;
+                _unitOfWork.Repository<Order>().Update(order);
+            }
+
+            if (shouldUpdateStatus || messagesToNotify.Count > 0)
+            {
+                var result = await _unitOfWork.Complete();
+                if (result <= 0)
+                    return BadRequest(new ApiResponse(400, "Problem confirming order delivery"));
+            }
+
+            foreach (var messageToNotify in messagesToNotify)
+            {
+                await NotifyOrderMessageAsync(messageToNotify.Message, messageToNotify.Producer, buyer);
             }
 
             return _mapper.Map<Order, OrderToReturnDto>(order);

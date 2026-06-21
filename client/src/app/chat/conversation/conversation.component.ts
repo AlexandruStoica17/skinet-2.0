@@ -6,6 +6,7 @@ import { MessageService } from '../../core/services/message.service';
 import { OrdersService } from '../../orders/orders.service';
 import { ReviewService } from '../../core/services/review.service';
 import { OrderItem } from '../../shared/models/order';
+import { Message } from '../../shared/models/message';
 
 @Component({
   selector: 'app-conversation',
@@ -21,15 +22,17 @@ export class ConversationComponent implements OnInit, OnDestroy {
   isSelfConversation = false;
 
   deliveredMarked = false;
-  showDeliveryButton = false; // Folosit pentru bara de actiune
+  showDeliveryButton = false;
+  confirmingDelivery = false;
+  private orderStatus = '';
+  private ensuringDeliveryPrompt = false;
+  private deliveryPromptEnsureAttempted = false;
 
-  // Review vanzator
   showReviewForm = false;
   reviewOrderId: number | null = null;
   sellerRating = 5;
   sellerComment = '';
 
-  // Reviews produse
   orderItems: OrderItem[] = [];
   productRatings: { [productId: number]: number } = {};
   productComments: { [productId: number]: string } = {};
@@ -50,64 +53,60 @@ export class ConversationComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.accountService.currentUser$.pipe(take(1)).subscribe({
       next: user => {
-        if (user) {
-          this.currentUserEmail = user.email;
-          this.currentUserToken = user.token;
+        if (!user) return;
 
-          this.route.queryParams.pipe(take(1)).subscribe(params => {
-            if (!params['user']) {
-              this.router.navigate(['/chat']);
-              return;
-            }
+        this.currentUserEmail = user.email;
+        this.currentUserToken = user.token;
 
-            this.recipientEmail = params['user'].trim();
-            if (params['orderId']) this.orderId = +params['orderId'];
+        this.route.queryParams.pipe(take(1)).subscribe(params => {
+          if (!params['user']) {
+            this.router.navigate(['/chat']);
+            return;
+          }
 
-            this.isSelfConversation =
-              this.recipientEmail.toLowerCase() === this.currentUserEmail.toLowerCase();
+          this.recipientEmail = params['user'].trim();
+          if (params['orderId']) this.orderId = +params['orderId'];
 
-            if (this.isSelfConversation) {
-              this.messageService.stopHubConnection();
-              return;
-            }
+          this.isSelfConversation =
+            this.recipientEmail.toLowerCase() === this.currentUserEmail.toLowerCase();
 
-            this.messageService.createHubConnection(
-              this.currentUserToken, this.recipientEmail, this.orderId
-            );
+          if (this.isSelfConversation) {
+            this.messageService.stopHubConnection();
+            return;
+          }
 
-            // ---> MODIFICAT AICI: Verificam statusul comenzii si daca afisam bara de confirmare
-            this.messageService.messageThread$.subscribe(messages => {
-              const alreadyDelivered = messages.some(m =>
-                m.content.includes('confirmed delivery') || m.isReviewPrompt
-              );
-              
-              const shippedMsg = messages.find(m => m.content.includes('has been shipped'));
-              const isBuyer = shippedMsg && shippedMsg.recipientUsername === this.currentUserEmail;
+          this.messageService.createHubConnection(
+            this.currentUserToken, this.recipientEmail, this.orderId
+          );
 
-              if (alreadyDelivered) {
-                this.deliveredMarked = true;
-                this.showDeliveryButton = false;
-              } else if (shippedMsg && isBuyer) {
-                this.showDeliveryButton = true;
+          this.messageService.messageThread$.subscribe(messages => {
+            this.updateDeliveryButton(messages);
+          });
+
+          if (this.orderId) {
+            this.ordersService.getOrderDetailed(this.orderId).subscribe({
+              next: order => {
+                this.orderItems = order.orderItems;
+                this.orderStatus = order.status;
+
+                if (order.status === 'Delivered') {
+                  this.deliveredMarked = true;
+                  this.showDeliveryButton = false;
+                }
+
+                this.messageService.messageThread$.pipe(take(1)).subscribe(messages => {
+                  this.updateDeliveryButton(messages);
+                });
+
+                order.orderItems.forEach(item => {
+                  this.productRatings[item.productId] = 5;
+                  this.productComments[item.productId] = '';
+                  this.productReviewsDone[item.productId] = false;
+                });
               }
             });
-
-            // Incarcam produsele comenzii daca avem orderId
-            if (this.orderId) {
-              this.ordersService.getOrderDetailed(this.orderId).subscribe({
-                next: order => {
-                  this.orderItems = order.orderItems;
-                  // Initializam rating-ul la 5 pentru fiecare produs
-                  order.orderItems.forEach(item => {
-                    this.productRatings[item.productId] = 5;
-                    this.productComments[item.productId] = '';
-                    this.productReviewsDone[item.productId] = false;
-                  });
-                }
-              });
-            }
-          });
-        }
+          }
+        });
       }
     });
   }
@@ -118,24 +117,72 @@ export class ConversationComponent implements OnInit, OnDestroy {
     if (sent) this.messageContent = '';
   }
 
-  // ---> MODIFICAT AICI: Adaugat refresh instant la SignalR
-  markDelivered(orderId: number) {
-    if (this.deliveredMarked) return;
-    this.ordersService.markOrderAsDelivered(orderId).subscribe({
-      next: () => { 
-        this.deliveredMarked = true; 
-        this.showDeliveryButton = false;
+  private updateDeliveryButton(messages: Message[]) {
+    const alreadyDelivered = messages.some(m =>
+      m.content.includes('confirmed delivery') || m.isReviewPrompt
+    );
 
-        // Oprim și repornim conexiunea pentru a aduce instant noul mesaj de sistem cu Review
-        this.messageService.stopHubConnection();
-        setTimeout(() => {
-          this.messageService.createHubConnection(this.currentUserToken, this.recipientEmail, this.orderId);
-        }, 200); // O scurtă întârziere pentru a ne asigura că vechea conexiune s-a închis
+    if (alreadyDelivered) {
+      this.deliveredMarked = true;
+      this.showDeliveryButton = false;
+      return;
+    }
+
+    if (this.orderStatus === 'Delivered') {
+      this.deliveredMarked = true;
+      this.showDeliveryButton = false;
+      this.ensureDeliveryPrompt();
+      return;
+    }
+
+    const shippedMsg = messages.find(m => m.content.includes('has been shipped'));
+    const isBuyer = shippedMsg && shippedMsg.recipientUsername === this.currentUserEmail;
+    this.showDeliveryButton = !!shippedMsg && !!isBuyer && !this.confirmingDelivery;
+  }
+
+  private ensureDeliveryPrompt() {
+    if (!this.orderId || this.ensuringDeliveryPrompt || this.deliveryPromptEnsureAttempted) return;
+
+    this.deliveryPromptEnsureAttempted = true;
+    this.ensuringDeliveryPrompt = true;
+    this.ordersService.markOrderAsDelivered(this.orderId).subscribe({
+      next: () => {
+        this.ensuringDeliveryPrompt = false;
+        this.refreshMessageThread();
       },
       error: err => {
+        this.ensuringDeliveryPrompt = false;
+        console.log(err);
+      }
+    });
+  }
+
+  private refreshMessageThread() {
+    this.messageService.stopHubConnection();
+    setTimeout(() => {
+      this.messageService.createHubConnection(this.currentUserToken, this.recipientEmail, this.orderId);
+    }, 200);
+  }
+
+  markDelivered(orderId: number) {
+    if (this.deliveredMarked || this.confirmingDelivery) return;
+
+    this.confirmingDelivery = true;
+    this.ordersService.markOrderAsDelivered(orderId).subscribe({
+      next: order => {
+        this.orderStatus = order.status;
+        this.deliveredMarked = true;
+        this.showDeliveryButton = false;
+        this.confirmingDelivery = false;
+        this.deliveryPromptEnsureAttempted = true;
+
+        this.refreshMessageThread();
+      },
+      error: err => {
+        this.confirmingDelivery = false;
         if (err.status === 400) {
-            this.deliveredMarked = true;
-            this.showDeliveryButton = false;
+          this.deliveredMarked = true;
+          this.showDeliveryButton = false;
         }
         console.log(err);
       }
@@ -148,12 +195,10 @@ export class ConversationComponent implements OnInit, OnDestroy {
     this.reviewSubmitted = false;
   }
 
-  // Trimite review-ul pentru vanzator + toate produsele dintr-o data
   submitAllReviews() {
     if (!this.reviewOrderId) return;
     this.reviewSubmitting = true;
 
-    // 1. Review vanzator
     this.messageService.submitReview({
       orderId: this.reviewOrderId,
       producerEmail: this.recipientEmail,
@@ -161,7 +206,6 @@ export class ConversationComponent implements OnInit, OnDestroy {
       comment: this.sellerComment
     }).subscribe({
       next: () => {
-        // 2. Review pentru fiecare produs
         const productReviewCalls = this.orderItems.map(item =>
           this.reviewService.submitProductReview({
             productId: item.productId,
@@ -171,7 +215,6 @@ export class ConversationComponent implements OnInit, OnDestroy {
           })
         );
 
-        // Trimitem toate review-urile de produs in paralel
         let completed = 0;
         if (productReviewCalls.length === 0) {
           this.reviewSubmitting = false;

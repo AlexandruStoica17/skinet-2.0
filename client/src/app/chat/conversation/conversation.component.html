@@ -139,8 +139,9 @@
                     <span class="text-dark small fw-bold d-block mb-2">
                         Package shipped. Click the button below only after you physically receive the package:
                     </span>
-                    <button class="btn btn-success shadow-sm" (click)="markDelivered(orderId!)">
-                        Confirm order delivery
+                    <button class="btn btn-success shadow-sm" (click)="markDelivered(orderId!)"
+                        [disabled]="confirmingDelivery">
+                        {{ confirmingDelivery ? 'Confirming...' : 'Confirm order delivery' }}
                     </button>
                 </div>
 
