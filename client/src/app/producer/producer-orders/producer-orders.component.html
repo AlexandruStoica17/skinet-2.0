@@ -26,8 +26,8 @@
                                 <td class="align-middle"><strong>{{order.subtotal | currency}}</strong></td>
                                 <td class="align-middle">
                                     <span [ngClass]="{
-                                            'badge badge-success text-white': order.status === 'Payment Received' || order.status === 'Shipped',
-                                            'badge badge-warning text-dark': order.status !== 'Payment Received' && order.status !== 'Shipped'
+                                            'badge badge-success text-white': order.status === 'Payment Received',
+                                            'badge badge-warning text-dark': order.status !== 'Payment Received'
                                           }" class="p-2 shadow-sm">
                                         {{order.status}}
                                     </span>
@@ -112,9 +112,9 @@
                         <p class="mb-1"><strong>Date:</strong> {{selectedOrder.orderDate | date: 'medium'}}</p>
                         <p class="mb-1"><strong>Client Email:</strong> {{selectedOrder?.buyerEmail}}</p>
                         <p class="mb-1">
-                            <strong>Status:</strong> 
+                             <strong>Status:</strong> 
                             <span class="badge" style="color: black;"
-                                  [ngClass]="selectedOrder.status === 'Shipped' ? 'badge-primary' : 'badge-success'">
+                                  [ngClass]="selectedOrder.status === 'Payment Received' ? 'badge-success' : 'badge-warning'">
                                 {{selectedOrder.status}}
                             </span>
                         </p>
