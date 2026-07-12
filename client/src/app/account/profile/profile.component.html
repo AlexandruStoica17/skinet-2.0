@@ -100,27 +100,15 @@
                         <div class="form-group mb-3">
                             <label class="form-label">New Password</label>
                             <input type="password" class="form-control" formControlName="newPassword" placeholder="Enter a new password">
-                            <div class="form-text text-danger" *ngIf="passwordForm.get('newPassword')?.errors?.['passwordMinLength'] && passwordForm.get('newPassword')?.touched">
-                                Password must be at least 6 characters.
-                            </div>
-                            <div class="form-text text-danger" *ngIf="passwordForm.get('newPassword')?.errors?.['passwordMaxLength'] && passwordForm.get('newPassword')?.touched">
-                                Password must be at most 30 characters.
-                            </div>
-                            <div class="form-text text-danger" *ngIf="passwordForm.get('newPassword')?.errors?.['passwordUppercase'] && passwordForm.get('newPassword')?.touched">
-                                Password must include an uppercase letter.
-                            </div>
-                            <div class="form-text text-danger" *ngIf="passwordForm.get('newPassword')?.errors?.['passwordLowercase'] && passwordForm.get('newPassword')?.touched">
-                                Password must include a lowercase letter.
-                            </div>
-                            <div class="form-text text-danger" *ngIf="passwordForm.get('newPassword')?.errors?.['passwordNumber'] && passwordForm.get('newPassword')?.touched">
-                                Password must include a number.
-                            </div>
-                            <div class="form-text text-danger" *ngIf="passwordForm.get('newPassword')?.errors?.['passwordSpecial'] && passwordForm.get('newPassword')?.touched">
-                                Password must include a special character.
-                            </div>
-                            <div class="form-text text-danger" *ngIf="passwordForm.get('newPassword')?.errors?.['passwordWhitespace'] && passwordForm.get('newPassword')?.touched">
-                                Password must not contain spaces.
-                            </div>
+                            <ng-container *ngIf="passwordForm.get('newPassword')?.touched">
+                                <div class="form-text text-danger" *ngIf="passwordForm.get('newPassword')?.errors?.['passwordMinLength']">Password must be at least 6 characters.</div>
+                                <div class="form-text text-danger" *ngIf="passwordForm.get('newPassword')?.errors?.['passwordMaxLength']">Password must be at most 30 characters.</div>
+                                <div class="form-text text-danger" *ngIf="passwordForm.get('newPassword')?.errors?.['passwordUppercase']">Password must include an uppercase letter.</div>
+                                <div class="form-text text-danger" *ngIf="passwordForm.get('newPassword')?.errors?.['passwordLowercase']">Password must include a lowercase letter.</div>
+                                <div class="form-text text-danger" *ngIf="passwordForm.get('newPassword')?.errors?.['passwordNumber']">Password must include a number.</div>
+                                <div class="form-text text-danger" *ngIf="passwordForm.get('newPassword')?.errors?.['passwordSpecial']">Password must include a special character.</div>
+                                <div class="form-text text-danger" *ngIf="passwordForm.get('newPassword')?.errors?.['passwordWhitespace']">Password must not contain spaces.</div>
+                            </ng-container>
                         </div>
                         <div class="form-group mb-4">
                             <label class="form-label">Confirm New Password</label>
