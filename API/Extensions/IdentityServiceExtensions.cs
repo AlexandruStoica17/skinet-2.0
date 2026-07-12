@@ -12,25 +12,10 @@ namespace API.Extensions
     {
         public static IServiceCollection AddIdentityServices( this IServiceCollection services, IConfiguration config)
         {
-            /* --- COD VECHI COMENTAT (Baza de date separată pentru Identity) ---
-            services.AddDbContext<AppIdentityDbContext>(opt =>
-            {
-                opt.UseSqlite(config.GetConnectionString("IdentityConnection"));
-            });
-            ------------------------------------------------------------------ */
-            
-            services.AddIdentityCore<AppUser>(opt =>
-            {
-                //identity options here
-            })
-            // --- COD NOU ADAUGAT PENTRU ROLURI ---
+            services.AddIdentityCore<AppUser>(opt =>{})
             .AddRoles<IdentityRole>() 
             .AddRoleManager<RoleManager<IdentityRole>>() 
-            // -------------------------------------
-            /* --- COD VECHI COMENTAT ---
-            .AddEntityFrameworkStores<AppIdentityDbContext>()
-            ----------------------------- */
-            .AddEntityFrameworkStores<StoreContext>() // <--- FOLOSIM NOUA BAZĂ DE DATE UNIFICATĂ
+            .AddEntityFrameworkStores<StoreContext>()
             .AddSignInManager<SignInManager<AppUser>>();
 
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -45,15 +30,13 @@ namespace API.Extensions
                         ValidateAudience = false
                     };
 
-                 // ---> ADAUGĂ ACEASTĂ PARTE PENTRU SIGNALR <--- (LĂSAT EXACT CUM ERA)
                  options.Events = new JwtBearerEvents
                  {
                      OnMessageReceived = context => 
                      {
                          var accessToken = context.Request.Query["access_token"];
                          var path = context.HttpContext.Request.Path;
-                         
-                         // Verificăm dacă requestul este pentru un Hub și avem un token în URL
+             
                          if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs"))
                          {
                              context.Token = accessToken;
@@ -62,7 +45,6 @@ namespace API.Extensions
                          return Task.CompletedTask;
                      }
                  };
-                 // ---> PÂNĂ AICI <---
             });
 
             services.AddAuthorization();

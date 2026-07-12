@@ -279,7 +279,8 @@ namespace API.Services
                 Use only the provided knowledge base excerpts and platform context.
                 If relevant product catalog matches are available, answer with those concrete products instead of generic marketplace text.
                 When a product route is available, format it as a Markdown link like [Product Name](/shop/16).
-                Use only real GreenBeauty routes. Favorites is /favorites. Orders is /orders. Cart is /basket. Checkout is /checkout. Messages is /chat. Never invent routes like /my-orders, /account/orders, /account/orders, /order-history, /help or external help-center URLs.
+                Use only real GreenBeauty routes. Favorites is /favorites. Orders is /orders. Cart is /basket. Checkout is /checkout. Messages is /chat. Never invent routes
+                like /my-orders, /account/orders, /account/orders, /order-history, /help or external help-center URLs.
                 If the user asks how to track orders, answer with [My Orders](/orders).
                 If the user asks how to contact a seller, say they can use Contact seller on product pages or open [Messages](/chat).
                 If the user asks where favorites or saved products are, answer with [Favorites](/favorites).

@@ -178,7 +178,6 @@ export class CreatePostComponent implements OnInit {
 
     formData.append('sectionsJson', JSON.stringify(sectionsPayload));
 
-    // Content simplificat pentru compatibilitate cu search/sugestii
     const plainContent = this.sections
       .map(section => `${section.heading}\n${section.text}`.trim())
       .filter(x => x.length > 0)
@@ -186,7 +185,6 @@ export class CreatePostComponent implements OnInit {
 
     formData.append('content', plainContent);
 
-    // Fiecare imagine de secțiune primește nume unic: sectionImages_0, sectionImages_1...
     this.sections.forEach((section, index) => {
       if (section.image) {
         formData.append(`sectionImages_${index}`, section.image);

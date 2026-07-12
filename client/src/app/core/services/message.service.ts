@@ -9,7 +9,7 @@ import { Message } from 'src/app/shared/models/message';
 import { Conversation } from 'src/app/shared/models/conversation';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class MessageService {
   baseUrl = environment.apiUrl;
@@ -29,8 +29,8 @@ export class MessageService {
   constructor(
     private http: HttpClient,
     private toastr: ToastrService,
-    private router: Router
-  ) { }
+    private router: Router,
+  ) {}
 
   // ─── REST ──────────────────────────────────────────────────────────────────
 
@@ -40,25 +40,35 @@ export class MessageService {
       .set('pageIndex', pageIndex.toString())
       .set('pageSize', pageSize.toString());
 
-    return this.http.get<Conversation[]>(this.baseUrl + 'messages/inbox', {
-      params,
-      observe: 'response'
-    }).pipe(
-      map((response: HttpResponse<Conversation[]>) => ({
-        conversations: response.body ?? [],
-        totalCount: parseInt(response.headers.get('X-Pagination-Total') ?? '0', 10)
-      }))
-    );
+    return this.http
+      .get<Conversation[]>(this.baseUrl + 'messages/inbox', {
+        params,
+        observe: 'response',
+      })
+      .pipe(
+        map((response: HttpResponse<Conversation[]>) => ({
+          conversations: response.body ?? [],
+          totalCount: parseInt(
+            response.headers.get('X-Pagination-Total') ?? '0',
+            10,
+          ),
+        })),
+      );
   }
 
   searchUsers(query: string) {
     return this.http.get<{ email: string; displayName: string }[]>(
       this.baseUrl + 'messages/search-user',
-      { params: new HttpParams().set('query', query) }
+      { params: new HttpParams().set('query', query) },
     );
   }
 
-  submitReview(data: { orderId: number; producerEmail: string; rating: number; comment: string }) {
+  submitReview(data: {
+    orderId: number;
+    producerEmail: string;
+    rating: number;
+    comment: string;
+  }) {
     return this.http.post(this.baseUrl + 'messages/review', data);
   }
 
@@ -69,12 +79,12 @@ export class MessageService {
 
     this.notificationConnection = new HubConnectionBuilder()
       .withUrl(this.hubUrl + 'notification', {
-        accessTokenFactory: () => token
+        accessTokenFactory: () => token,
       })
       .withAutomaticReconnect()
       .build();
 
-    this.notificationConnection.start().catch(error => console.log(error));
+    this.notificationConnection.start().catch((error) => console.log(error));
 
     // Primim contorul real de la server (nu il calculam noi)
     this.notificationConnection.on('UnreadCount', (count: number) => {
@@ -96,47 +106,62 @@ export class MessageService {
 
     this.presenceConnection = new HubConnectionBuilder()
       .withUrl(this.hubUrl + 'presence', {
-        accessTokenFactory: () => token
+        accessTokenFactory: () => token,
       })
       .withAutomaticReconnect()
       .build();
 
-    this.presenceConnection.start().catch(error => console.log(error));
+    this.presenceConnection.start().catch((error) => console.log(error));
 
     // FIX: toast cu click direct la conversatie
-    this.presenceConnection.on('NewMessageReceived', ({ senderEmail, senderName, orderId, isSystemMessage, content }) => {
-      // FIX: nu afisam toast daca suntem deja in conversatia cu acel user
-      const currentUrl = this.router.url;
-      const isInConversation = currentUrl.includes('/chat/conversation') &&
-                               currentUrl.includes(encodeURIComponent(senderEmail)) &&
-                               (!orderId || currentUrl.includes(`orderId=${orderId}`));
+    this.presenceConnection.on(
+      'NewMessageReceived',
+      ({ senderEmail, senderName, orderId, isSystemMessage, content }) => {
+        // FIX: nu afisam toast daca suntem deja in conversatia cu acel user
+        const currentUrl = this.router.url;
+        const isInConversation =
+          currentUrl.includes('/chat/conversation') &&
+          currentUrl.includes(encodeURIComponent(senderEmail)) &&
+          (!orderId || currentUrl.includes(`orderId=${orderId}`));
 
-      if (!isInConversation) {
-        if (isSystemMessage && orderId) {
-          this.toastr.info(content || `You have an update for order #${orderId}. Click to view.`, '', {
-            timeOut: 5000,
-            progressBar: true
-          }).onTap.pipe(take(1)).subscribe(() => {
-            this.router.navigate(['/chat', 'conversation'], {
-              queryParams: { user: senderEmail, orderId }
+        if (!isInConversation) {
+          if (isSystemMessage && orderId) {
+            this.toastr
+              .info(
+                content ||
+                  `You have an update for order #${orderId}. Click to view.`,
+                '',
+                {
+                  timeOut: 5000,
+                  progressBar: true,
+                },
+              )
+              .onTap.pipe(take(1))
+              .subscribe(() => {
+                this.router.navigate(['/chat', 'conversation'], {
+                  queryParams: { user: senderEmail, orderId },
+                });
+              });
+            return;
+          }
+
+          this.toastr
+            .info(`${senderName} sent you a new message. Click to view.`, '', {
+              timeOut: 5000,
+              progressBar: true,
+            })
+            .onTap.pipe(take(1))
+            .subscribe(() => {
+              const queryParams: any = { user: senderEmail };
+              if (orderId) queryParams.orderId = orderId;
+
+              this.router.navigate(['/chat', 'conversation'], {
+                queryParams,
+              });
             });
-          });
-          return;
         }
-
-        this.toastr.info(`${senderName} sent you a new message. Click to view.`, '', {
-          timeOut: 5000,
-          progressBar: true
-        }).onTap.pipe(take(1)).subscribe(() => {
-          const queryParams: any = { user: senderEmail };
-          if (orderId) queryParams.orderId = orderId;
-
-          this.router.navigate(['/chat', 'conversation'], {
-            queryParams
-          });
-        });
-      }
-    });
+      },
+    );
   }
 
   stopPresenceConnection() {
@@ -149,7 +174,6 @@ export class MessageService {
   // ─── SignalR: Message Hub (conversatie activa) ─────────────────────────────
 
   createHubConnection(token: string, otherUsername: string, orderId?: number) {
-    // FIX: adaugam orderId in URL
     let url = this.hubUrl + 'message?user=' + encodeURIComponent(otherUsername);
     if (orderId) url += '&orderId=' + encodeURIComponent(orderId.toString());
 
@@ -158,22 +182,22 @@ export class MessageService {
       .withAutomaticReconnect()
       .build();
 
-    this.hubConnectionStartPromise = this.hubConnection.start().catch(error => {
-      console.log(error);
-      throw error;
-    });
+    this.hubConnectionStartPromise = this.hubConnection
+      .start()
+      .catch((error) => {
+        console.log(error);
+        throw error;
+      });
 
-    this.hubConnection.on('ReceiveMessageThread', messages => {
+    this.hubConnection.on('ReceiveMessageThread', (messages) => {
       this.messageThreadSource.next(messages);
-      // FIX: NU resetam badge-ul la 0 global — serverul trimite contorul corect prin PushUnreadCount
     });
 
-    // FIX: mesajele noi apar instant fara refresh
-    this.hubConnection.on('NewMessage', message => {
+    this.hubConnection.on('NewMessage', (message) => {
       this.messageThread$.pipe(take(1)).subscribe({
-        next: messages => {
+        next: (messages) => {
           this.messageThreadSource.next([...messages, message]);
-        }
+        },
       });
     });
   }
@@ -187,12 +211,18 @@ export class MessageService {
     }
   }
 
-  async sendMessage(username: string, content: string, orderId?: number): Promise<boolean> {
+  async sendMessage(
+    username: string,
+    content: string,
+    orderId?: number,
+  ): Promise<boolean> {
     const trimmedContent = content.trim();
     if (!trimmedContent) return false;
 
     if (!this.hubConnection) {
-      this.toastr.error('Messaging connection is not ready. Please reopen the conversation.');
+      this.toastr.error(
+        'Messaging connection is not ready. Please reopen the conversation.',
+      );
       return false;
     }
 
@@ -201,7 +231,7 @@ export class MessageService {
       await this.hubConnection.invoke('SendMessage', {
         recipientUsername: username,
         content: trimmedContent,
-        orderId: orderId ?? null
+        orderId: orderId ?? null,
       });
       return true;
     } catch (error: any) {
@@ -212,7 +242,7 @@ export class MessageService {
   }
 
   private getSendMessageError(error: any): string {
-    const message = typeof error === 'string' ? error : error?.message ?? '';
+    const message = typeof error === 'string' ? error : (error?.message ?? '');
 
     if (message.includes('You cannot send messages to yourself')) {
       return 'You cannot send messages to your own account.';

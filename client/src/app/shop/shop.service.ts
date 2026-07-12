@@ -30,7 +30,6 @@ export class ShopService {
   constructor(private http: HttpClient) {}
 
   getProducts(useCache = true) {
-    // RESTAURAT: dacă apelăm getProducts(false), curățăm cache-ul
     if (!useCache) {
       this.productCache = new Map<string, Pagination<Product[]>>();
     }
@@ -38,8 +37,6 @@ export class ShopService {
     const shopParams = this.getShopParams();
     const cacheKey = this.buildShopCacheKey(shopParams);
 
-    // RESTAURAT: dacă avem deja rezultatul pentru acești parametri,
-    // îl returnăm din cache, fără request nou către backend.
     if (useCache && this.productCache.has(cacheKey)) {
       const cachedResponse = this.productCache.get(cacheKey);
 
@@ -63,7 +60,6 @@ export class ShopService {
       params = params.append('search', shopParams.search);
     }
 
-    // Price range
     if (shopParams.minPrice > 0) {
       params = params.append('minPrice', shopParams.minPrice.toString());
     }
@@ -72,7 +68,6 @@ export class ShopService {
       params = params.append('maxPrice', shopParams.maxPrice.toString());
     }
 
-    // MULTISELECT: trimitem valorile ca string separat prin virgulă
     if (shopParams.skinTypes && shopParams.skinTypes.length > 0) {
       params = params.append('skinTypes', shopParams.skinTypes.join(','));
     }
@@ -99,7 +94,6 @@ export class ShopService {
 
     return this.http.get<Pagination<Product[]>>(this.baseUrl + 'products', { params }).pipe(
       map(response => {
-        // RESTAURAT: salvăm rezultatul în cache folosind cheia parametrilor actuali
         this.productCache.set(cacheKey, response);
         this.pagination = response;
 

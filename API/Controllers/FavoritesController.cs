@@ -1,32 +1,32 @@
 using API.Dtos;
 using API.Errors;
-using API.Extensions; // Necesar pentru RetrieveEmailFromPrincipal
+using API.Extensions;
 using AutoMapper;
 using Core.Entities;
-using Core.Entities.Identity; // Necesar pentru AppUser
+using Core.Entities.Identity; 
 using Core.Interfaces;
 using Core.Specifications;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity; // Necesar pentru UserManager
+using Microsoft.AspNetCore.Identity; 
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
 {
-    [Authorize] // Asigură-te că doar userii logați pot accesa aceste rute
+    [Authorize] 
     public class FavoritesController : BaseApiController
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
-        private readonly UserManager<AppUser> _userManager; // <--- AICI ESTE DECLARAȚIA CARE LIPSEA
+        private readonly UserManager<AppUser> _userManager; 
 
         public FavoritesController(IUnitOfWork unitOfWork, IMapper mapper, UserManager<AppUser> userManager)
         {
             _unitOfWork = unitOfWork;
             _mapper = mapper;
-            _userManager = userManager; // <--- AICI ESTE INIȚIALIZAREA CARE LIPSEA
+            _userManager = userManager; 
         }
 
-        // 1. Vezi toate produsele favorite ale utilizatorului (luăm user-ul din token direct)
+       
         [HttpGet]
         public async Task<ActionResult<IReadOnlyList<ProductToReturnDto>>> GetFavorites()
         {
@@ -44,7 +44,7 @@ namespace API.Controllers
             return Ok(_mapper.Map<IReadOnlyList<Product>, IReadOnlyList<ProductToReturnDto>>(products));
         }
 
-        // 2. Adaugă un produs la favorite (Like)
+        [Authorize]
         [HttpPost]
         public async Task<ActionResult> AddFavorite(FavoriteDto favoriteDto)
         {
@@ -65,7 +65,7 @@ namespace API.Controllers
             var favorite = new FavoriteProduct
             {
                 ProductId = favoriteDto.ProductId,
-                AppUserId = userId // Salvăm ID-ul corect generat de Identity
+                AppUserId = userId 
             };
 
             _unitOfWork.Repository<FavoriteProduct>().Add(favorite);
@@ -76,7 +76,7 @@ namespace API.Controllers
             return Ok(new { alreadyExists = false, message = "Product added to favorites" });
         }
 
-        // 3. Șterge de la favorite (Unlike)
+
         [HttpDelete]
         public async Task<ActionResult> RemoveFavorite(FavoriteDto favoriteDto)
         {

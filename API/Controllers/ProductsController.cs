@@ -48,12 +48,10 @@ namespace API.Controllers
 public async Task<ActionResult<Pagination<ProductToReturnDto>>> GetProducts(
     [FromQuery] ProductSpecParams productParams)
 {
-   var spec = new ProductsWithTypesAndBrandsSpecification(productParams, applyPaging: false);
+    var spec = new ProductsWithTypesAndBrandsSpecification(productParams, applyPaging: false);
     var countSpec = new ProductWithFiltersForCountSpecification(productParams);
-
     var products = await _productsRepo.ListAsync(spec);
-
-    // MULTISELECT filters applied in-memory (cannot be done in EF expression tree)
+    
     if (!string.IsNullOrEmpty(productParams.SkinTypes))
     {
         var skinList = productParams.SkinTypes.Split(',').Select(s => s.Trim()).ToList();
@@ -89,8 +87,6 @@ public async Task<ActionResult<Pagination<ProductToReturnDto>>> GetProducts(
             formulaList.Any(s => p.Formula.Contains(s))
         ).ToList();
     }
-
-    // Rating filter (uses ProductReviews table)
     if (productParams.MinRating > 0)
     {
         var allReviews = await _unitOfWork.Repository<ProductReview>().ListAllAsync();
@@ -103,8 +99,6 @@ public async Task<ActionResult<Pagination<ProductToReturnDto>>> GetProducts(
     }
 
     var totalItems = products.Count;
-
-    // Apply paging manually after in-memory filters
     var pagedProducts = products
         .Skip(productParams.PageSize * (productParams.PageIndex - 1))
         .Take(productParams.PageSize)
@@ -162,19 +156,18 @@ public async Task<ActionResult<ProductToReturnDto>> AddProduct([FromForm] Produc
     if (user == null || !user.IsVerified)
         return BadRequest("Your account is not approved yet.");
 
-    // AUTO-CREATE BRAND from seller's display name if it doesn't exist
-    // Admin can pick any brand; regular sellers get their own brand auto-assigned
+  
     var isAdmin = await _userManager.IsInRoleAsync(user, "Admin");
     int brandId;
 
     if (isAdmin && productDto.ProductBrandId > 0)
     {
-        // Admin selected a brand manually
+     
         brandId = productDto.ProductBrandId;
     }
     else
     {
-        // Regular seller: find or create their personal brand
+       
         var sellerBrandName = user.DisplayName;
         var existingBrand = _context.ProductBrands
             .FirstOrDefault(b => b.Name == sellerBrandName);
@@ -185,7 +178,7 @@ public async Task<ActionResult<ProductToReturnDto>> AddProduct([FromForm] Produc
         }
         else
         {
-            // Create brand automatically from seller's display name
+         
             var newBrand = new ProductBrand { Name = sellerBrandName };
             _context.ProductBrands.Add(newBrand);
             await _context.SaveChangesAsync();
@@ -193,7 +186,7 @@ public async Task<ActionResult<ProductToReturnDto>> AddProduct([FromForm] Produc
         }
     }
 
-    // Handle image upload
+  
     var photoUrl = "";
     if (productDto.Picture != null && productDto.Picture.Length > 0)
     {
@@ -214,11 +207,11 @@ public async Task<ActionResult<ProductToReturnDto>> AddProduct([FromForm] Produc
         Description = productDto.Description,
         Price = productDto.Price,
         ProductTypeId = productDto.ProductTypeId,
-        ProductBrandId = brandId,     // uses auto-created or admin-selected brand
+        ProductBrandId = brandId,  
         PictureUrl = photoUrl,
         ProducerId = user.Id,
         ProducerName = user.DisplayName,
-        // Multiselect fields stored as comma-separated strings
+      
         SkinType  = productDto.SkinType,
         Usage     = productDto.Usage,
         Benefits  = productDto.Benefits,
@@ -280,7 +273,7 @@ public async Task<ActionResult> EditProduct(int id, [FromForm] ProductEditDto pr
 
     if (user == null) return Unauthorized();
 
-    // MODIFICAT: includem Photos ca să putem gestiona galeria produsului
+  
     var product = await _context.Products
         .Include(p => p.Photos)
         .FirstOrDefaultAsync(p => p.Id == id);
@@ -296,8 +289,6 @@ public async Task<ActionResult> EditProduct(int id, [FromForm] ProductEditDto pr
     product.ProductBrandId = productDto.ProductBrandId;
     product.ProducerName = user.DisplayName;
 
-    // MODIFICAT: dacă produsul vechi avea doar PictureUrl,
-    // îl adăugăm în Photos folosind product.PictureUrl, nu photoUrl.
     if (!string.IsNullOrEmpty(product.PictureUrl) &&
         !product.Photos.Any(p => p.Url == product.PictureUrl))
     {
@@ -314,14 +305,14 @@ public async Task<ActionResult> EditProduct(int id, [FromForm] ProductEditDto pr
         });
     }
 
-    // NOU: salvăm toate pozele noi selectate în pagina de editare
+
     if (productDto.Pictures != null && productDto.Pictures.Count > 0)
     {
         foreach (var picture in productDto.Pictures)
         {
             if (picture.Length <= 0) continue;
 
-            // Aici se creează photoUrl, deci poate fi folosit doar după această linie.
+           
             var photoUrl = await SaveProductImageAsync(picture);
 
             var nextOrder = product.Photos.Any()
@@ -336,7 +327,7 @@ public async Task<ActionResult> EditProduct(int id, [FromForm] ProductEditDto pr
                 ProductId = product.Id
             });
 
-            // Dacă produsul nu avea poză principală, prima poză nouă devine principală
+         
             if (string.IsNullOrEmpty(product.PictureUrl))
             {
                 product.PictureUrl = photoUrl;
@@ -359,7 +350,6 @@ public async Task<ActionResult> EditProduct(int id, [FromForm] ProductEditDto pr
 
     return Ok(new { message = "Product updated successfully!" });
 }
-        // NEW: Recently added products for the "What's New" page
         // GET /api/products/recent?pageIndex=1&pageSize=8
        
        [HttpGet("recent")]
@@ -367,8 +357,7 @@ public async Task<ActionResult<Pagination<ProductToReturnDto>>> GetRecentProduct
     [FromQuery] int pageIndex = 1,
     [FromQuery] int pageSize = 8)
 {
-    // MODIFICAT: produsele sunt considerate "new" doar 30 de zile.
-    // Ele rămân în continuare disponibile și în Shop.
+   
     var oneMonthAgo = DateTime.UtcNow.AddMonths(-1);
 
     var totalItems = await _context.Products
@@ -391,7 +380,6 @@ public async Task<ActionResult<Pagination<ProductToReturnDto>>> GetRecentProduct
     return Ok(new Pagination<ProductToReturnDto>(pageIndex, pageSize, totalItems, data));
 }
 
-        // GET /api/products/suggestions?keywords=lavender,oil&excludeId=5&count=4
         [HttpGet("suggestions")]
         public async Task<ActionResult<IReadOnlyList<ProductToReturnDto>>> GetSuggestions(
             [FromQuery] string keywords,
@@ -400,7 +388,6 @@ public async Task<ActionResult<Pagination<ProductToReturnDto>>> GetRecentProduct
         {
             if (string.IsNullOrWhiteSpace(keywords))
                 return Ok(new List<ProductToReturnDto>());
-
             var keywordList = keywords
                 .Split(',', StringSplitOptions.RemoveEmptyEntries)
                 .Select(k => k.Trim().ToLower())
@@ -409,14 +396,11 @@ public async Task<ActionResult<Pagination<ProductToReturnDto>>> GetRecentProduct
 
             if (!keywordList.Any())
                 return Ok(new List<ProductToReturnDto>());
-
             var spec = new ProductsWithTypesAndBrandsSpecification(
                 new ProductSpecParams { PageSize = 1000, PageIndex = 1 },
                 applyPaging: false);
             var allProducts = await _productsRepo.ListAsync(spec);
-
             var currentProduct = allProducts.FirstOrDefault(p => p.Id == excludeId);
-
             var suggestions = allProducts
                 .Where(p => p.Id != excludeId)
                 .Select(product => new

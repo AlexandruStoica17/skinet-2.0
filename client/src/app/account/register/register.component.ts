@@ -12,7 +12,7 @@ import { debounceTime, finalize, map, switchMap, take } from 'rxjs';
 export class RegisterComponent {
   errors: string[] | null = null;
   
-  // Lista de roluri pentru dropdown
+
   roles = [
     { value: 'Buyer', display: 'Buyer' },
     { value: 'CosmeticsProducer', display: 'Cosmetics Producer' },
@@ -20,14 +20,14 @@ export class RegisterComponent {
     { value: 'Blogger', display: 'Blogger' }
   ];
 
-  complexPassword = "(?=^.{6,10}$)(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()_+}{\":;'?/>.<,])(?!.*\\s).*$"
+  complexPassword = "(?=^.{6,30}$)(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()_+}{\":;'?/>.<,])(?!.*\\s).*$"
 
   registerForm = this.fb.group({
     displayName: ['', Validators.required],
     email: ['', [Validators.required, Validators.email], [this.validateEmailNotTaken()]],
     password: ['', [Validators.required, Validators.pattern(this.complexPassword)]],
     role: ['Buyer', Validators.required],
-    companyName: [''] // Îl lăsăm gol la început
+    companyName: [''] 
   })
 
   constructor(private fb: FormBuilder, private accountService: AccountService, private router: Router) {

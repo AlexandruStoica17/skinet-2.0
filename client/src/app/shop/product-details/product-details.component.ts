@@ -141,7 +141,6 @@ export class ProductDetailsComponent implements OnInit {
     });
   }
 
-  // MODIFICAT: nu mai duplică aceeași poză de 3 ori
   getImages(): NgxGalleryImage[] {
     const uniqueUrls = new Set<string>();
 
@@ -154,7 +153,6 @@ export class ProductDetailsComponent implements OnInit {
         });
     }
 
-    // fallback pentru produsele vechi, care au doar pictureUrl
     if (uniqueUrls.size === 0 && this.product?.pictureUrl) {
       uniqueUrls.add(this.product.pictureUrl);
     }
@@ -165,8 +163,7 @@ export class ProductDetailsComponent implements OnInit {
       big: url
     }));
   }
-
-  // MODIFICAT: transformă stringul "Oily,Dry" în listă curată
+  
   formatList(value?: string): string[] {
     if (!value) return [];
 

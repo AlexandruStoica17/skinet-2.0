@@ -45,7 +45,6 @@ namespace Infrastructure.Services
 
             var deliveryMethod = await _unitOfWork.Repository<DeliveryMethod>().GetByIdAsync(deliveryMethodId);
             var subtotal = items.Sum(item => item.Price * item.Quantity);
-
             var spec = new OrderByPaymentIntentIdSpecification(basket.PaymentIntentId);
             var order = await _unitOfWork.Repository<Order>().GetEntityWithSpec(spec);
 
@@ -76,7 +75,6 @@ namespace Infrastructure.Services
                     if (producer == null) continue;
                     if (string.Equals(producer.Email, buyer.Email, StringComparison.OrdinalIgnoreCase)) continue;
 
-                    // ---> MODIFICAT AICI: Am înlocuit cele 2 mesaje duplicate cu un singur mesaj de sistem
                     var systemMsg = new Message
                     {
                         SenderId = producer.Id,
