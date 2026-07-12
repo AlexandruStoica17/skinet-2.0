@@ -6,6 +6,13 @@
     <label for="floatingInput">{{label}}</label>
     <div *ngIf="control.errors?.['required']" class="invalid-feedback">Please enter your {{label}}</div>
     <div *ngIf="control.errors?.['email']" class="invalid-feedback">Invalid email address</div>
-    <div *ngIf="control.errors?.['pattern']" class="invalid-feedback">Password not complex enough</div>
+    <div *ngIf="control.errors?.['pattern']" class="invalid-feedback">Password must be 6-30 characters and include uppercase, lowercase, number and special character</div>
+    <div *ngIf="control.errors?.['passwordMinLength']" class="invalid-feedback">Password must be at least 6 characters</div>
+    <div *ngIf="control.errors?.['passwordMaxLength']" class="invalid-feedback">Password must be at most 30 characters</div>
+    <div *ngIf="control.errors?.['passwordUppercase']" class="invalid-feedback">Password must include an uppercase letter</div>
+    <div *ngIf="control.errors?.['passwordLowercase']" class="invalid-feedback">Password must include a lowercase letter</div>
+    <div *ngIf="control.errors?.['passwordNumber']" class="invalid-feedback">Password must include a number</div>
+    <div *ngIf="control.errors?.['passwordSpecial']" class="invalid-feedback">Password must include a special character</div>
+    <div *ngIf="control.errors?.['passwordWhitespace']" class="invalid-feedback">Password must not contain spaces</div>
     <div *ngIf="control.errors?.['emailExists']" class="invalid-feedback">Email address is taken</div>
 </div>

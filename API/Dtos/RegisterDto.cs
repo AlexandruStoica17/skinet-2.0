@@ -9,8 +9,9 @@ namespace API.Dtos
         [Required]
         [EmailAddress]
         public string Email { get; set; }
-        [RegularExpression("(?=^.{6,30}$)(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()_+}{\":;'?/>.<,])(?!.*\\s).*$", 
-        ErrorMessage = "Password must have 1 Uppercase, 1 Lowercase, 1 number, 1 non alphanumeric and at least 6 characters")]
+        [Required]
+        [RegularExpression("(?=^.{6,30}$)(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^A-Za-z0-9\\s])(?!.*\\s).*$",
+        ErrorMessage = "Password must be 6-30 characters and include uppercase, lowercase, number and special character")]
         public string Password { get; set; }
         [Required]
         public string Role { get; set; } // Angular ne va trimite "Buyer", "CosmeticsProducer", etc.

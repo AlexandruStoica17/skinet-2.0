@@ -3,6 +3,7 @@ import { AbstractControl, AsyncValidatorFn, FormBuilder, Validators } from '@ang
 import { AccountService } from '../account.service';
 import { Router } from '@angular/router';
 import { debounceTime, finalize, map, switchMap, take } from 'rxjs';
+import { passwordValidator } from 'src/app/shared/validators/password.validator';
 
 @Component({
   selector: 'app-register',
@@ -20,12 +21,10 @@ export class RegisterComponent {
     { value: 'Blogger', display: 'Blogger' }
   ];
 
-  complexPassword = "(?=^.{6,30}$)(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*()_+}{\":;'?/>.<,])(?!.*\\s).*$"
-
   registerForm = this.fb.group({
     displayName: ['', Validators.required],
     email: ['', [Validators.required, Validators.email], [this.validateEmailNotTaken()]],
-    password: ['', [Validators.required, Validators.pattern(this.complexPassword)]],
+    password: ['', [Validators.required, passwordValidator()]],
     role: ['Buyer', Validators.required],
     companyName: [''] 
   })
@@ -64,4 +63,5 @@ export class RegisterComponent {
       )
     }
   }
+
 }

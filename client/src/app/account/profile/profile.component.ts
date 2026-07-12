@@ -4,6 +4,7 @@ import { ToastrService } from 'ngx-toastr';
 import { AccountService } from '../account.service';
 import { Observable } from 'rxjs';
 import { User } from 'src/app/shared/models/user';
+import { passwordValidator } from 'src/app/shared/validators/password.validator';
 
 @Component({
   selector: 'app-profile',
@@ -71,11 +72,9 @@ export class ProfileComponent implements OnInit {
 
   // --- LOGICA PENTRU PAROLĂ ---
   createPasswordForm() {
-    const passwordRegex = "(?=^.{6,10}$)(?=.*\\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&amp;*()_+}{&quot;:;'?/&gt;.&lt;,])(?!.*\\s).*$";
-    
     this.passwordForm = this.fb.group({
       oldPassword: ['', Validators.required],
-      newPassword: ['', [Validators.required, Validators.pattern(passwordRegex)]],
+      newPassword: ['', [Validators.required, passwordValidator()]],
       confirmPassword: ['', Validators.required]
     });
   }
