@@ -11,17 +11,29 @@
     background: #fafafa;
 
     .form-check {
-        padding: 4px 8px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        min-height: 30px;
+        padding: 4px 10px;
         border-radius: 4px;
         cursor: pointer;
 
         &:hover { background: rgba(108, 118, 95, 0.08); }
+
+        .form-check-input {
+            flex: 0 0 auto;
+            margin: 0;
+        }
 
         .form-check-input:checked {
             background-color: #6c765f;
             border-color: #6c765f;
         }
 
-        .form-check-label { cursor: pointer; }
+        .form-check-label {
+            cursor: pointer;
+            margin: 0;
+        }
     }
 }
