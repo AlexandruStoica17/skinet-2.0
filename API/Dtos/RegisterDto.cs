@@ -15,7 +15,7 @@ namespace API.Dtos
         [Required]
         public string Role { get; set; } // Angular ne va trimite "Buyer", "CosmeticsProducer", etc.
 
-        public string CompanyName { get; set; } // Opțional (pentru Buyer nu e nevoie, dar pentru producători da)
+        public string CompanyName { get; set; } 
 
     }
 }
